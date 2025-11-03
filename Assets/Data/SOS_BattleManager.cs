@@ -12,6 +12,11 @@ public class SO_BattleManager : ScriptableObject
     [HideInInspector] public bool mainAction = false;
     [HideInInspector] public bool myTurn = false;
 
+    //Test for now to see if in attack mode or move mode
+    [HideInInspector] public bool attackMode = false;
+
+    [HideInInspector] public MBEntity currentTarget;
+
     private MBActor _activePlayer;
     [HideInInspector] public MBActor activePlayer
     {
@@ -57,6 +62,11 @@ public class SO_BattleManager : ScriptableObject
         moveEvent.Invoke();
     }
 
+    public void OnMainUsed(Tile target)
+    {
+        _activePlayer.UseMainAction(target);
+    }
+
     public void EndTurn()
     {
         myTurn = false;
@@ -76,7 +86,14 @@ public class SO_BattleManager : ScriptableObject
         manueverAction = true;
         mainAction = true;
 
+        currentTarget = null;
+
         beginTurnEvent.Invoke();
+    }
+
+    public void SetAttackMode(bool state)
+    {
+        attackMode = state;
     }
 
 

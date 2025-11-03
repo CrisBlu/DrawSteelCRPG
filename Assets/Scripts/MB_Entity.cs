@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class MBEntity : MonoBehaviour
 {
-    [SerializeField] MBGridSystem gridSystem;
-    private int stamina = 1;
+    [SerializeField] protected MBGridSystem gridSystem;
+    public int stamina = 10;
     public int X = 0;
     public int Y = 0;
 
@@ -25,5 +25,10 @@ public class MBEntity : MonoBehaviour
         gridSystem.UpdateOnGrid(this, lastPos);
         Vector3 newPos = new Vector3 (X, 0 , Y);
         transform.position = newPos;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        stamina -= damage;
     }
 }

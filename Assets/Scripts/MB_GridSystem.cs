@@ -8,7 +8,7 @@ using UnityEngine.Events;
 public class MBGridSystem : MonoBehaviour
 {
 
-    private MBEntity[,] GridMatrix = new MBEntity[10,10];
+    public Tile[,] GridMatrix = new Tile[10,10];
     [SerializeField] private MBWorldSelect WorldSelect;
     [SerializeField] private Grid MapGrid;
     [SerializeField] private GameObject cellIndicator;
@@ -20,10 +20,19 @@ public class MBGridSystem : MonoBehaviour
 
 
 
-    void Start()
+    void Awake()
     {
         selectAction = InputSystem.actions.FindAction("Select");
         selectAction.performed += GridSelect;
+
+        for (int i = 0; i < 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                GridMatrix[i, j] = new Tile();
+                GridMatrix[i, j].position = new Vector2Int(i, j);
+            }
+        }
 
         
     }
@@ -44,46 +53,85 @@ public class MBGridSystem : MonoBehaviour
     public void AddToGrid(MBEntity newEntity)
     {
          
-        GridMatrix[newEntity.X, newEntity.Y] = newEntity;
+        GridMatrix[newEntity.X, newEntity.Y].entity = newEntity;
     }
 
     public void UpdateOnGrid(MBEntity movingEntity, Vector2Int lastPos)
     {
         //Need to check if this actually works
-        GridMatrix[lastPos.x, lastPos.y] = null;
-        GridMatrix[movingEntity.X, movingEntity.Y] = movingEntity;
+        GridMatrix[lastPos.x, lastPos.y].entity = null;
+        GridMatrix[movingEntity.X, movingEntity.Y].entity = movingEntity;
     }
 
     //This is a move action and happens when you click on a cell
     private void GridSelect(InputAction.CallbackContext context)
     {
         Vector2Int cords = CoordTranslate(gridPosition);
-        MBEntity entityInSpace = GridMatrix[cords.x, cords.y];
+        MBEntity entityInSpace = GridMatrix[cords.x, cords.y].entity;
         //Something is in that space
+
+        //Activate Actor
         if (entityInSpace != null)
         {
-
             if (entityInSpace.GetType() == typeof(MBActor))
             {
                 //Activate an Actor
                 BattleManager.activePlayer = (MBActor)entityInSpace;
+                return;
             }
-
-            return;
+           
+            
         }
 
-        
-        if(BattleManager.activePlayer == null)
+        //If Actor has not activated nothing else can happen
+        if (BattleManager.activePlayer == null)
         {
             return;
         }
 
-        if (BattleManager.moveAction == true)
+
+
+        if (BattleManager.attackMode)
         {
-            BattleManager.OnMoveUsed(cords);
+            //Set Target
+            //Doesn't work to confirm target
+            if(BattleManager.currentTarget == null)
+            {
+                BattleManager.currentTarget = entityInSpace;
+                return;
+            }else
+            {
+                BattleManager.OnMainUsed(GridMatrix[cords.x, cords.y]);
+            }
+            
         }
+        else
+        {
+            //Move action
+            if (BattleManager.moveAction == true)
+            {
+                BattleManager.OnMoveUsed(cords);
+            }
+        }
+
         
         
+
+        
+        
+        
+    }
+
+    public bool GridCheckIfFull(Vector2Int cords)
+    {
+        if (GridMatrix[cords.x, cords.y].entity != null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private Vector2Int CoordTranslate(Vector3 unityGridCords)
