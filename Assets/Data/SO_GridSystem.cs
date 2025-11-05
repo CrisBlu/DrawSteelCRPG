@@ -1,0 +1,209 @@
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+[CreateAssetMenu(fileName = "SO_GridSystem", menuName = "Scriptable Objects/SO_GridSystem")]
+public class SO_GridSystem : ScriptableObject
+{
+    [SerializeField] SO_BattleManager BattleManager;
+    List<Tile> possibleSteps = new List<Tile>();
+    public readonly int size = 10;
+    public Tile[,] GridMatrix;
+
+
+    private void OnEnable()
+    {
+
+        GridMatrix = new Tile[size, size];
+
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                GridMatrix[i, j] = new Tile();
+                GridMatrix[i, j].position = new Vector2Int(i, j);
+            }
+        }
+    }
+
+    //Add new entity to grid
+    public void GridAdd(MB_Entity newEntity)
+    {
+
+        GridMatrix[newEntity.X, newEntity.Y].entity = newEntity;
+    }
+
+    //Move entity position on grid
+    public void GridUpdatePos(MB_Entity movingEntity, Vector2Int lastPos)
+    {
+        //Need to check if this actually works
+        GridMatrix[lastPos.x, lastPos.y].entity = null;
+        GridMatrix[movingEntity.X, movingEntity.Y].entity = movingEntity;
+    }
+
+    public void GridCellSelect(Vector2Int selectedPos)
+    {
+        if(selectedPos.x >= size || selectedPos.y >= size || selectedPos.x < 0 || selectedPos.y < 0)
+            { return; }
+
+        Tile selectedCell = GridMatrix[selectedPos.x, selectedPos.y];
+
+        if (BattleManager.lookingForTarget)
+        {
+            GridTarget(selectedCell);
+        }
+        else if(BattleManager.activeActor == null)
+        {
+            GridActivate(selectedCell);
+        }
+        else
+        {
+            GridMoveTo(selectedCell);
+        }
+    }
+    //--------------------------------------------------------------------------------------------------------------- Feeling like these should be in a different script
+    //Activate an Actor
+    public void GridActivate(Tile cell)
+    {
+        MB_Entity entityInSpace = cell.entity;
+        if (entityInSpace != null)
+        {
+            if (entityInSpace.GetType() == typeof(MB_Actor))
+            {
+                //Activate an Actor
+                BattleManager.SetActiveActor((MB_Actor)entityInSpace);
+                GridDisplayPossibleSteps();
+
+                return;
+            }
+        }
+    }
+
+    //
+    public void GridMoveTo(Tile cell)
+    {
+        MB_Entity entityInSpace = cell.entity;
+        if(entityInSpace == null)
+        {
+            if(!possibleSteps.Contains(cell))
+            {
+                return;
+            }
+            BattleManager.MoveAction(cell, this);
+        }
+    }
+
+    public void GridTarget(Tile cell)
+    {
+        List<Tile> possibleTargets = GridBFSFromCell(GridMatrix[BattleManager.activeActor.X, BattleManager.activeActor.Y], BattleManager.activeAbility.Range, false);
+        
+        if(!possibleTargets.Contains(cell))
+        { return; }
+        
+        MB_Entity entityInSpace = cell.entity;
+        if (entityInSpace != null)
+        {
+            BattleManager.SetActiveTarget(cell);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------
+
+    public bool GridCheckIfFull(Tile cell)
+    {
+        if (GridMatrix[cell.position.x, cell.position.y].entity != null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public List<Tile> GridBFSFromCell(Tile cell, int range, bool forMove)
+    {
+        Queue<Tile> openSet = new Queue<Tile>();
+        List<Tile> possibilities = new List<Tile>();
+        cell.cost = 0;
+        openSet.Enqueue(cell);
+
+        while (openSet.Count > 0)
+        {
+            Tile currentCell = openSet.Dequeue();
+
+            foreach (Tile neighbor in currentCell.FindNeighbors(this))
+            {
+                if (openSet.Contains(neighbor))
+                    continue;
+
+                neighbor.cost = currentCell.cost + 1;
+
+                if (!CheckIfValidCell(neighbor, range, possibilities, forMove))
+                    continue; 
+
+
+                GridMatrix[neighbor.position.x, neighbor.position.y].parent = currentCell;
+
+
+
+                openSet.Enqueue(neighbor);
+                possibilities.Add(neighbor);
+            }
+        }
+
+        return possibilities;
+    }
+
+    bool CheckIfValidCell(Tile cell, int maxcost, List<Tile> possibilities, bool forMove)
+    {
+        bool valid = false;
+
+        if (forMove)
+        {
+            if (GridCheckIfFull(cell))
+                return valid;
+        }
+        
+
+        if (!possibilities.Contains(cell) && cell.cost <= maxcost)
+            valid = true;  
+
+        return valid;
+    }
+
+    public void GridDisplayPossibleSteps()
+    {
+        possibleSteps = GridBFSFromCell(GridMatrix[BattleManager.activeActor.X, BattleManager.activeActor.Y], BattleManager.activeActor.speed, true);
+
+        foreach (Tile step in possibleSteps)
+        {
+            //Debug.Log(step);
+        }
+    }
+
+
+
+
+    //Upon clicking a Cell
+    //If user is not attacking
+    //  If entity is in Cell 
+    //      If entity is Actor
+    //          Activate Actor
+    //
+    //If user is attacking
+    //  If entity is in Cell and Actor is activated
+    //      entity is now target
+    //
+    //If user is not attacking
+    //  If no entity is in Cell and Actor is activated
+    //      Actor moves to cell
+    //      
+
+
+
+}

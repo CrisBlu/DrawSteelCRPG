@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e27818f7162a35d4290117299611c6a8, type: 3}
+  m_Script: {fileID: 11500000, guid: 37791d7d261e45840bb6aa56bb2cdbe2, type: 3}
   m_Name: SO_BattleManager
   m_EditorClassIdentifier: 
-  moveEvent:
-    m_PersistentCalls:
-      m_Calls: []
+  activeActor: {fileID: 0}
+  activeTarget: {fileID: 0}
+  lookingForTarget: 0

@@ -1,142 +1,51 @@
-using NUnit.Framework;
-using System;
+using System.Drawing;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-using UnityEngine.Events;
-
-public class MBGridSystem : MonoBehaviour
+//Deal with user interaction that effects the Grid Data
+public class MB_GridSystem : MonoBehaviour
 {
-
-    public Tile[,] GridMatrix = new Tile[10,10];
-    [SerializeField] private MBWorldSelect WorldSelect;
-    [SerializeField] private Grid MapGrid;
-    [SerializeField] private GameObject cellIndicator;
-    [SerializeField] private SO_BattleManager BattleManager;
-
+    [SerializeField] SO_GridSystem data;
 
     InputAction selectAction;
-    
-
-
-
-    void Awake()
+    private void Awake()
     {
         selectAction = InputSystem.actions.FindAction("Select");
-        selectAction.performed += GridSelect;
-
-        for (int i = 0; i < 10; i++)
-        {
-            for (int j = 0; j < 10; j++)
-            {
-                GridMatrix[i, j] = new Tile();
-                GridMatrix[i, j].position = new Vector2Int(i, j);
-            }
-        }
-
-        
+        selectAction.performed += CellSelect;
     }
 
-    //Eh
-    //This highlights every cell you mouse over
-    Vector3Int gridPosition;
+
+    //Mouse over and highlight Grid Cells
+    [SerializeField] private Camera sceneCamera;
+    [SerializeField] private Grid Map;
+    [SerializeField] private GameObject cellIndicator;
+
+    CS_GridSelect GridSelect = new CS_GridSelect();
+
+    private Vector3Int currentCell;
     void Update()
     {
-        Vector3 mousePosition = WorldSelect.GetSelectedMapPosition();
-        gridPosition = MapGrid.WorldToCell(mousePosition);
+        //Get Cell user is mousing over
+        Vector3 mousePosition = GridSelect.GetSelectedMapPosition(sceneCamera);
+        currentCell = Map.WorldToCell(mousePosition);
 
-        cellIndicator.transform.position = MapGrid.CellToWorld(gridPosition);
-        
+        //Highlight Cell
+        cellIndicator.transform.position = Map.CellToWorld(currentCell);
     }
 
-    //Add Entity into Grid
-    public void AddToGrid(MBEntity newEntity)
+
+
+    //Select a Cell on the Grid
+    void CellSelect(InputAction.CallbackContext context)
     {
-         
-        GridMatrix[newEntity.X, newEntity.Y].entity = newEntity;
+        //Watch for entries outside of the bounds of the array
+        data.GridCellSelect(CoordTranslate(currentCell));
     }
 
-    public void UpdateOnGrid(MBEntity movingEntity, Vector2Int lastPos)
+    private Vector2Int CoordTranslate(Vector3 unityGridCoords)
     {
-        //Need to check if this actually works
-        GridMatrix[lastPos.x, lastPos.y].entity = null;
-        GridMatrix[movingEntity.X, movingEntity.Y].entity = movingEntity;
-    }
-
-    //This is a move action and happens when you click on a cell
-    private void GridSelect(InputAction.CallbackContext context)
-    {
-        Vector2Int cords = CoordTranslate(gridPosition);
-        MBEntity entityInSpace = GridMatrix[cords.x, cords.y].entity;
-        //Something is in that space
-
-        //Activate Actor
-        if (entityInSpace != null)
-        {
-            if (entityInSpace.GetType() == typeof(MBActor))
-            {
-                //Activate an Actor
-                BattleManager.activePlayer = (MBActor)entityInSpace;
-                return;
-            }
-           
-            
-        }
-
-        //If Actor has not activated nothing else can happen
-        if (BattleManager.activePlayer == null)
-        {
-            return;
-        }
-
-
-
-        if (BattleManager.attackMode)
-        {
-            //Set Target
-            //Doesn't work to confirm target
-            if(BattleManager.currentTarget == null)
-            {
-                BattleManager.currentTarget = entityInSpace;
-                return;
-            }else
-            {
-                BattleManager.OnMainUsed(GridMatrix[cords.x, cords.y]);
-            }
-            
-        }
-        else
-        {
-            //Move action
-            if (BattleManager.moveAction == true)
-            {
-                BattleManager.OnMoveUsed(cords);
-            }
-        }
-
-        
-        
-
-        
-        
-        
-    }
-
-    public bool GridCheckIfFull(Vector2Int cords)
-    {
-        if (GridMatrix[cords.x, cords.y].entity != null)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    private Vector2Int CoordTranslate(Vector3 unityGridCords)
-    {
-        Vector2Int correctedCords = new Vector2Int((int)unityGridCords.x + 5, (int)unityGridCords.z + 5);
+        Vector2Int correctedCords = new Vector2Int((int)unityGridCoords.x + data.size / 2, (int)unityGridCoords.z + data.size / 2);
         return correctedCords;
     }
+
 }
