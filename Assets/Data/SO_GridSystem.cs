@@ -52,17 +52,21 @@ public class SO_GridSystem : ScriptableObject
 
         Tile selectedCell = GridMatrix[selectedPos.x, selectedPos.y];
 
-        if (BattleManager.lookingForTarget)
+        if (BattleManager.selectState == E_SelectState.LookingForTarget)
         {
             GridTarget(selectedCell);
         }
-        else if(BattleManager.activeActor == null)
+        else if(BattleManager.selectState == E_SelectState.LookingForActor)
         {
             GridActivate(selectedCell);
         }
-        else
+        else if(BattleManager.selectState == E_SelectState.LookingForMove)
         {
             GridMoveTo(selectedCell);
+        }
+        else if(BattleManager.selectState == E_SelectState.LookingForCell)
+        {
+            GridForceMoveTo(selectedCell);
         }
     }
     //--------------------------------------------------------------------------------------------------------------- Feeling like these should be in a different script
@@ -111,11 +115,17 @@ public class SO_GridSystem : ScriptableObject
         }
     }
 
+    public void GridForceMoveTo(Tile cell)
+    {
+        BattleManager.activeTarget[1] = cell;
+        BattleManager.UseAbility();
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------------------
 
     public bool GridCheckIfFull(Tile cell)
     {
-        if (GridMatrix[cell.position.x, cell.position.y].entity != null)
+        if (cell.entity != null)
         {
             return true;
         }

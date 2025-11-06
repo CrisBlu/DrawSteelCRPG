@@ -10,24 +10,38 @@ using UnityEngine.Events;
 public class SO_BattleManager : ScriptableObject
 {
     [HideInInspector] public MB_Actor activeActor;
-    [HideInInspector] public Tile activeTarget;
+    [HideInInspector] public Tile[] activeTarget = new Tile[3];
     [HideInInspector] public CS_Ability activeAbility;
-    
 
-    [HideInInspector] public bool lookingForTarget = false;
+
+    [HideInInspector] public E_SelectState selectState;
+
+    private int main = 0;
+    private int manuever = 0;
+    private int move = 0;
 
     //Events
     [HideInInspector] public UnityEvent<MB_Actor> EventActivateActor;
+
+    //State Enum
+    //LookingForActor
+    //LookingForCell
+    //LookingForTarget
 
 
     private void OnEnable()
     {
         //On Begin turn 
         activeActor = null;
-        activeTarget = null;
+        activeTarget[0] = null;
+        activeTarget[1] = null;
         activeAbility = null;
 
-        lookingForTarget=false;
+        main = 1;
+        manuever = 1;
+        move = 1;
+
+        selectState= E_SelectState.LookingForActor;
 
         if (EventActivateActor != null)
         {
@@ -39,10 +53,15 @@ public class SO_BattleManager : ScriptableObject
 
     public void SetActiveActor(MB_Actor actor)
     {
-        activeTarget = null;
+        activeTarget[0] = null;
+        activeTarget[1] = null;
         activeAbility = null;
 
         activeActor = actor;
+        selectState = E_SelectState.LookingForMove;
+
+
+
         EventActivateActor.Invoke(activeActor);
 
   
@@ -51,16 +70,16 @@ public class SO_BattleManager : ScriptableObject
 
     public void SetActiveTarget(Tile target)
     {
-
+        
         //Double click correct target
-        if (activeTarget != target)
+        if (activeTarget[0] == null)
         {
-            activeTarget = target;
+            activeTarget[0] = target;
             
         }
         else
         {
-            activeAbility.Use(activeTarget);
+            UseAbility();
         }
 
         
@@ -68,6 +87,13 @@ public class SO_BattleManager : ScriptableObject
 
     public void MoveAction(Tile cellToMoveTo, SO_GridSystem gridSystem)
     {
+        if(move <= 0)
+        {
+            Debug.Log("No movement left");
+            return;
+        }
+
+        
         List<Tile> stepsToTake = new List<Tile>();
 
         Tile current = gridSystem.GridMatrix[cellToMoveTo.position.x, cellToMoveTo.position.y];
@@ -87,24 +113,113 @@ public class SO_BattleManager : ScriptableObject
         stepsToTake.Reverse();
 
         Debug.Log(activeActor + "moves to " +  cellToMoveTo.position);
+        move -= 1;
         activeActor.ActorStartWalking(stepsToTake);
     }
 
     public void StartLookingForTarget(CS_Ability ability)
     {
-        lookingForTarget = !lookingForTarget;
-        Debug.Log("Looking For Target?" + lookingForTarget);
-
-        if (lookingForTarget)
+        selectState = E_SelectState.LookingForTarget;
+        Debug.Log("Looking For Target?" + selectState);
+        
+        //Need script specfifcally for changing values on state change
+        /*if (selectState == E_SelectState.LookingForTarget)
         {
             Debug.Log(ability.Name);
         }
         else
         {
-            activeTarget = null;
-        }
+            activeTarget[0] = null;
+            activeTarget[1] = null;
+        }*/
 
         activeAbility = ability;
+    }
+
+    public void UseAbility()
+    {
+        if(activeAbility.Type == E_ActionType.main)
+        {
+            if(main <= 0)
+            {
+                Debug.Log("Main action used");
+                return;
+            }
+        }
+
+        if(activeAbility.Type == E_ActionType.manuever)
+        {
+            if(manuever <= 0)
+            {
+                Debug.Log("Manuever used");
+                return;
+            }
+        }
+        //New script, ability information gatherer
+        //When using an ability check it's effects
+        //for each effect do something else
+        //Push - Ask user to select another space on the grid
+        //
+
+        if (activeAbility.Effects.Contains("push"))
+        {
+            if (activeTarget[1] == null)
+            {
+                selectState = E_SelectState.LookingForCell;
+                Debug.Log("Need to select cell to push to");
+                return;
+            }
+            
+        }
+
+
+        if (activeAbility.Type == E_ActionType.main)
+        { 
+            main -= 1;
+        }
+
+        if (activeAbility.Type == E_ActionType.manuever)
+        {
+            manuever -= 1;
+        }
+
+        //Tile[] testArray = new Tile[1] { activeTarget[0] };
+        activeAbility.Use(activeTarget);
+    }
+
+    public void TopOfTheRound()
+    {
+        return;
+    }
+
+    public void OnTurnBegin()
+    {
+
+        main = 1;
+        manuever = 1;
+        move = 1;
+
+        selectState = E_SelectState.LookingForActor;
+
+
+    }
+
+    public void OnTurnEnd()
+    {
+        activeActor.TestTurnEnd(this);
+
+        activeActor = null;
+        activeTarget[0] = null;
+        activeTarget[1] = null;
+        activeAbility = null;
+
+        main = 0;
+        manuever = 0;
+        move = 0;
+
+        selectState = E_SelectState.None;
+
+
     }
 
 

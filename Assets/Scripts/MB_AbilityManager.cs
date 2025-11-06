@@ -23,7 +23,7 @@ public class MB_AbilityManager : MonoBehaviour
             DestroyImmediate(ability);
         }
 
-        foreach(CS_Ability ability in actor.abilties)
+        foreach(CS_Ability ability in actor.abilities)
         {
             GameObject obj = Instantiate(AbilityPrefab, ContentHolder);
             Button sad = obj.GetComponent<Button>();

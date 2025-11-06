@@ -28,8 +28,9 @@ public class MB_Entity : MonoBehaviour
         transform.position = newPos;
     }
 
-    public virtual void TakeForcedMovement()
+    public virtual void ForcedMovement(Tile cellPushedInto, int distance)
     {
+        TakeDamage(distance);
         return;
     }
 
