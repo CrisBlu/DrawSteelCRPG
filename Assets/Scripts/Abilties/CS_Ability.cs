@@ -56,3 +56,51 @@ public class A_Knockback : CS_Ability
         target[0].entity.ForcedMovement(target[1], distance);
     }
 }
+
+public class A_Advance : CS_Ability
+{
+    public override string Name => "Advance";
+    public override string Description => "Move up to your speed";
+    public override E_ActionType Type => E_ActionType.move;
+    public override List<string> Effects => new();
+    public override int Range => 0;
+
+
+    public override void Use(Tile[] target)
+    {
+        MB_Actor movingActor = (MB_Actor)target[0].entity;
+        movingActor.movement = movingActor.Speed;
+    }
+}
+
+public class A_CatchBreath : CS_Ability
+{
+    public override string Name => "Catch Breath";
+    public override string Description => "Recover a third of your stamina";
+    public override E_ActionType Type => E_ActionType.manuever;
+    public override List<string> Effects => new List<string> { "self" };
+    public override int Range => 0;
+
+
+    public override void Use(Tile[] target)
+    {
+        MB_Hero hero = (MB_Hero)target[0].entity;
+        hero.SpendRecovery();
+    }
+}
+
+/*
+ *  public override string Name => "";
+    public override string Description => "";
+    public override E_ActionType Type => E_ActionType.;
+    public override List<string> Effects => new();
+    public override int Range => ;
+
+
+    public override void Use(Tile[] target)
+    {
+        
+    }
+
+ * 
+ */

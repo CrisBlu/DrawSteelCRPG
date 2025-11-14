@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -31,18 +32,26 @@ public class SO_GridSystem : ScriptableObject
     }
 
     //Add new entity to grid
-    public void GridAdd(MB_Entity newEntity)
+    public Tile GridAdd(MB_Entity newEntity)
     {
 
         GridMatrix[newEntity.X, newEntity.Y].entity = newEntity;
+        return GridMatrix[newEntity.X, newEntity.Y];
     }
 
     //Move entity position on grid
-    public void GridUpdatePos(MB_Entity movingEntity, Vector2Int lastPos)
+    public Tile GridUpdatePos(MB_Entity movingEntity, Vector2Int lastPos)
     {
         //Need to check if this actually works
         GridMatrix[lastPos.x, lastPos.y].entity = null;
         GridMatrix[movingEntity.X, movingEntity.Y].entity = movingEntity;
+
+        return GridMatrix[movingEntity.X, movingEntity.Y];
+    }
+
+    public void GridRemove(MB_Entity destroyedEntity)
+    {
+        destroyedEntity.currentTile.entity = null;
     }
 
     public void GridCellSelect(Vector2Int selectedPos)
@@ -52,44 +61,65 @@ public class SO_GridSystem : ScriptableObject
 
         Tile selectedCell = GridMatrix[selectedPos.x, selectedPos.y];
 
+        GridOnSelection(selectedCell);
+        
+    }
+
+    public void GridOnSelection(Tile selectedCell)
+    {
         if (BattleManager.selectState == E_SelectState.LookingForTarget)
         {
             GridTarget(selectedCell);
         }
-        else if(BattleManager.selectState == E_SelectState.LookingForActor)
+        else if (BattleManager.selectState == E_SelectState.LookingForActor)
         {
             GridActivate(selectedCell);
         }
-        else if(BattleManager.selectState == E_SelectState.LookingForMove)
+        else if (BattleManager.selectState == E_SelectState.LookingForMove)
         {
             GridMoveTo(selectedCell);
         }
-        else if(BattleManager.selectState == E_SelectState.LookingForCell)
+        else if (BattleManager.selectState == E_SelectState.LookingForCell)
         {
             GridForceMoveTo(selectedCell);
         }
     }
+
     //--------------------------------------------------------------------------------------------------------------- Feeling like these should be in a different script
     //Activate an Actor
     public void GridActivate(Tile cell)
     {
-        MB_Entity entityInSpace = cell.entity;
-        if (entityInSpace != null)
-        {
-            if (entityInSpace.GetType() == typeof(MB_Actor))
-            {
-                //Activate an Actor
-                BattleManager.SetActiveActor((MB_Actor)entityInSpace);
-                GridDisplayPossibleSteps();
 
-                return;
-            }
+        MB_Entity entityInSpace = cell.entity;
+
+        if (entityInSpace == null)
+        {
+            return;
         }
+
+        if (!entityInSpace.CompareTag(BattleManager.activePlayer.role))
+        {
+            Debug.Log("Not your unit");
+            return;
+        }
+
+
+        if (entityInSpace is MB_Actor)
+        {
+            //Activate an Actor
+            if (BattleManager.SetActiveActor((MB_Actor)entityInSpace))
+            {
+                GridDisplayPossibleSteps(BattleManager.activeActor.Speed);
+            }
+            return;
+        }
+        
     }
 
     //
     public void GridMoveTo(Tile cell)
     {
+        GridUpdateBFS(BattleManager.activeActor.movement);
         MB_Entity entityInSpace = cell.entity;
         if(entityInSpace == null)
         {
@@ -103,7 +133,7 @@ public class SO_GridSystem : ScriptableObject
 
     public void GridTarget(Tile cell)
     {
-        List<Tile> possibleTargets = GridBFSFromCell(GridMatrix[BattleManager.activeActor.X, BattleManager.activeActor.Y], BattleManager.activeAbility.Range, false);
+        List<Tile> possibleTargets = GridBFSFromCell(BattleManager.activeActor.currentTile, BattleManager.activeAbility.Range, false);
         
         if(!possibleTargets.Contains(cell))
         { return; }
@@ -160,8 +190,12 @@ public class SO_GridSystem : ScriptableObject
                 GridMatrix[neighbor.position.x, neighbor.position.y].parent = currentCell;
 
 
-
-                openSet.Enqueue(neighbor);
+                //The idea here is to make it so that when targeting, cells with targets don't become parents of any other cell
+                if(neighbor.entity == null)
+                {
+                    openSet.Enqueue(neighbor);
+                }
+                
                 possibilities.Add(neighbor);
             }
         }
@@ -175,9 +209,13 @@ public class SO_GridSystem : ScriptableObject
 
         if (forMove)
         {
+            //If moving return false for cells that have entities in them
             if (GridCheckIfFull(cell))
                 return valid;
         }
+
+
+        
         
 
         if (!possibilities.Contains(cell) && cell.cost <= maxcost)
@@ -186,14 +224,20 @@ public class SO_GridSystem : ScriptableObject
         return valid;
     }
 
-    public void GridDisplayPossibleSteps()
+    public void GridDisplayPossibleSteps(int distance)
     {
-        possibleSteps = GridBFSFromCell(GridMatrix[BattleManager.activeActor.X, BattleManager.activeActor.Y], BattleManager.activeActor.speed, true);
+        possibleSteps = GridBFSFromCell(BattleManager.activeActor.currentTile, distance, true);
 
         foreach (Tile step in possibleSteps)
         {
             //Debug.Log(step);
         }
+    }
+
+    public void GridUpdateBFS(int distance)
+    {
+        possibleSteps = GridBFSFromCell(BattleManager.activeActor.currentTile, distance, true);
+
     }
 
 

@@ -9,6 +9,11 @@ using UnityEngine.Events;
 ///This should control the state of the fight and what the active User or AI is doing
 public class SO_BattleManager : ScriptableObject
 {
+
+    [HideInInspector] public SO_TurnManager activePlayer;
+    private int activePlayerIndex;
+    [SerializeField] private List<SO_TurnManager> Players = new List<SO_TurnManager>();
+
     [HideInInspector] public MB_Actor activeActor;
     [HideInInspector] public Tile[] activeTarget = new Tile[3];
     [HideInInspector] public CS_Ability activeAbility;
@@ -19,6 +24,7 @@ public class SO_BattleManager : ScriptableObject
     private int main = 0;
     private int manuever = 0;
     private int move = 0;
+    public int currentSpeed;
 
     //Events
     [HideInInspector] public UnityEvent<MB_Actor> EventActivateActor;
@@ -32,10 +38,13 @@ public class SO_BattleManager : ScriptableObject
     private void OnEnable()
     {
         //On Begin turn 
+        activePlayerIndex = 0;
+        activePlayer = Players[activePlayerIndex];
         activeActor = null;
         activeTarget[0] = null;
         activeTarget[1] = null;
         activeAbility = null;
+       
 
         main = 1;
         manuever = 1;
@@ -51,28 +60,39 @@ public class SO_BattleManager : ScriptableObject
 
     }
 
-    public void SetActiveActor(MB_Actor actor)
+    private void SetSelectState(E_SelectState newState)
     {
+        selectState = newState;
+    }
+
+    public bool SetActiveActor(MB_Actor actor)
+    {
+        if(actor.turnTaken)
+        {
+            return false;
+        }
         activeTarget[0] = null;
         activeTarget[1] = null;
         activeAbility = null;
+        currentSpeed = actor.Speed;
 
         activeActor = actor;
-        selectState = E_SelectState.LookingForMove;
+        //selectState = E_SelectState.LookingForMove;
 
 
 
         EventActivateActor.Invoke(activeActor);
-
+        return true;
   
 
     }
 
     public void SetActiveTarget(Tile target)
     {
+
         
         //Double click correct target
-        if (activeTarget[0] == null)
+        if (activeTarget[0] != target)
         {
             activeTarget[0] = target;
             
@@ -87,13 +107,14 @@ public class SO_BattleManager : ScriptableObject
 
     public void MoveAction(Tile cellToMoveTo, SO_GridSystem gridSystem)
     {
-        if(move <= 0)
+        if(activeActor.movement <= 0)
         {
             Debug.Log("No movement left");
             return;
         }
 
-        
+        selectState = E_SelectState.None;
+
         List<Tile> stepsToTake = new List<Tile>();
 
         Tile current = gridSystem.GridMatrix[cellToMoveTo.position.x, cellToMoveTo.position.y];
@@ -111,29 +132,26 @@ public class SO_BattleManager : ScriptableObject
         }
 
         stepsToTake.Reverse();
+       
+        activeActor.ActorStartWalking(stepsToTake, SetSelectState);
 
-        Debug.Log(activeActor + "moves to " +  cellToMoveTo.position);
-        move -= 1;
-        activeActor.ActorStartWalking(stepsToTake);
     }
 
     public void StartLookingForTarget(CS_Ability ability)
     {
-        selectState = E_SelectState.LookingForTarget;
-        Debug.Log("Looking For Target?" + selectState);
-        
-        //Need script specfifcally for changing values on state change
-        /*if (selectState == E_SelectState.LookingForTarget)
-        {
-            Debug.Log(ability.Name);
-        }
-        else
-        {
-            activeTarget[0] = null;
-            activeTarget[1] = null;
-        }*/
-
         activeAbility = ability;
+
+        //Self target
+        if (activeAbility.Range == 0)
+        {
+            activeTarget[0] = activeActor.currentTile;
+            UseAbility();
+            return;
+        }
+
+        selectState = E_SelectState.LookingForTarget;
+        Debug.Log("Looking For Target");
+        
     }
 
     public void UseAbility()
@@ -155,6 +173,18 @@ public class SO_BattleManager : ScriptableObject
                 return;
             }
         }
+
+        if (activeAbility.Type == E_ActionType.move)
+        {
+            if (move <= 0)
+            {
+                Debug.Log("Move used");
+                return;
+            }
+        }
+        //Don't allow more selection by default when an ability is used
+        
+
         //New script, ability information gatherer
         //When using an ability check it's effects
         //for each effect do something else
@@ -183,17 +213,55 @@ public class SO_BattleManager : ScriptableObject
             manuever -= 1;
         }
 
-        //Tile[] testArray = new Tile[1] { activeTarget[0] };
+        if (activeAbility.Type == E_ActionType.move)
+        {
+            move -= 1;
+        }
+
         activeAbility.Use(activeTarget);
+
+        //Default assumption is that you'll want to finish you move after, and if you've already selected your move action, this is the only way to get back the move state
+        selectState = E_SelectState.LookingForMove;
+
+
+        //Tile[] testArray = new Tile[1] { activeTarget[0] };
+
     }
 
     public void TopOfTheRound()
     {
+        foreach(SO_TurnManager player in Players)
+        {
+            player.finished = false;
+            foreach(MB_Actor actor in player.actorsUnderControl)
+            {
+                actor.SetTurnTaken(false);
+            }
+        }
+        Debug.Log("Top of the round");
         return;
     }
 
     public void OnTurnBegin()
     {
+
+
+        activePlayerIndex = (activePlayerIndex + 1) % Players.Count;
+        CheckIfAllActorsWent(Players[activePlayerIndex]);
+
+        int roundCheck = activePlayerIndex;
+        while (Players[activePlayerIndex].finished)
+        {
+            activePlayerIndex = (activePlayerIndex + 1) % Players.Count;
+            CheckIfAllActorsWent(Players[activePlayerIndex]);
+
+            if(roundCheck == activePlayerIndex)
+            {
+                TopOfTheRound();
+                break;
+            }
+        }
+        
 
         main = 1;
         manuever = 1;
@@ -201,17 +269,28 @@ public class SO_BattleManager : ScriptableObject
 
         selectState = E_SelectState.LookingForActor;
 
+        activePlayer = Players[activePlayerIndex];
+
+        if(activePlayerIndex == 1)
+        {
+            activePlayer.YourTurn(this);
+        }
+
+
 
     }
 
     public void OnTurnEnd()
     {
+        activeActor.SetTurnTaken(true);
         activeActor.TestTurnEnd(this);
 
         activeActor = null;
         activeTarget[0] = null;
         activeTarget[1] = null;
         activeAbility = null;
+
+        
 
         main = 0;
         manuever = 0;
@@ -220,6 +299,20 @@ public class SO_BattleManager : ScriptableObject
         selectState = E_SelectState.None;
 
 
+    }
+
+    private bool CheckIfAllActorsWent(SO_TurnManager next)
+    {
+        foreach(MB_Actor actor in next.actorsUnderControl)
+        {
+            if(!actor.turnTaken)
+            {
+                return false;
+            }
+        }
+
+        next.finished = true;
+        return true;
     }
 
 

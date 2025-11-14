@@ -12,6 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37791d7d261e45840bb6aa56bb2cdbe2, type: 3}
   m_Name: SO_BattleManager
   m_EditorClassIdentifier: 
+  activePlayer: {fileID: 0}
+  Players:
+  - {fileID: 11400000, guid: 98309597894e25e4f8b47caa0105af34, type: 2}
+  - {fileID: 11400000, guid: 4de04bca931517c42a8bc5e3747f9822, type: 2}
   activeActor: {fileID: 0}
-  activeTarget: {fileID: 0}
-  lookingForTarget: 0
+  selectState: 0
+  EventActivateActor:
+    m_PersistentCalls:
+      m_Calls: []

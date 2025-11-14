@@ -7,25 +7,35 @@ public class MB_Entity : MonoBehaviour
     public int X = 0;
     public int Y = 0;
 
+
+    public Tile currentTile = null;
+
     private void Start()
     {
-        AddToWorld();
+       currentTile = AddToWorld();
     }
 
 
     //Entity Position
-    private void AddToWorld()
+    private Tile AddToWorld()
     {
-        gridSystem.GridAdd(this);
         Vector3 newPos = new Vector3(X, 0, Y);
         transform.position = newPos;
+
+        return gridSystem.GridAdd(this);
     }
 
     protected void UpdatePosition(Vector2Int lastPos)
     {
-        gridSystem.GridUpdatePos(this, lastPos);
+        currentTile = gridSystem.GridUpdatePos(this, lastPos);
         Vector3 newPos = new Vector3(X, 0, Y);
         transform.position = newPos;
+    }
+
+    protected virtual void RemoveFromWorld()
+    {
+        gridSystem.GridRemove(this);
+        gameObject.SetActive(false);
     }
 
     public virtual void ForcedMovement(Tile cellPushedInto, int distance)
@@ -39,5 +49,11 @@ public class MB_Entity : MonoBehaviour
     public void TakeDamage(int damage)
     {
         stamina -= damage;
+
+        if(stamina <= 0)
+        {
+            RemoveFromWorld();
+        }
+
     }
 }
