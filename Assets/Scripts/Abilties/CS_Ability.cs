@@ -16,14 +16,6 @@ public abstract class CS_Ability
     //This will have to get more complicated but for now, Tile[0] the main target, Tile[1] is reserved for Forced Movement, and Tile[2] and on is for
     public abstract CS_AbilityReturnData Use(CS_AbilityInputData data);
 
-    //Dictionary<string, Tile[]>
-    // Target | Tile[1,1]
-    // Tar
-
-
-    //Targets | Tile[All tiles targets are standing on]
-    //ForcedMove | Tile[A new tile for each target]
-    //
 }
 public class CS_AbilityInputData
 {

@@ -11,7 +11,7 @@ public class MB_Actor : MB_Entity
 {
     public List<CS_Ability> abilities = new List<CS_Ability>();
 
-    private SO_ActorEventManager ActorEventManager;
+    private CS_ActorEventManager ActorEventManager;
 
     [SerializeField] MB_Model ActorModel;
 
@@ -24,7 +24,7 @@ public class MB_Actor : MB_Entity
     protected virtual void Awake()
     {
         base.Awake();
-        ActorEventManager = new SO_ActorEventManager();
+        ActorEventManager = new CS_ActorEventManager();
         ActorModel.ActorEventManager = ActorEventManager;
         abilities.Add(new A_MeleeFreeStrike());
         abilities.Add(new A_RangedFreeStrike());
@@ -66,7 +66,7 @@ public class MB_Actor : MB_Entity
         }
 
         //When done moving
-        gridSystem.GridDisplayPossibleSteps(movement);
+        gridSystem.GridUpdateBFS(movement);
         isWalking = false;
         callbackForState(E_SelectState.LookingForMove);
 
@@ -137,6 +137,11 @@ public class MB_Actor : MB_Entity
     public void UseAbility()
     {
         ActorEventManager.EventActorAttack.Invoke();
+    }
+
+    void OnDisable()
+    {
+        ActorEventManager.OnDisable();
     }
 
 

@@ -16,13 +16,17 @@ public class MB_AbilityManager : MonoBehaviour
     private void OnEnable()
     {
         BattleManager.EventActivateActor.AddListener(LoadAbilities);
+        BattleManager.EventTurnEnd.AddListener(ClearAbilities);
     }
 
     public void LoadAbilities(MB_Actor actor)
     {
-        foreach (GameObject ability in displayedAbilties)
+        ClearAbilities();
+
+        //Hardcode, Monsters don't trigger this
+        if(actor.CompareTag("Monster"))
         {
-            DestroyImmediate(ability);
+            return;
         }
 
         foreach(CS_Ability ability in actor.abilities)
@@ -43,6 +47,14 @@ public class MB_AbilityManager : MonoBehaviour
             abilityInstance.UpdateText();
 
             displayedAbilties.Add(obj);
+        }
+    }
+
+    public void ClearAbilities()
+    {
+        foreach (GameObject ability in displayedAbilties)
+        {
+            DestroyImmediate(ability);
         }
     }
 

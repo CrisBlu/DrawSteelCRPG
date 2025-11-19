@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MB_Model : MonoBehaviour
 {
-    [HideInInspector] public SO_ActorEventManager ActorEventManager;
+    [HideInInspector] public CS_ActorEventManager ActorEventManager;
 
     private void Start()
     {

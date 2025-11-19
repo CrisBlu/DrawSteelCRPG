@@ -122,7 +122,6 @@ public class SO_TurnManager : ScriptableObject
 
         //Activate
         gridSystem.GridOnSelection(activeMonster.currentTile);
-        Debug.Log(BattleManager.activeActor);
 
         //Move
         BattleManager.StartLookingForTarget(activeMonster.abilities[3]);

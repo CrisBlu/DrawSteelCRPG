@@ -7,6 +7,7 @@ using UnityEngine.Events;
 [CreateAssetMenu(fileName = "SO_BattleManager", menuName = "Scriptable Objects/SO_BattleManager")]
 
 ///This should control the state of the fight and what the active User or AI is doing
+//Ultimately I think I need to take the idea of select states more seriously, the grid display feature needs to be 100% linked with my selection state because that's all information for the player
 public class SO_BattleManager : ScriptableObject
 {
 
@@ -28,6 +29,8 @@ public class SO_BattleManager : ScriptableObject
 
     //Events
     [HideInInspector] public UnityEvent<MB_Actor> EventActivateActor;
+    [HideInInspector] public UnityEvent<CS_Ability> EventSelectAbility;
+    [HideInInspector] public UnityEvent EventTurnEnd;
 
     //State Enum
     //LookingForActor
@@ -52,10 +55,9 @@ public class SO_BattleManager : ScriptableObject
 
         selectState= E_SelectState.LookingForActor;
 
-        if (EventActivateActor != null)
-        {
-            EventActivateActor = new UnityEvent<MB_Actor>();
-        }
+
+        EventActivateActor = new UnityEvent<MB_Actor>();
+        
 
 
     }
@@ -140,10 +142,26 @@ public class SO_BattleManager : ScriptableObject
 
     public void StartLookingForTarget(CS_Ability ability)
     {
+        //If you're in the middle of selecting tiles for a move, don't change the state
+        if(selectState == E_SelectState.LookingForCell)
+        {
+            return;
+        }
+
+
+
         activeAbility = ability;
         activeTarget = null;
+
+
         TryAbility();
+
+        if(ability.Type != E_ActionType.move)
+        {
+            EventSelectAbility.Invoke(activeAbility);
+        }
         
+
     }
 
 
@@ -271,6 +289,7 @@ public class SO_BattleManager : ScriptableObject
         move = 0;
 
         selectState = E_SelectState.None;
+        EventTurnEnd.Invoke();
 
 
     }
@@ -294,6 +313,8 @@ public class SO_BattleManager : ScriptableObject
     private void OnDisable()
     {
         EventActivateActor.RemoveAllListeners();
+        EventSelectAbility.RemoveAllListeners();
+        EventTurnEnd.RemoveAllListeners();
     }
 
 

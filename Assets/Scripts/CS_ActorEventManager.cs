@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-[CreateAssetMenu(fileName = "SO_ActorEventManager", menuName = "Scriptable Objects/SO_ActorEventManager")]
-public class SO_ActorEventManager : ScriptableObject
+//[CreateAssetMenu(fileName = "SO_ActorEventManager", menuName = "Scriptable Objects/SO_ActorEventManager")]
+public class CS_ActorEventManager
 {
     [HideInInspector] public UnityEvent EventActorIdle;
     [HideInInspector] public UnityEvent EventActorWalk;
@@ -10,7 +10,7 @@ public class SO_ActorEventManager : ScriptableObject
     [HideInInspector] public UnityEvent EventActorHurt;
     [HideInInspector] public UnityEvent EventActorPushed;
 
-    private void OnEnable()
+    public CS_ActorEventManager()
     {
 
 
@@ -26,7 +26,7 @@ public class SO_ActorEventManager : ScriptableObject
 
 
 
-    private void OnDisable()
+    public void OnDisable()
     {
         EventActorIdle?.RemoveAllListeners();
         EventActorWalk?.RemoveAllListeners();

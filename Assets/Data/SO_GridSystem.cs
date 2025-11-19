@@ -5,19 +5,26 @@ using System.Linq;
 using System.Xml;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 [CreateAssetMenu(fileName = "SO_GridSystem", menuName = "Scriptable Objects/SO_GridSystem")]
 public class SO_GridSystem : ScriptableObject
 {
     [SerializeField] SO_BattleManager BattleManager;
-    List<Tile> possibleSteps = new List<Tile>();
+    [HideInInspector] public List<Tile> possibleSteps = new List<Tile>();
     public readonly int size = 10;
     public Tile[,] GridMatrix;
+
+    [HideInInspector] public UnityEvent<List<Tile>, Color> EventGridUpdate;
 
 
     private void OnEnable()
     {
+        EventGridUpdate = new UnityEvent<List<Tile>, Color>();
+
+        BattleManager.EventSelectAbility.AddListener(GridUpdateBFSForAttack);
 
         GridMatrix = new Tile[size, size];
 
@@ -109,7 +116,7 @@ public class SO_GridSystem : ScriptableObject
             //Activate an Actor
             if (BattleManager.SetActiveActor((MB_Actor)entityInSpace))
             {
-                GridDisplayPossibleSteps(BattleManager.activeActor.Speed);
+                GridUpdateBFS(BattleManager.activeActor.Speed);
             }
             return;
         }
@@ -133,7 +140,7 @@ public class SO_GridSystem : ScriptableObject
 
     public void GridTarget(Tile cell)
     {
-        List<Tile> possibleTargets = GridBFSFromCell(BattleManager.activeActor.currentTile, BattleManager.activeAbility.Range, false);
+        List<Tile> possibleTargets = GridBFSForAttack(BattleManager.activeActor.currentTile, BattleManager.activeAbility.Range);
         
         if(!possibleTargets.Contains(cell))
         { return; }
@@ -202,6 +209,56 @@ public class SO_GridSystem : ScriptableObject
         return possibilities;
     }
 
+    public List<Tile> GridBFSForAttack(Tile cell, int range, bool forMove = false)
+    {
+        Queue<Tile> openSet = new Queue<Tile>();
+        List<Tile> possibilities = new List<Tile>();
+        cell.cost = 0;
+        openSet.Enqueue(cell);
+
+        while (openSet.Count > 0)
+        {
+            Tile currentCell = openSet.Dequeue();
+
+            foreach (Tile neighbor in currentCell.FindNeighbors(this))
+            {
+                if (openSet.Contains(neighbor))
+                    continue;
+
+                neighbor.cost = currentCell.cost + 1;
+
+                if (!CheckIfValidCell(neighbor, range, possibilities, forMove))
+                    continue;
+
+
+                GridMatrix[neighbor.position.x, neighbor.position.y].parent = currentCell;
+
+
+                //The idea here is to make it so that when targeting, cells with targets don't become parents of any other cell
+                if (neighbor.entity == null)
+                {
+                    openSet.Enqueue(neighbor);
+                }
+
+                //Iterate to origin cell until finds origin cell or other target; this does mean actors can block shots, which is unwanted
+                //While currentx and currenty don't equal origin x and origin y
+                //  if current x doesn't equal, move one closer
+                //  if current y doesn't equal, move one closer
+                //  check closer tile, if entity != null break and do not add to possibilties
+                //possibilities.Add(current)
+
+                if(CheckForLineOfSight(cell, neighbor))
+                {
+                    possibilities.Add(neighbor);
+                }
+                
+            }
+        }
+
+        return possibilities;
+    }
+
+
     bool CheckIfValidCell(Tile cell, int maxcost, List<Tile> possibilities, bool forMove)
     {
         bool valid = false;
@@ -223,21 +280,46 @@ public class SO_GridSystem : ScriptableObject
         return valid;
     }
 
-    public void GridDisplayPossibleSteps(int distance)
+    bool CheckForLineOfSight(Tile origin, Tile current)
     {
-        possibleSteps = GridBFSFromCell(BattleManager.activeActor.currentTile, distance, true);
+        Vector2Int closerTile = current.position;
+        while(closerTile != origin.position)
+        { 
+            if(closerTile.x != origin.position.x)
+            {
+                closerTile.x = closerTile.x > origin.position.x ? closerTile.x - 1 : closerTile.x + 1;
+            }
 
-        foreach (Tile step in possibleSteps)
-        {
-            //Debug.Log(step);
+            if (closerTile.y != origin.position.y)
+            {
+                closerTile.y = closerTile.y > origin.position.y ? closerTile.y - 1 : closerTile.y + 1;
+            }
+
+            if (GridMatrix[closerTile.x, closerTile.y].entity != null && closerTile != origin.position)
+            {
+                return false;
+            }
+
         }
+
+        return true;
     }
+
 
     public void GridUpdateBFS(int distance)
     {
         possibleSteps = GridBFSFromCell(BattleManager.activeActor.currentTile, distance, true);
-
+        EventGridUpdate.Invoke(possibleSteps, Color.green);
     }
+
+    public void GridUpdateBFSForAttack(CS_Ability ability)
+    {
+        List<Tile> possibleTargets = GridBFSForAttack(BattleManager.activeActor.currentTile, ability.Range);
+        EventGridUpdate.Invoke(possibleTargets, Color.red);
+    }
+
+ 
+
 
 
 
