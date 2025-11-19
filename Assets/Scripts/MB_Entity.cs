@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MB_Entity : MonoBehaviour
 {
-    [SerializeField] protected SO_GridSystem gridSystem;
+    public SO_GridSystem gridSystem;
     public int stamina = 10;
     public int X = 0;
     public int Y = 0;
@@ -10,7 +10,7 @@ public class MB_Entity : MonoBehaviour
 
     public Tile currentTile = null;
 
-    private void Start()
+    protected virtual void Awake()
     {
        currentTile = AddToWorld();
     }
@@ -46,7 +46,7 @@ public class MB_Entity : MonoBehaviour
 
 
     //Entity Stamina
-    public void TakeDamage(int damage)
+    public virtual void TakeDamage(int damage)
     {
         stamina -= damage;
 

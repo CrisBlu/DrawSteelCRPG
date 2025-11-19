@@ -7,8 +7,9 @@ public class MB_Monster : MB_Actor
 {
     [SerializeField] private SO_TurnManager Team;
  
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         Team.actorsUnderControl.Add(this);
     }
 

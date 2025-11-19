@@ -15,7 +15,7 @@ public class SO_BattleManager : ScriptableObject
     [SerializeField] private List<SO_TurnManager> Players = new List<SO_TurnManager>();
 
     [HideInInspector] public MB_Actor activeActor;
-    [HideInInspector] public Tile[] activeTarget = new Tile[3];
+    [HideInInspector] public Tile activeTarget;
     [HideInInspector] public CS_Ability activeAbility;
 
 
@@ -34,17 +34,17 @@ public class SO_BattleManager : ScriptableObject
     //LookingForCell
     //LookingForTarget
 
-
+    public CS_AbilityParser AbilityParser = new CS_AbilityParser();
     private void OnEnable()
     {
+        AbilityParser.SetUp(SetSelectState);
+
         //On Begin turn 
         activePlayerIndex = 0;
         activePlayer = Players[activePlayerIndex];
         activeActor = null;
-        activeTarget[0] = null;
-        activeTarget[1] = null;
-        activeAbility = null;
-       
+        activeTarget = null;
+
 
         main = 1;
         manuever = 1;
@@ -71,8 +71,8 @@ public class SO_BattleManager : ScriptableObject
         {
             return false;
         }
-        activeTarget[0] = null;
-        activeTarget[1] = null;
+        activeTarget = null;
+ 
         activeAbility = null;
         currentSpeed = actor.Speed;
 
@@ -92,14 +92,14 @@ public class SO_BattleManager : ScriptableObject
 
         
         //Double click correct target
-        if (activeTarget[0] != target)
+        if (activeTarget != target)
         {
-            activeTarget[0] = target;
+            activeTarget = target;
             
         }
         else
         {
-            UseAbility();
+            TryAbility();
         }
 
         
@@ -107,6 +107,7 @@ public class SO_BattleManager : ScriptableObject
 
     public void MoveAction(Tile cellToMoveTo, SO_GridSystem gridSystem)
     {
+        //This if statement is redudant
         if(activeActor.movement <= 0)
         {
             Debug.Log("No movement left");
@@ -140,22 +141,15 @@ public class SO_BattleManager : ScriptableObject
     public void StartLookingForTarget(CS_Ability ability)
     {
         activeAbility = ability;
-
-        //Self target
-        if (activeAbility.Range == 0)
-        {
-            activeTarget[0] = activeActor.currentTile;
-            UseAbility();
-            return;
-        }
-
-        selectState = E_SelectState.LookingForTarget;
-        Debug.Log("Looking For Target");
+        activeTarget = null;
+        TryAbility();
         
     }
 
-    public void UseAbility()
+
+    public void TryAbility()
     {
+        //Check if actor has that action type left
         if(activeAbility.Type == E_ActionType.main)
         {
             if(main <= 0)
@@ -182,46 +176,27 @@ public class SO_BattleManager : ScriptableObject
                 return;
             }
         }
-        //Don't allow more selection by default when an ability is used
-        
 
-        //New script, ability information gatherer
-        //When using an ability check it's effects
-        //for each effect do something else
-        //Push - Ask user to select another space on the grid
-        //
-
-        if (activeAbility.Effects.Contains("push"))
+        //Try the ability, deduct action point if successful
+        if(AbilityParser.TryAbility(activeAbility, activeActor, activeTarget))
         {
-            if (activeTarget[1] == null)
+            activeActor.UseAbility();
+            if (activeAbility.Type == E_ActionType.main)
             {
-                selectState = E_SelectState.LookingForCell;
-                Debug.Log("Need to select cell to push to");
-                return;
+                main -= 1;
             }
-            
+
+            if (activeAbility.Type == E_ActionType.manuever)
+            {
+                manuever -= 1;
+            }
+
+            if (activeAbility.Type == E_ActionType.move)
+            {
+                move -= 1;
+            }
         }
 
-
-        if (activeAbility.Type == E_ActionType.main)
-        { 
-            main -= 1;
-        }
-
-        if (activeAbility.Type == E_ActionType.manuever)
-        {
-            manuever -= 1;
-        }
-
-        if (activeAbility.Type == E_ActionType.move)
-        {
-            move -= 1;
-        }
-
-        activeAbility.Use(activeTarget);
-
-        //Default assumption is that you'll want to finish you move after, and if you've already selected your move action, this is the only way to get back the move state
-        selectState = E_SelectState.LookingForMove;
 
 
         //Tile[] testArray = new Tile[1] { activeTarget[0] };
@@ -286,8 +261,7 @@ public class SO_BattleManager : ScriptableObject
         activeActor.TestTurnEnd(this);
 
         activeActor = null;
-        activeTarget[0] = null;
-        activeTarget[1] = null;
+        activeTarget = null;
         activeAbility = null;
 
         

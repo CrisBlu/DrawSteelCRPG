@@ -10,15 +10,24 @@ using UnityEngine;
 public class MB_Actor : MB_Entity
 {
     public List<CS_Ability> abilities = new List<CS_Ability>();
+
+    private SO_ActorEventManager ActorEventManager;
+
+    [SerializeField] MB_Model ActorModel;
+
     [HideInInspector] public int Speed = 5;
     [HideInInspector] public int movement = 0;
-    public bool turnTaken = false;
 
+    public bool turnTaken = false;
     protected bool isWalking = false;
 
-    private void OnEnable()
+    protected virtual void Awake()
     {
+        base.Awake();
+        ActorEventManager = new SO_ActorEventManager();
+        ActorModel.ActorEventManager = ActorEventManager;
         abilities.Add(new A_MeleeFreeStrike());
+        abilities.Add(new A_RangedFreeStrike());
         abilities.Add(new A_Knockback());
         abilities.Add(new A_Advance());
     }
@@ -27,6 +36,8 @@ public class MB_Actor : MB_Entity
     public void ActorStartWalking(List<Tile> stepsToTake, Action<E_SelectState> callbackForState)
     {
         StartCoroutine(ActorWalking(stepsToTake, callbackForState));
+
+        ActorEventManager.EventActorWalk.Invoke();
     }
 
     private IEnumerator ActorWalking(List<Tile> stepsToTake, Action<E_SelectState> callbackForState)
@@ -53,9 +64,13 @@ public class MB_Actor : MB_Entity
             stepsToTake.RemoveAt(0);
             yield return new WaitForSeconds(.2f);
         }
+
+        //When done moving
         gridSystem.GridDisplayPossibleSteps(movement);
         isWalking = false;
         callbackForState(E_SelectState.LookingForMove);
+
+
         yield return null;
     }
 
@@ -67,6 +82,11 @@ public class MB_Actor : MB_Entity
 
     public override void ForcedMovement(Tile cellPushedInto, int distance)
     {
+        ActorEventManager.EventActorPushed.Invoke();
+
+
+        //Shoves the actor into the next square to their destination, up to the distance
+        //If something exists in that space, take damage and don't move 
         Vector2Int origin = new Vector2Int(X, Y);
         Vector2Int nextCell = new Vector2Int(X, Y);
         while(X != cellPushedInto.position.x || Y != cellPushedInto.position.y)
@@ -104,7 +124,19 @@ public class MB_Actor : MB_Entity
         }
 
         UpdatePosition(origin);
+
         //stepsToTake.Add(cords);
+    }
+
+    public override void TakeDamage(int damage)
+    {
+        ActorEventManager.EventActorHurt.Invoke();
+        base.TakeDamage(damage);
+    }
+
+    public void UseAbility()
+    {
+        ActorEventManager.EventActorAttack.Invoke();
     }
 
 

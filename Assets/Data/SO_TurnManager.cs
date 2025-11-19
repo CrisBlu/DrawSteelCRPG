@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SO_TurnManager", menuName = "Scriptable Objects/SO_TurnManager")]
+
 
 public class C_MoveScore
 {
@@ -19,7 +19,7 @@ public class C_MoveScore
 }
 
 
-
+[CreateAssetMenu(fileName = "SO_TurnManager", menuName = "Scriptable Objects/SO_TurnManager")]
 public class SO_TurnManager : ScriptableObject
 {
     public string role; 
@@ -33,8 +33,6 @@ public class SO_TurnManager : ScriptableObject
     Dictionary<MB_Actor, List<Tile>> possibleTargets = new Dictionary<MB_Actor, List<Tile>>();
     List<Tile> possibleSteps;
 
-
-    public bool AI = false;
 
     //Goals
     //Kill all heroes
@@ -127,7 +125,7 @@ public class SO_TurnManager : ScriptableObject
         Debug.Log(BattleManager.activeActor);
 
         //Move
-        BattleManager.StartLookingForTarget(activeMonster.abilities[2]);
+        BattleManager.StartLookingForTarget(activeMonster.abilities[3]);
         gridSystem.GridOnSelection(bestPlay.position);
 
         

@@ -147,8 +147,7 @@ public class SO_GridSystem : ScriptableObject
 
     public void GridForceMoveTo(Tile cell)
     {
-        BattleManager.activeTarget[1] = cell;
-        BattleManager.UseAbility();
+        BattleManager.AbilityParser.selectedCell = cell;
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------

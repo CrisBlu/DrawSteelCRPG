@@ -8,8 +8,9 @@ public class MB_Hero : MB_Actor
     private int recoveryValue = 5;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         abilities.Add(new A_CatchBreath());
         Team.actorsUnderControl.Add(this);
         recoveries = MaxRecoveries;
@@ -23,13 +24,14 @@ public class MB_Hero : MB_Actor
         base.RemoveFromWorld();
     }
 
-    public void SpendRecovery()
+    public bool SpendRecovery()
     {
-        if(recoveries <= 0) { return; }
+        if(recoveries <= 0) { return false; }
 
         recoveries -= 1;
 
         stamina += recoveryValue;
+        return true;
     }
 
 }
