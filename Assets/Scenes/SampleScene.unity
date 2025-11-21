@@ -1059,6 +1059,7 @@ MonoBehaviour:
   stamina: 10
   X: 3
   Y: 1
+  isActor: 0
 --- !u!23 &671412820
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1162,6 +1163,7 @@ MonoBehaviour:
   stamina: 3
   X: 2
   Y: 2
+  isActor: 0
 --- !u!23 &745920479
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1263,8 +1265,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridSystem: {fileID: 11400000, guid: 8b0da9658adb0804885fe3f9d859a48f, type: 2}
   stamina: 3
-  X: 0
-  Y: 3
+  X: 5
+  Y: 5
+  isActor: 0
+  sheet: {fileID: 11400000, guid: dbefb32b72880394d87a8c28fb8680a8, type: 2}
   ActorModel: {fileID: 1999868160}
   Speed: 5
   movement: 0
@@ -1498,6 +1502,7 @@ MonoBehaviour:
   stamina: 10
   X: 4
   Y: 2
+  isActor: 0
 --- !u!23 &1023990212
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2148,6 +2153,7 @@ MonoBehaviour:
   stamina: 10
   X: 1
   Y: 8
+  isActor: 0
 --- !u!23 &1404692571
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2451,6 +2457,7 @@ MonoBehaviour:
   stamina: 10
   X: 3
   Y: 3
+  isActor: 0
 --- !u!23 &1632604702
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2681,6 +2688,7 @@ MonoBehaviour:
   stamina: 10
   X: 3
   Y: 3
+  isActor: 0
 --- !u!23 &1781041272
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2870,6 +2878,8 @@ MonoBehaviour:
   stamina: 10
   X: 7
   Y: 7
+  isActor: 0
+  sheet: {fileID: 11400000, guid: cd302685518414c4789a6fefd8228980, type: 2}
   ActorModel: {fileID: 1531926797}
   Speed: 5
   movement: 0
@@ -3317,6 +3327,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Goblin
       objectReference: {fileID: 0}
+    - target: {fileID: 2911228610925858535, guid: 0daf8f3c56e6b404b918e0ad9d98ef55, type: 3}
+      propertyPath: sheet
+      value: 
+      objectReference: {fileID: 11400000, guid: dbefb32b72880394d87a8c28fb8680a8, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3370,6 +3384,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3022669711131476176, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
+      propertyPath: sheet
+      value: 
+      objectReference: {fileID: 11400000, guid: 923b95faf79a9d747937b0a219498671, type: 2}
     - target: {fileID: 3022669711131476176, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
       propertyPath: ActorModel
       value: 

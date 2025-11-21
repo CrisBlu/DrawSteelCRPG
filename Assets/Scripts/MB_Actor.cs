@@ -7,9 +7,14 @@ using Unity.VisualScripting;
 using UnityEditor.Playables;
 using UnityEngine;
 
+
+
+
+
 public class MB_Actor : MB_Entity
 {
     public List<CS_Ability> abilities = new List<CS_Ability>();
+    public SO_CharacterSheet sheet;
 
     private CS_ActorEventManager ActorEventManager;
 
@@ -21,26 +26,33 @@ public class MB_Actor : MB_Entity
     public bool turnTaken = false;
     protected bool isWalking = false;
 
+    
+
     protected virtual void Awake()
     {
+
         base.Awake();
+        isActor = true;
         ActorEventManager = new CS_ActorEventManager();
         ActorModel.ActorEventManager = ActorEventManager;
         abilities.Add(new A_MeleeFreeStrike());
         abilities.Add(new A_RangedFreeStrike());
         abilities.Add(new A_Knockback());
         abilities.Add(new A_Advance());
+        abilities.Add(new A_Charge());
+
+        
     }
 
 
-    public void ActorStartWalking(List<Tile> stepsToTake, Action<E_SelectState> callbackForState)
+    public void ActorStartWalking(List<Tile> stepsToTake, Func<E_SelectState, bool> callbackForState = null)
     {
         StartCoroutine(ActorWalking(stepsToTake, callbackForState));
 
         ActorEventManager.EventActorWalk.Invoke();
     }
 
-    private IEnumerator ActorWalking(List<Tile> stepsToTake, Action<E_SelectState> callbackForState)
+    private IEnumerator ActorWalking(List<Tile> stepsToTake, Func<E_SelectState, bool> callbackForState = null)
     {
         isWalking = true;
 
@@ -54,8 +66,6 @@ public class MB_Actor : MB_Entity
 
             movement--;
 
-            Debug.Log("Moving to " + stepsToTake[0].position);
-
             Vector2Int lastPos = new Vector2Int(X, Y);
             X = stepsToTake[0].position.x; Y = stepsToTake[0].position.y;
 
@@ -66,13 +76,20 @@ public class MB_Actor : MB_Entity
         }
 
         //When done moving
-        gridSystem.GridUpdateBFS(movement);
         isWalking = false;
-        callbackForState(E_SelectState.LookingForMove);
 
-
+        if(callbackForState != null)
+        {
+            callbackForState(E_SelectState.LookingForMove);
+            if (movement <= 0) { callbackForState(E_SelectState.LookingForAction); }
+        }
+        
+        
+        
         yield return null;
     }
+
+   
 
     public void SetTurnTaken(bool state)
     {

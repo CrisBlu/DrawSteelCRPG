@@ -24,7 +24,9 @@ public class SO_GridSystem : ScriptableObject
     {
         EventGridUpdate = new UnityEvent<List<Tile>, Color>();
 
-        BattleManager.EventSelectAbility.AddListener(GridUpdateBFSForAttack);
+        BattleManager.EventSelectStateMove.AddListener(GridUpdateBFS);
+        BattleManager.EventSelectStateTarget.AddListener(GridUpdateBFSForAttack);
+        BattleManager.EventSelectStateCell.AddListener(GridUpdateForCellSelect);
 
         GridMatrix = new Tile[size, size];
 
@@ -33,6 +35,7 @@ public class SO_GridSystem : ScriptableObject
             for (int j = 0; j < size; j++)
             {
                 GridMatrix[i, j] = new Tile();
+                GridMatrix[i, j].parentGrid = this;
                 GridMatrix[i, j].position = new Vector2Int(i, j);
             }
         }
@@ -82,6 +85,10 @@ public class SO_GridSystem : ScriptableObject
         {
             GridActivate(selectedCell);
         }
+        else if(BattleManager.selectState == E_SelectState.LookingForAction)
+        {
+            GridInspect(selectedCell);
+        }
         else if (BattleManager.selectState == E_SelectState.LookingForMove)
         {
             GridMoveTo(selectedCell);
@@ -123,10 +130,23 @@ public class SO_GridSystem : ScriptableObject
         
     }
 
+    public void GridInspect(Tile cell)
+    {
+        if(cell == BattleManager.activeActor.currentTile)
+        {
+            BattleManager.SelectActiveActor();
+        }
+    }
+
     //
     public void GridMoveTo(Tile cell)
     {
-        GridUpdateBFS(BattleManager.activeActor.movement);
+        if (cell == BattleManager.activeActor.currentTile)
+        {
+            BattleManager.ReturnToDefaultState();
+            return;
+        }
+        //GridUpdateBFS(BattleManager.activeActor.movement);
         MB_Entity entityInSpace = cell.entity;
         if(entityInSpace == null)
         {
@@ -154,7 +174,11 @@ public class SO_GridSystem : ScriptableObject
 
     public void GridForceMoveTo(Tile cell)
     {
-        BattleManager.AbilityParser.selectedCell = cell;
+        if(BattleManager.AbilityParser.validTiles.Contains(cell))
+        {
+            BattleManager.AbilityParser.selectedCell = cell;
+        }
+        
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------
@@ -308,7 +332,8 @@ public class SO_GridSystem : ScriptableObject
 
     public void GridUpdateBFS(int distance)
     {
-        possibleSteps = GridBFSFromCell(BattleManager.activeActor.currentTile, distance, true);
+        //This doesn't work properly
+        possibleSteps = CS_GridUtility.GetMovementArea(BattleManager.activeActor.currentTile, distance, false);/*GridBFSFromCell(BattleManager.activeActor.currentTile, distance, true);*/
         EventGridUpdate.Invoke(possibleSteps, Color.green);
     }
 
@@ -316,6 +341,11 @@ public class SO_GridSystem : ScriptableObject
     {
         List<Tile> possibleTargets = GridBFSForAttack(BattleManager.activeActor.currentTile, ability.Range);
         EventGridUpdate.Invoke(possibleTargets, Color.red);
+    }
+
+    public void GridUpdateForCellSelect()
+    {
+        EventGridUpdate.Invoke(BattleManager.AbilityParser.validTiles, Color.blue);
     }
 
  

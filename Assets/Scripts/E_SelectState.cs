@@ -6,5 +6,7 @@ public enum E_SelectState
     LookingForTarget,
     LookingForMove,
     LookingForCell,
+    WaitingForAnimation,
+    LookingForAction,
     None
 }

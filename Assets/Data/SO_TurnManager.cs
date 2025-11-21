@@ -143,6 +143,13 @@ public class SO_TurnManager : ScriptableObject
 
     private void TargetAndAttack(CS_Ability ability, MB_Monster activeMonster)
     {
+        //Reselect Actor if needed
+        if(battleManager.selectState != E_SelectState.LookingForAction)
+        {
+            gridSystem.GridOnSelection(activeMonster.currentTile);
+        }
+        
+
         //Select Ability
         battleManager.StartLookingForTarget(ability);
 

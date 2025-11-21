@@ -11,6 +11,7 @@ public class MB_Hero : MB_Actor
     protected override void Awake()
     {
         base.Awake();
+        abilities.Add(new A_Lightfall());
         abilities.Add(new A_CatchBreath());
         Team.actorsUnderControl.Add(this);
         recoveries = MaxRecoveries;

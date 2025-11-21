@@ -9,8 +9,10 @@ public class Tile
     public Vector2Int position;
     public int cost;
 
+    public SO_GridSystem parentGrid;
 
-    public List<Tile> FindNeighbors(SO_GridSystem gridSystem)
+
+    public List<Tile> FindNeighbors(SO_GridSystem gridSystem = null /*Obsolete*/)
     {
         List<Tile> neighbors = new List<Tile>();
         for (int i = -1; i <= 1; i++)
@@ -26,11 +28,11 @@ public class Tile
                     continue;
 
                 //If outside the grid, need to change with grid size
-                if (posToCheck.x >= gridSystem.size || posToCheck.y >= gridSystem.size)
+                if (posToCheck.x >= parentGrid.size || posToCheck.y >= parentGrid.size)
                     continue;
 
 
-                Tile neighbor = gridSystem.GridMatrix[position.x - i, position.y - j];
+                Tile neighbor = parentGrid.GridMatrix[position.x - i, position.y - j];
 
                 
 

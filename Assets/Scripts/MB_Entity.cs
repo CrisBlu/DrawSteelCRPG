@@ -7,6 +7,8 @@ public class MB_Entity : MonoBehaviour
     public int X = 0;
     public int Y = 0;
 
+    public bool isActor = false;
+
 
     public Tile currentTile = null;
 
@@ -25,9 +27,9 @@ public class MB_Entity : MonoBehaviour
         return gridSystem.GridAdd(this);
     }
 
-    protected void UpdatePosition(Vector2Int lastPos)
+    protected void UpdatePosition(Vector2Int lastPos = new())
     {
-        currentTile = gridSystem.GridUpdatePos(this, lastPos);
+        currentTile = gridSystem.GridUpdatePos(this, currentTile.position);
         Vector3 newPos = new Vector3(X, 0, Y);
         transform.position = newPos;
     }
@@ -56,4 +58,13 @@ public class MB_Entity : MonoBehaviour
         }
 
     }
+
+    public void Teleport(Vector2Int newLocation)
+    {
+        X = newLocation.x;
+        Y = newLocation.y;
+
+        UpdatePosition();
+    }
+
 }

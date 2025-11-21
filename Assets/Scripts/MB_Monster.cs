@@ -6,7 +6,7 @@ using UnityEngine;
 public class MB_Monster : MB_Actor
 {
     [SerializeField] private SO_TurnManager Team;
- 
+    
     protected override void Awake()
     {
         base.Awake();

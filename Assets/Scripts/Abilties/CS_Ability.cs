@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 
 public abstract class CS_Ability
@@ -46,12 +47,14 @@ public class CS_CallbackData
 {
     public Action<MB_Actor, Tile> abilityCallback = null;
     public MB_Actor target = null;
+    public List<Tile> validTiles = null;
 
 
-    public CS_CallbackData(Action<MB_Actor, Tile> callback = null, MB_Actor currentTarget = null)
+    public CS_CallbackData(Action<MB_Actor, Tile> callback = null, MB_Actor currentTarget = null, List<Tile> validTiles = null)
     {
         abilityCallback = callback;
         target = currentTarget;
+        this.validTiles = validTiles;
 
 
     }
@@ -68,22 +71,27 @@ public class A_MeleeFreeStrike : CS_Ability
 
     public override CS_AbilityReturnData Use(CS_AbilityInputData data)
     {
-        int tier = CS_DiceRoller.PowerRoll();
+        CS_Characteristics stats = data.actor.sheet.stats;
+        int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
+
+
+
+        int tier = CS_DiceRoller.PowerRoll(favoredStat);
 
         Debug.Log("Melee Free Strike " + data.target.entity + "A tier " + tier);
 
         switch (tier)
         {
             case 1:
-                data.target.entity.TakeDamage(2);
+                data.target.entity.TakeDamage(2 + favoredStat);
                 break;
 
             case 2:
-                data.target.entity.TakeDamage(5);
+                data.target.entity.TakeDamage(5 + favoredStat);
                 break;
 
             case 3 or 4:
-                data.target.entity.TakeDamage(7);
+                data.target.entity.TakeDamage(7 + favoredStat);
                 break;
 
         }
@@ -91,6 +99,8 @@ public class A_MeleeFreeStrike : CS_Ability
         return new CS_AbilityReturnData(true);
     }
 }
+
+
 
 public class A_RangedFreeStrike: CS_Ability
 {
@@ -124,22 +134,26 @@ public class A_RangedFreeStrike: CS_Ability
         }
         //Code section ends here -----------------------------------------------------------------------------------
 
-        int tier = CS_DiceRoller.PowerRoll(0, 0, bane);
+        CS_Characteristics stats = data.actor.sheet.stats;
+        int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
+
+        int tier = CS_DiceRoller.PowerRoll(favoredStat, 0, bane);
+
 
         Debug.Log("Ranged Free Strike " + data.target.entity + "A tier " + tier);
 
         switch (tier)
         {
             case 1:
-                data.target.entity.TakeDamage(2);
+                data.target.entity.TakeDamage(2 + favoredStat);
                 break;
 
             case 2:
-                data.target.entity.TakeDamage(5);
+                data.target.entity.TakeDamage(4 + favoredStat);
                 break;
 
             case 3 or 4:
-                data.target.entity.TakeDamage(7);
+                data.target.entity.TakeDamage(6 + favoredStat);
                 break;
 
         }
@@ -158,21 +172,45 @@ public class A_Knockback : CS_Ability
     public override List<string> Effects => new List<string> { "push" };
     public override int Range => 1;
 
-
+    private int distance = 0;
     public override CS_AbilityReturnData Use(CS_AbilityInputData data)
     {
         Queue<CS_CallbackData> callbackList = new();
-
         MB_Actor targetActor = (MB_Actor)data.target.entity;
-        callbackList.Enqueue(new CS_CallbackData(KnockbackActor, targetActor));
+        CS_Characteristics stats = data.actor.sheet.stats;
+        distance = 0;
 
-        
+        int tier = CS_DiceRoller.PowerRoll(stats.Might + 10);
+
+        switch (tier)
+        {
+            case 1:
+                distance = 1;
+                break;
+
+            case 2:
+                distance = 2;
+                break;
+
+            case 3 or 4:
+                distance = 3;
+                break;
+        }
+
+        List<Tile> validPushLocations = CS_GridUtility.GetValidPushArea(data.actor.currentTile, data.target, distance);
+        //if original distance is (0,1), then this is along the y axis, only y needs to increase every cell
+        //if original distance is (1,0), then this is along the y axis, only x needs to increase every cell
+
+
+        callbackList.Enqueue(new CS_CallbackData(KnockbackActor, targetActor, validPushLocations));
+
+
         return new CS_AbilityReturnData(true, callbackList);
     }
 
     private void KnockbackActor(MB_Actor target, Tile destination)
     {
-        target.ForcedMovement(destination, 3);
+        target.ForcedMovement(destination, distance);
     }
 }
 
@@ -210,6 +248,34 @@ public class A_CatchBreath : CS_Ability
     }
 }
 
+public class A_Charge : CS_Ability
+{
+    public override string Name => "Charge";
+    public override string Description => "Move up to you speed in a straight and free strike";
+    public override E_ActionType Type => E_ActionType.main;
+    public override List<string> Effects => new();
+    public override int Range => 0;
+
+
+    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
+    {
+        Queue<CS_CallbackData> callbackQueue = new Queue<CS_CallbackData> ();
+        List<Tile> validCharge = CS_GridUtility.GetMovementArea(data.target, data.actor.Speed, true);
+        callbackQueue.Enqueue(new CS_CallbackData(Charge, data.actor, validCharge));
+
+        return new CS_AbilityReturnData(true, callbackQueue);
+    }
+
+    void Charge(MB_Actor self, Tile destination)
+    {
+        List<Tile> path = CS_GridUtility.GridMakePath(destination, self.currentTile);
+        self.movement += path.Count;
+        self.ActorStartWalking(path);
+    }
+}
+
+
+
 /*
  *  public override string Name => "";
     public override string Description => "";
@@ -218,7 +284,7 @@ public class A_CatchBreath : CS_Ability
     public override int Range => ;
 
 
-    public override void Use(Tile[] target)
+    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
     {
         
     }

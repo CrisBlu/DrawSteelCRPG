@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class CS_AbilityParser
 {
-    Action<E_SelectState> StateChange;
+    Func<E_SelectState, bool> StateChange;
     private Queue<CS_CallbackData> callbackQueue = new();
+    CS_CallbackData currentCallback;
 
     private Tile _selectedCell;
     public Tile selectedCell
@@ -21,8 +22,11 @@ public class CS_AbilityParser
         }
     }
 
-    public void SetUp(Action<E_SelectState> function)
+    public List<Tile> validTiles = new List<Tile>();
+
+    public void SetUp(Func<E_SelectState, bool> function)
     {
+        validTiles.Clear();
         StateChange = function;
     }
 
@@ -30,6 +34,8 @@ public class CS_AbilityParser
     {
         //Try ability happens everytime the user fufills a step required for an ability to activate; once that certain ability has enough information
         //it'll trigger and return true
+
+        //Try ability needs a look, I think it has some checks that are now redudant
 
         //Select Target
         if (activeTarget == null)
@@ -47,36 +53,49 @@ public class CS_AbilityParser
                 return false;
             }
 
-            //If ability needs specfifc target (like free strike)
-
-            //If an ability can be cast on empty square 
-
         }
+
 
         CS_AbilityReturnData returnData = ability.Use(new CS_AbilityInputData(activeActor, activeTarget));
 
+
+
         if(returnData.callbackQueue != null)
         {
+            //Callback data parsing
             callbackQueue = returnData.callbackQueue;
+            currentCallback = callbackQueue.Dequeue();
+            validTiles = currentCallback.validTiles;
+
+            //State change
             StateChange(E_SelectState.LookingForCell);
         }
         else
         {
-            StateChange(E_SelectState.LookingForMove);
+            StateChange(E_SelectState.LookingForAction);
+            if (ability.Type == E_ActionType.move)
+            {
+                StateChange(E_SelectState.LookingForMove);
+            }
+            
         }
         
         return returnData.isSuccessful;
     }
 
+
+
     private void DealWithCallbacks(Tile cell)
     {
-        CS_CallbackData currentCallback = callbackQueue.Dequeue();
-
         currentCallback.abilityCallback(currentCallback.target, cell);
 
         if(callbackQueue.Count <= 0)
         {
-            StateChange(E_SelectState.LookingForMove);
+            StateChange(E_SelectState.LookingForAction);
+        }
+        else
+        {
+           currentCallback = callbackQueue.Dequeue();
         }
     }
 

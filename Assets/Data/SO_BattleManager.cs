@@ -1,6 +1,7 @@
 using Mono.Cecil.Cil;
 using NUnit.Framework;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -29,13 +30,15 @@ public class SO_BattleManager : ScriptableObject
 
     //Events
     [HideInInspector] public UnityEvent<MB_Actor> EventActivateActor;
-    [HideInInspector] public UnityEvent<CS_Ability> EventSelectAbility;
+
+    //Do we need an event or do we just need a reference to the grid?
+    [HideInInspector] public UnityEvent<CS_Ability> EventSelectStateTarget;
+    [HideInInspector] public UnityEvent EventSelectStateAction;
+    [HideInInspector] public UnityEvent<int> EventSelectStateMove;
+    [HideInInspector] public UnityEvent EventSelectStateCell;
     [HideInInspector] public UnityEvent EventTurnEnd;
 
-    //State Enum
-    //LookingForActor
-    //LookingForCell
-    //LookingForTarget
+
 
     public CS_AbilityParser AbilityParser = new CS_AbilityParser();
     private void OnEnable()
@@ -62,9 +65,63 @@ public class SO_BattleManager : ScriptableObject
 
     }
 
-    private void SetSelectState(E_SelectState newState)
+    private bool SetSelectState(E_SelectState newState)
     {
+        //Keep feeling like there needs to be some sort of default state
+
+        switch (newState)
+        {
+            case E_SelectState.LookingForActor:
+                if (selectState != E_SelectState.None) { return false; }
+
+                break;
+
+            case E_SelectState.LookingForAction:
+                if (selectState == E_SelectState.WaitingForAnimation) { return false; }
+
+                EventSelectStateAction.Invoke();
+                break;
+
+
+            case E_SelectState.LookingForMove:
+                if (selectState != E_SelectState.LookingForAction && selectState != E_SelectState.WaitingForAnimation && selectState != newState) { return false; }
+
+                EventSelectStateMove.Invoke(activeActor.movement);
+                break;
+
+
+            case E_SelectState.LookingForTarget:
+                //Only look for targets in the same situations where looking for a move would be acceptable
+                if (selectState != E_SelectState.LookingForAction && selectState != newState) { return false; }
+
+                activeTarget = null;
+                EventSelectStateTarget.Invoke(activeAbility);
+                break;
+
+
+            case E_SelectState.LookingForCell:
+                if (selectState != E_SelectState.LookingForTarget && selectState != newState) { return false; }
+
+                EventSelectStateCell.Invoke();
+                break;
+
+
+
+            case E_SelectState.WaitingForAnimation:
+                if (selectState != E_SelectState.LookingForMove) { return false; }
+
+                break;
+
+
+            case E_SelectState.None:
+                if(selectState != E_SelectState.LookingForAction) { return false; }
+                break;
+        }
+
+
+        Debug.Log("State: " + newState);
         selectState = newState;
+        return true;
     }
 
     public bool SetActiveActor(MB_Actor actor)
@@ -79,15 +136,28 @@ public class SO_BattleManager : ScriptableObject
         currentSpeed = actor.Speed;
 
         activeActor = actor;
-        //selectState = E_SelectState.LookingForMove;
-
 
 
         EventActivateActor.Invoke(activeActor);
+        
+        SetSelectState(E_SelectState.LookingForAction);
         return true;
   
 
     }
+
+    public void SelectActiveActor()
+    {
+ 
+        SetSelectState(E_SelectState.LookingForMove);
+
+    }
+
+    public void ReturnToDefaultState()
+    {
+        SetSelectState(E_SelectState.LookingForAction);
+    }
+
 
     public void SetActiveTarget(Tile target)
     {
@@ -116,7 +186,7 @@ public class SO_BattleManager : ScriptableObject
             return;
         }
 
-        selectState = E_SelectState.None;
+        SetSelectState(E_SelectState.WaitingForAnimation);
 
         List<Tile> stepsToTake = new List<Tile>();
 
@@ -142,25 +212,19 @@ public class SO_BattleManager : ScriptableObject
 
     public void StartLookingForTarget(CS_Ability ability)
     {
-        //If you're in the middle of selecting tiles for a move, don't change the state
-        if(selectState == E_SelectState.LookingForCell)
+        activeAbility = ability;
+
+
+
+        if (!SetSelectState(E_SelectState.LookingForTarget))
         {
             return;
         }
 
 
-
-        activeAbility = ability;
-        activeTarget = null;
-
-
+       
         TryAbility();
 
-        if(ability.Type != E_ActionType.move)
-        {
-            EventSelectAbility.Invoke(activeAbility);
-        }
-        
 
     }
 
@@ -260,7 +324,7 @@ public class SO_BattleManager : ScriptableObject
         manuever = 1;
         move = 1;
 
-        selectState = E_SelectState.LookingForActor;
+        SetSelectState(E_SelectState.LookingForActor);
 
         activePlayer = Players[activePlayerIndex];
 
@@ -275,6 +339,10 @@ public class SO_BattleManager : ScriptableObject
 
     public void OnTurnEnd()
     {
+        if(!SetSelectState(E_SelectState.None))
+        {
+            return;
+        }
         activeActor.SetTurnTaken(true);
         activeActor.TestTurnEnd(this);
 
@@ -288,7 +356,7 @@ public class SO_BattleManager : ScriptableObject
         manuever = 0;
         move = 0;
 
-        selectState = E_SelectState.None;
+        
         EventTurnEnd.Invoke();
 
 
@@ -312,9 +380,11 @@ public class SO_BattleManager : ScriptableObject
 
     private void OnDisable()
     {
-        EventActivateActor.RemoveAllListeners();
-        EventSelectAbility.RemoveAllListeners();
-        EventTurnEnd.RemoveAllListeners();
+        EventActivateActor?.RemoveAllListeners();
+        EventSelectStateTarget?.RemoveAllListeners();
+        EventSelectStateMove?.RemoveAllListeners();
+        EventSelectStateCell?.RemoveAllListeners();
+        EventTurnEnd?.RemoveAllListeners();
     }
 
 
