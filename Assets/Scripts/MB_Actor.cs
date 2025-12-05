@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor.Playables;
 using UnityEngine;
+using UnityEngine.Events;
 
 
 
@@ -26,6 +27,7 @@ public class MB_Actor : MB_Entity
     public bool turnTaken = false;
     protected bool isWalking = false;
 
+
     
 
     protected virtual void Awake()
@@ -35,8 +37,7 @@ public class MB_Actor : MB_Entity
         isActor = true;
         ActorEventManager = new CS_ActorEventManager();
         ActorModel.ActorEventManager = ActorEventManager;
-        abilities.Add(new A_MeleeFreeStrike());
-        abilities.Add(new A_RangedFreeStrike());
+        
         abilities.Add(new A_Knockback());
         abilities.Add(new A_Advance());
         abilities.Add(new A_Charge());
@@ -45,14 +46,15 @@ public class MB_Actor : MB_Entity
     }
 
 
-    public void ActorStartWalking(List<Tile> stepsToTake, Func<E_SelectState, bool> callbackForState = null)
+
+    public void ActorStartWalking(List<Tile> stepsToTake, Action callbackAtEnd = null)
     {
-        StartCoroutine(ActorWalking(stepsToTake, callbackForState));
+        StartCoroutine(ActorWalking(stepsToTake, callbackAtEnd));
 
         ActorEventManager.EventActorWalk.Invoke();
     }
 
-    private IEnumerator ActorWalking(List<Tile> stepsToTake, Func<E_SelectState, bool> callbackForState = null)
+    private IEnumerator ActorWalking(List<Tile> stepsToTake, Action callbackAtEnd = null)
     {
         isWalking = true;
 
@@ -78,14 +80,10 @@ public class MB_Actor : MB_Entity
         //When done moving
         isWalking = false;
 
-        if(callbackForState != null)
-        {
-            callbackForState(E_SelectState.LookingForMove);
-            if (movement <= 0) { callbackForState(E_SelectState.LookingForAction); }
-        }
-        
-        
-        
+        callbackAtEnd.Invoke();
+
+
+
         yield return null;
     }
 
@@ -151,9 +149,15 @@ public class MB_Actor : MB_Entity
         base.TakeDamage(damage);
     }
 
-    public void UseAbility()
+    public void UseAbilityAnimation()
     {
+        //Seperate out these events to make it clear, solely for animation
         ActorEventManager.EventActorAttack.Invoke();
+    }
+
+    public void LoadAbilities()
+    {
+
     }
 
     void OnDisable()

@@ -10,6 +10,7 @@ public class MB_Monster : MB_Actor
     protected override void Awake()
     {
         base.Awake();
+        abilities.Add(new A_SpearCharge());
         Team.actorsUnderControl.Add(this);
     }
 
@@ -32,7 +33,7 @@ public class MB_Monster : MB_Actor
         yield return new WaitUntil(() => !isWalking);
         Debug.Log("Done walking");
 
-        callback(abilities[0], this);
+        callback(abilities[3], this);
 
 
         Team.EndTurn();

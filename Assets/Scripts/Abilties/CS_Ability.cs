@@ -22,11 +22,17 @@ public class CS_AbilityInputData
 {
     public MB_Actor actor;
     public Tile target;
+    public Action<CS_ActorTurnStats> addActorToTurn;
+    public int edges;
+    public int banes;
 
-    public CS_AbilityInputData(MB_Actor actorUsingAbility, Tile targetedTile)
+    public CS_AbilityInputData(MB_Actor actorUsingAbility, Tile targetedTile, Action<CS_ActorTurnStats> addActorToTurn = null, int edges = 0, int banes = 0)
     {
         actor = actorUsingAbility;
         target = targetedTile;
+        this.addActorToTurn = addActorToTurn;
+        this.edges = edges;
+        this.banes = banes;
     }
 }
 
@@ -65,7 +71,7 @@ public class A_MeleeFreeStrike : CS_Ability
     public override string Name => "Melee Free Strike";
     public override string Description => "A simple strike";
     public override E_ActionType Type => E_ActionType.main;
-    public override List<string> Effects => new();
+    public override List<string> Effects => new List<string> { "charge", "signature", "melee", "strike"};
     public override int Range => 1;
 
 
@@ -73,10 +79,10 @@ public class A_MeleeFreeStrike : CS_Ability
     {
         CS_Characteristics stats = data.actor.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
+       
 
 
-
-        int tier = CS_DiceRoller.PowerRoll(favoredStat);
+        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges);
 
         Debug.Log("Melee Free Strike " + data.target.entity + "A tier " + tier);
 
@@ -107,7 +113,7 @@ public class A_RangedFreeStrike: CS_Ability
     public override string Name => "Ranged Free Strike";
     public override string Description => "A pot shot";
     public override E_ActionType Type => E_ActionType.main;
-    public override List<string> Effects => new List<string> { "ranged" };
+    public override List<string> Effects => new List<string> { "ranged", "signature" };
     public override int Range => 5;
 
 
@@ -257,8 +263,13 @@ public class A_Charge : CS_Ability
     public override int Range => 0;
 
 
+    private Action<CS_ActorTurnStats> addActorToTurn;
+    private MB_Actor actor;
     public override CS_AbilityReturnData Use(CS_AbilityInputData data)
     {
+
+        addActorToTurn = data.addActorToTurn;
+        actor = data.actor;
         Queue<CS_CallbackData> callbackQueue = new Queue<CS_CallbackData> ();
         List<Tile> validCharge = CS_GridUtility.GetMovementArea(data.target, data.actor.Speed, true);
         callbackQueue.Enqueue(new CS_CallbackData(Charge, data.actor, validCharge));
@@ -270,9 +281,73 @@ public class A_Charge : CS_Ability
     {
         List<Tile> path = CS_GridUtility.GridMakePath(destination, self.currentTile);
         self.movement += path.Count;
-        self.ActorStartWalking(path);
+        self.ActorStartWalking(path, EndOfChargeAttack);
+    }
+
+    void EndOfChargeAttack()
+    {
+        addActorToTurn(new CS_ActorTurnStats(actor, 1, 0, 0, "charge"));
+
     }
 }
+
+public class A_StrikeNow : CS_Ability
+{
+    public override string Name => "Strike Now!";
+    public override string Description => "a opening!";
+    public override E_ActionType Type => E_ActionType.main;
+    public override List<string> Effects => new List<string> { "ranged" };
+    public override int Range => 10;
+
+
+    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
+    {
+        data.addActorToTurn(new CS_ActorTurnStats((MB_Actor)data.target.entity, 1, 0, 0, "signature"));
+        return new CS_AbilityReturnData(true);
+    }
+
+}
+
+public class A_SpearCharge : CS_Ability
+{
+    public override string Name => "Spear Charge";
+    public override string Description => "The goblin rushes forward";
+    public override E_ActionType Type => E_ActionType.main;
+    public override List<string> Effects => new List<string> { "charge", "melee", "strike" };
+    public override int Range => 1;
+
+
+    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
+    {
+        CS_Characteristics stats = data.actor.sheet.stats;
+        int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
+
+
+
+        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges);
+
+        Debug.Log("Melee Free Strike " + data.target.entity + "A tier " + tier);
+
+        switch (tier)
+        {
+            case 1:
+                data.target.entity.TakeDamage(1 + favoredStat);
+                break;
+
+            case 2:
+                data.target.entity.TakeDamage(2 + favoredStat);
+                break;
+
+            case 3 or 4:
+                data.target.entity.TakeDamage(3 + favoredStat);
+                break;
+
+        }
+
+        return new CS_AbilityReturnData(true);
+    }
+}
+
 
 
 
@@ -280,7 +355,7 @@ public class A_Charge : CS_Ability
  *  public override string Name => "";
     public override string Description => "";
     public override E_ActionType Type => E_ActionType.;
-    public override List<string> Effects => new();
+    public override List<string> Effects => new(); new List<string> { "" };
     public override int Range => ;
 
 

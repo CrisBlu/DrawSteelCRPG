@@ -124,7 +124,7 @@ public class SO_TurnManager : ScriptableObject
         gridSystem.GridOnSelection(activeMonster.currentTile);
 
         //Move
-        BattleManager.StartLookingForTarget(activeMonster.abilities[3]);
+        BattleManager.StartLookingForTarget(activeMonster.abilities[1]);
         gridSystem.GridOnSelection(bestPlay.position);
 
         

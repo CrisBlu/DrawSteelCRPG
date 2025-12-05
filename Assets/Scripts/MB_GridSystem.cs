@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -60,6 +61,7 @@ public class MB_GridSystem : MonoBehaviour
     }
 
     private Mesh mesh;
+    public MeshFilter gridMesh;
     private void GenerateGrid()
     {
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
@@ -76,6 +78,7 @@ public class MB_GridSystem : MonoBehaviour
 
         mesh.vertices = vertices;
 
+
         int[] triangles = new int[data.size * data.size * 6];
        
         for (int ti = 0, vi = 0, y = 0; y < data.size; y++, vi++)
@@ -89,6 +92,8 @@ public class MB_GridSystem : MonoBehaviour
             }
 
         }
+
+        
 
         colors = new Color[vertices.Length];
         for (int i = 0; i < vertices.Length; i++)
@@ -109,6 +114,11 @@ public class MB_GridSystem : MonoBehaviour
         triangles[5] = data.size + 2;*/
         mesh.triangles = triangles;
         mesh.RecalculateNormals();
+
+
+        
+        gameObject.AddComponent<MeshCollider>();
+        
 
     }
 

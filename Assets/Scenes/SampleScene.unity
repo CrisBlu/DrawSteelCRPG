@@ -2653,6 +2653,7 @@ MonoBehaviour:
   sceneCamera: {fileID: 330585545}
   Map: {fileID: 1032657262}
   cellIndicator: {fileID: 3364468500688779779}
+  gridMesh: {fileID: 0}
 --- !u!1 &1781041270
 GameObject:
   m_ObjectHideFlags: 0
@@ -3488,8 +3489,8 @@ SceneRoots:
   - {fileID: 1632604704}
   - {fileID: 745920481}
   - {fileID: 1023990214}
-  - {fileID: 1266397081}
   - {fileID: 9107255923971425888}
   - {fileID: 2089332835}
   - {fileID: 1490540523}
   - {fileID: 1034890959}
+  - {fileID: 1266397081}

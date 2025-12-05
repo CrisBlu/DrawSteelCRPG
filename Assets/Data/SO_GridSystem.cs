@@ -12,7 +12,7 @@ using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 [CreateAssetMenu(fileName = "SO_GridSystem", menuName = "Scriptable Objects/SO_GridSystem")]
 public class SO_GridSystem : ScriptableObject
 {
-    [SerializeField] SO_BattleManager BattleManager;
+    [SerializeField] public SO_BattleManager BattleManager;
     [HideInInspector] public List<Tile> possibleSteps = new List<Tile>();
     public readonly int size = 10;
     public Tile[,] GridMatrix;

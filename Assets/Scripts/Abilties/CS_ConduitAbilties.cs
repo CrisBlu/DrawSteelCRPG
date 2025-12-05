@@ -15,7 +15,7 @@ public class A_Lightfall : CS_Ability
     public override string Name => "Lightfall";
     public override string Description => "A rain of holy light scours your enemies and repositions your allies.";
     public override E_ActionType Type => E_ActionType.main;
-    public override List<string> Effects => new();
+    public override List<string> Effects => new List<string> { "signature" };
     public override int Range => 0;
 
 

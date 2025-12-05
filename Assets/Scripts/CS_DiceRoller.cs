@@ -19,7 +19,7 @@ public static class CS_DiceRoller
     public static int PowerRoll(int bonus = 0, int edges = 0, int banes = 0)
     {
         int diceResult = RollDice(2, 10);
-
+        Debug.Log("Raw Roll:" + diceResult);
         //Check for crit before any bonuses or edges applies
         if(diceResult >= 19) { return 4;  }
 
@@ -35,9 +35,10 @@ public static class CS_DiceRoller
         }
         
         diceResult += bonus;
+        Debug.Log("Roll With Bonus:" + diceResult);
 
-        
-        
+
+
         if (diceResult < 12) { tierResult += 1; } else
 
         if (diceResult >= 12 && diceResult <= 16) { tierResult += 2; } else

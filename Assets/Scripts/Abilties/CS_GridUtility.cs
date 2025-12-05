@@ -193,10 +193,6 @@ public static class CS_GridUtility
     }
 
 
-
-
-
-
     static bool CheckForLineOfSight(Tile origin, Tile current)
     {
         Vector2Int closerTile = current.position;
@@ -220,6 +216,25 @@ public static class CS_GridUtility
         }
 
         return true;
+    }
+
+    public static bool CheckForFlanking(MB_Actor attacker, Tile target)
+    {
+        //Take the distance between attacker and target, move one more in that direction, check if there's an actor Ally there
+        Vector2Int directionFromAttackerToTarget = target.position - attacker.currentTile.position;
+        Vector2Int adjacentPosition = target.position + directionFromAttackerToTarget;
+        Tile adjacentTile = target.parentGrid.GridMatrix[adjacentPosition.x, adjacentPosition.y];
+
+        if(adjacentTile.entity && attacker.CompareTag(adjacentTile.entity.tag))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+
     }
 
 }

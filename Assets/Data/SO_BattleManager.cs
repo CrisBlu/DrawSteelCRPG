@@ -16,6 +16,8 @@ public class SO_BattleManager : ScriptableObject
     private int activePlayerIndex;
     [SerializeField] private List<SO_TurnManager> Players = new List<SO_TurnManager>();
 
+    [HideInInspector] private List<CS_ActorTurnStats> activeActors = new List<CS_ActorTurnStats>();
+    [HideInInspector] public CS_ActorTurnStats temporaryReferenceToActiveActor;
     [HideInInspector] public MB_Actor activeActor;
     [HideInInspector] public Tile activeTarget;
     [HideInInspector] public CS_Ability activeAbility;
@@ -23,13 +25,12 @@ public class SO_BattleManager : ScriptableObject
 
     [HideInInspector] public E_SelectState selectState;
 
-    private int main = 0;
+    [HideInInspector] public int main = 0;
     private int manuever = 0;
     private int move = 0;
-    public int currentSpeed;
 
     //Events
-    [HideInInspector] public UnityEvent<MB_Actor> EventActivateActor;
+    [HideInInspector] public UnityEvent<CS_ActorTurnStats> EventActivateActor;
 
     //Do we need an event or do we just need a reference to the grid?
     [HideInInspector] public UnityEvent<CS_Ability> EventSelectStateTarget;
@@ -43,23 +44,25 @@ public class SO_BattleManager : ScriptableObject
     public CS_AbilityParser AbilityParser = new CS_AbilityParser();
     private void OnEnable()
     {
-        AbilityParser.SetUp(SetSelectState);
+        AbilityParser.SetUp(SetSelectState, AddActorToTurn);
 
         //On Begin turn 
         activePlayerIndex = 0;
         activePlayer = Players[activePlayerIndex];
         activeActor = null;
         activeTarget = null;
+        activeActors.Clear();
 
-
+        /*
         main = 1;
         manuever = 1;
         move = 1;
+        */
 
         selectState= E_SelectState.LookingForActor;
 
 
-        EventActivateActor = new UnityEvent<MB_Actor>();
+        EventActivateActor = new UnityEvent<CS_ActorTurnStats>();
         
 
 
@@ -92,7 +95,7 @@ public class SO_BattleManager : ScriptableObject
 
             case E_SelectState.LookingForTarget:
                 //Only look for targets in the same situations where looking for a move would be acceptable
-                if (selectState != E_SelectState.LookingForAction && selectState != newState) { return false; }
+                if (selectState != E_SelectState.LookingForAction && selectState != E_SelectState.LookingForCell && selectState != newState) { return false; }
 
                 activeTarget = null;
                 EventSelectStateTarget.Invoke(activeAbility);
@@ -130,20 +133,63 @@ public class SO_BattleManager : ScriptableObject
         {
             return false;
         }
+
+        /*
         activeTarget = null;
  
         activeAbility = null;
-        currentSpeed = actor.Speed;
+        */
 
-        activeActor = actor;
+        AddActorToTurn(new CS_ActorTurnStats(actor));
 
-
-        EventActivateActor.Invoke(activeActor);
         
         SetSelectState(E_SelectState.LookingForAction);
         return true;
   
 
+    }
+
+    public void AddActorToTurn(CS_ActorTurnStats actorTurnInstance)
+    {
+        activeActors.Add(actorTurnInstance);
+        activeActor = actorTurnInstance.actor;
+        temporaryReferenceToActiveActor = actorTurnInstance;
+
+        DisplayAbilities(temporaryReferenceToActiveActor);
+
+    }
+    
+    //Is turn done?
+    public bool RemoveActorFromTurn(CS_ActorTurnStats actorTurnInstance)
+    {
+        activeActors.Remove(actorTurnInstance);
+
+        
+         
+
+        if (activeActors.Count > 0) 
+        {
+            temporaryReferenceToActiveActor = activeActors[activeActors.Count - 1];
+            activeActor = temporaryReferenceToActiveActor.actor;
+            DisplayAbilities(temporaryReferenceToActiveActor);
+            return false;
+        }
+        else
+        {
+            activeActor.SetTurnTaken(true);
+            activeActor.TestTurnEnd(this);
+
+            temporaryReferenceToActiveActor = null;
+            activeActor = null;
+
+            return true;
+        }
+    }
+
+    public void DisplayAbilities(CS_ActorTurnStats actor)
+    {
+        //Every time the actor is changed, this needs updating
+        EventActivateActor.Invoke(actor);
     }
 
     public void SelectActiveActor()
@@ -206,8 +252,15 @@ public class SO_BattleManager : ScriptableObject
 
         stepsToTake.Reverse();
        
-        activeActor.ActorStartWalking(stepsToTake, SetSelectState);
+        activeActor.ActorStartWalking(stepsToTake, EndMoveAction);
 
+    }
+
+    private void EndMoveAction()
+    {
+
+        SetSelectState(E_SelectState.LookingForMove);
+        if (activeActor.movement <= 0) { SetSelectState(E_SelectState.LookingForAction); }
     }
 
     public void StartLookingForTarget(CS_Ability ability)
@@ -231,10 +284,11 @@ public class SO_BattleManager : ScriptableObject
 
     public void TryAbility()
     {
+        CS_ActorTurnStats abilityUser = temporaryReferenceToActiveActor;
         //Check if actor has that action type left
         if(activeAbility.Type == E_ActionType.main)
         {
-            if(main <= 0)
+            if(abilityUser.main <= 0)
             {
                 Debug.Log("Main action used");
                 return;
@@ -243,7 +297,7 @@ public class SO_BattleManager : ScriptableObject
 
         if(activeAbility.Type == E_ActionType.manuever)
         {
-            if(manuever <= 0)
+            if(abilityUser.manuever <= 0)
             {
                 Debug.Log("Manuever used");
                 return;
@@ -252,7 +306,7 @@ public class SO_BattleManager : ScriptableObject
 
         if (activeAbility.Type == E_ActionType.move)
         {
-            if (move <= 0)
+            if (abilityUser.move <= 0)
             {
                 Debug.Log("Move used");
                 return;
@@ -262,20 +316,25 @@ public class SO_BattleManager : ScriptableObject
         //Try the ability, deduct action point if successful
         if(AbilityParser.TryAbility(activeAbility, activeActor, activeTarget))
         {
-            activeActor.UseAbility();
+            activeActor.UseAbilityAnimation();
             if (activeAbility.Type == E_ActionType.main)
             {
-                main -= 1;
+                abilityUser.main -= 1;
             }
 
             if (activeAbility.Type == E_ActionType.manuever)
             {
-                manuever -= 1;
+                abilityUser.manuever -= 1;
             }
 
             if (activeAbility.Type == E_ActionType.move)
             {
-                move -= 1;
+                abilityUser.move -= 1;
+            }
+
+            if(temporaryReferenceToActiveActor.main == 0 && temporaryReferenceToActiveActor.manuever == 0 && temporaryReferenceToActiveActor.move == 0 && activeActor.movement == 0)
+            {
+                OnTurnEnd();
             }
         }
 
@@ -319,11 +378,11 @@ public class SO_BattleManager : ScriptableObject
             }
         }
         
-
+        /*
         main = 1;
         manuever = 1;
         move = 1;
-
+        */
         SetSelectState(E_SelectState.LookingForActor);
 
         activePlayer = Players[activePlayerIndex];
@@ -339,25 +398,27 @@ public class SO_BattleManager : ScriptableObject
 
     public void OnTurnEnd()
     {
-        if(!SetSelectState(E_SelectState.None))
+        //What if select state stored in a player class for eachc player?
+        if (!SetSelectState(E_SelectState.None))
         {
             return;
         }
-        activeActor.SetTurnTaken(true);
-        activeActor.TestTurnEnd(this);
 
-        activeActor = null;
-        activeTarget = null;
-        activeAbility = null;
+        EventTurnEnd.Invoke();
+        if (!RemoveActorFromTurn(temporaryReferenceToActiveActor))
+        {
+            SetSelectState(E_SelectState.LookingForActor);
+            SetSelectState(E_SelectState.LookingForAction);
+            return; 
+        }
 
-        
-
+        /*
         main = 0;
         manuever = 0;
         move = 0;
-
+        */
         
-        EventTurnEnd.Invoke();
+        
 
 
     }
@@ -389,3 +450,24 @@ public class SO_BattleManager : ScriptableObject
 
 
 }
+
+public class CS_ActorTurnStats
+{
+    public MB_Actor actor;
+    public int main;
+    public int manuever;
+    public int move;
+    public string abilityTagRestrict;
+    public Tile activeTarget = null;
+    public CS_Ability activeAbility = null;
+
+    public CS_ActorTurnStats(MB_Actor actor, int main = 1, int manuever = 1, int move = 1, string abilityTagRestrict = null)
+    {
+        this.actor = actor;
+        this.main = main;
+        this.manuever = manuever;
+        this.move = move;
+        this.abilityTagRestrict = abilityTagRestrict;
+    }
+}
+

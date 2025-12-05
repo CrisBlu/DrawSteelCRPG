@@ -5,6 +5,7 @@ using UnityEngine;
 public class CS_AbilityParser
 {
     Func<E_SelectState, bool> StateChange;
+    Action<CS_ActorTurnStats> action;
     private Queue<CS_CallbackData> callbackQueue = new();
     CS_CallbackData currentCallback;
 
@@ -24,10 +25,11 @@ public class CS_AbilityParser
 
     public List<Tile> validTiles = new List<Tile>();
 
-    public void SetUp(Func<E_SelectState, bool> function)
+    public void SetUp(Func<E_SelectState, bool> function, Action<CS_ActorTurnStats> action)
     {
         validTiles.Clear();
         StateChange = function;
+        this.action = action;
     }
 
     public bool TryAbility(CS_Ability ability, MB_Actor activeActor, Tile activeTarget)
@@ -55,8 +57,12 @@ public class CS_AbilityParser
 
         }
 
+        int edges = 0;
+        //Check for flanking
+        if(ability.Effects.Contains("melee") && ability.Effects.Contains("strike") && CS_GridUtility.CheckForFlanking(activeActor, activeTarget)) { edges++; }
 
-        CS_AbilityReturnData returnData = ability.Use(new CS_AbilityInputData(activeActor, activeTarget));
+
+        CS_AbilityReturnData returnData = ability.Use(new CS_AbilityInputData(activeActor, activeTarget, action, edges));
 
 
 
