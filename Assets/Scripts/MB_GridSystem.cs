@@ -21,7 +21,6 @@ public class MB_GridSystem : MonoBehaviour
 
         data.EventGridUpdate.AddListener(ColorCells);
         BattleManager.EventTurnEnd.AddListener(ClearGridColors);
-        
 
         GenerateGrid();
     }
@@ -56,12 +55,11 @@ public class MB_GridSystem : MonoBehaviour
 
     private Vector2Int CoordTranslate(Vector3 unityGridCoords)
     {
-        Vector2Int correctedCords = new Vector2Int((int)unityGridCoords.x + data.size / 2, (int)unityGridCoords.z + data.size / 2);
+        Vector2Int correctedCords = new Vector2Int((int)unityGridCoords.x + 10/ 2, (int)unityGridCoords.z + 10 / 2);
         return correctedCords;
     }
 
     private Mesh mesh;
-    public MeshFilter gridMesh;
     private void GenerateGrid()
     {
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();

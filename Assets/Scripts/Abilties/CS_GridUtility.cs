@@ -9,7 +9,7 @@ using static UnityEngine.Rendering.DebugUI;
 
 public static class CS_GridUtility
 {
-    public static CS_AoeReturnData GetTilesAndActorsWithin(Tile origin, int distance)
+    public static CS_AoeReturnData GetTilesAndActorsWithin(Tile origin, int distance, bool straightLine = false)
     {
         List<Tile> targetedTiles = new List<Tile>();
         List<MB_Actor> targetedActors = new List<MB_Actor>();
@@ -30,8 +30,16 @@ public static class CS_GridUtility
                 // Validating Function -----------------------------------------------------------------------------------
                 if (neighbor.cost <= distance && !targetedTiles.Contains(neighbor))
                 {
+                    if (straightLine)
+                    {
+                        if (!CheckForLineOfSight(origin, neighbor)) { continue; }
+                    }
+
+
                     targetedTiles.Add(neighbor);
                     openSet.Enqueue(neighbor);
+
+                    
 
                     if (neighbor.entity && neighbor.entity.isActor)
                     {

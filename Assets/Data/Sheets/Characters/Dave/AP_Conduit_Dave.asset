@@ -9,11 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b875c95bde931c3409d6ae3cee161ac3, type: 3}
-  m_Name: SO_Monster
+  m_Script: {fileID: 11500000, guid: e1b2c73f3b7443f4bb2f56468b198539, type: 3}
+  m_Name: AP_Conduit_Dave
   m_EditorClassIdentifier: 
-  role: Monster
-  actorsUnderControl: []
-  finished: 0
-  testRanged: 1
-  gridSystem: {fileID: 11400000, guid: 8b0da9658adb0804885fe3f9d859a48f, type: 2}

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
@@ -25,8 +27,17 @@ public class CS_Characteristics
 public class SO_CharacterSheet : ScriptableObject
 {
     public CS_Characteristics stats = new CS_Characteristics();
-    private void OnEnable()
+    public List<SO_AbilityPack> abilityPacks;
+
+
+    public List<CS_Ability> LoadAbilities()
     {
-        
+        List<CS_Ability> abilties = new List<CS_Ability>();
+        foreach(SO_AbilityPack abilityPack in abilityPacks)
+        {
+            abilties.AddRange(abilityPack.Abilities);
+        }
+
+        return abilties;
     }
 }

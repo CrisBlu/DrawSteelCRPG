@@ -14,7 +14,7 @@ public class SO_GridSystem : ScriptableObject
 {
     [SerializeField] public SO_BattleManager BattleManager;
     [HideInInspector] public List<Tile> possibleSteps = new List<Tile>();
-    public readonly int size = 10;
+    public readonly int size = 100;
     public Tile[,] GridMatrix;
 
     [HideInInspector] public UnityEvent<List<Tile>, Color> EventGridUpdate;
@@ -160,9 +160,16 @@ public class SO_GridSystem : ScriptableObject
 
     public void GridTarget(Tile cell)
     {
+        if (cell == BattleManager.activeActor.currentTile)
+        {
+            BattleManager.ReturnToDefaultState();
+            return;
+        }
+
         List<Tile> possibleTargets = GridBFSForAttack(BattleManager.activeActor.currentTile, BattleManager.activeAbility.Range);
-        
-        if(!possibleTargets.Contains(cell))
+
+
+        if (!possibleTargets.Contains(cell))
         { return; }
         
         MB_Entity entityInSpace = cell.entity;

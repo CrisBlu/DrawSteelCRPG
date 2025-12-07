@@ -21,13 +21,19 @@ public class MB_Entity : MonoBehaviour
     //Entity Position
     private Tile AddToWorld()
     {
+        
+        X = (int)transform.position.x;
+        Y = (int)transform.position.z;
+
         Vector3 newPos = new Vector3(X, 0, Y);
+
+
         transform.position = newPos;
 
         return gridSystem.GridAdd(this);
     }
 
-    protected void UpdatePosition(Vector2Int lastPos = new())
+    public void UpdatePosition(Vector2Int lastPos = new())
     {
         currentTile = gridSystem.GridUpdatePos(this, currentTile.position);
         Vector3 newPos = new Vector3(X, 0, Y);

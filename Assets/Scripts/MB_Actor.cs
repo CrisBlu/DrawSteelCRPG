@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEditor.Playables;
 using UnityEngine;
@@ -20,12 +21,16 @@ public class MB_Actor : MB_Entity
     private CS_ActorEventManager ActorEventManager;
 
     [SerializeField] MB_Model ActorModel;
+    [SerializeField] public TextMeshPro StaminaDisplay;
 
     [HideInInspector] public int Speed = 5;
     [HideInInspector] public int movement = 0;
 
     public bool turnTaken = false;
     protected bool isWalking = false;
+
+    private Material mat;
+    private Color ogColor;
 
 
     
@@ -42,7 +47,13 @@ public class MB_Actor : MB_Entity
         abilities.Add(new A_Advance());
         abilities.Add(new A_Charge());
 
-        
+        abilities.AddRange(sheet.LoadAbilities());
+
+        StaminaDisplay.text = stamina.ToString();
+
+        mat = ActorModel.GetComponent<MeshRenderer>().material;
+        ogColor = mat.color;
+
     }
 
 
@@ -91,6 +102,17 @@ public class MB_Actor : MB_Entity
 
     public void SetTurnTaken(bool state)
     {
+
+        if(state)
+        {
+            mat.color = ogColor/2;
+        }
+        else
+        {
+
+            mat.color = ogColor;
+
+        }
         turnTaken = state;
     }
 
@@ -147,6 +169,7 @@ public class MB_Actor : MB_Entity
     {
         ActorEventManager.EventActorHurt.Invoke();
         base.TakeDamage(damage);
+        StaminaDisplay.text = stamina.ToString();
     }
 
     public void UseAbilityAnimation()

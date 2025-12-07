@@ -117,7 +117,7 @@ public class SO_BattleManager : ScriptableObject
 
 
             case E_SelectState.None:
-                if(selectState != E_SelectState.LookingForAction) { return false; }
+                if(selectState != E_SelectState.LookingForAction && selectState != E_SelectState.LookingForTarget) { return false; }
                 break;
         }
 

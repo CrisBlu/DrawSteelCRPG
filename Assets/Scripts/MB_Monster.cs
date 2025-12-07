@@ -6,11 +6,18 @@ using UnityEngine;
 public class MB_Monster : MB_Actor
 {
     [SerializeField] private SO_TurnManager Team;
+    public bool advancing = true;
+    public bool watching = false;
+    public bool gaurding = false;
+
     
     protected override void Awake()
     {
+        
         base.Awake();
-        abilities.Add(new A_SpearCharge());
+
+        //desiredAbilities.Add(new A_Charge());
+
         Team.actorsUnderControl.Add(this);
     }
 
@@ -36,7 +43,6 @@ public class MB_Monster : MB_Actor
         callback(abilities[3], this);
 
 
-        Team.EndTurn();
     }
 
 

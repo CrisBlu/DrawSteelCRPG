@@ -121,32 +121,13 @@ public class A_RangedFreeStrike: CS_Ability
     {
 
 
-        //Code to determine if you get a bane while doing a ranged attack; almost certain should be somewhere where any ranged ability could access it ----------------------------------------------------------
-        List<Tile> nextTo = data.actor.currentTile.FindNeighbors(data.actor.gridSystem);
-        int bane = 0;
-
-        foreach(Tile neighbor in nextTo)
-        {
-            //This sucks and really, I should just be able to use tags
-            if(neighbor.entity && neighbor.entity.GetType().IsSubclassOf(typeof(MB_Actor)))
-            {
-                //If actor has different tag from entity in neighbor tile
-                if(!data.actor.CompareTag(neighbor.entity.tag))
-                {
-                    bane = 1;
-                    break;
-                }
-            }
-        }
-        //Code section ends here -----------------------------------------------------------------------------------
 
         CS_Characteristics stats = data.actor.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
 
-        int tier = CS_DiceRoller.PowerRoll(favoredStat, 0, bane);
+        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges, data.banes);
 
 
-        Debug.Log("Ranged Free Strike " + data.target.entity + "A tier " + tier);
 
         switch (tier)
         {
@@ -186,7 +167,7 @@ public class A_Knockback : CS_Ability
         CS_Characteristics stats = data.actor.sheet.stats;
         distance = 0;
 
-        int tier = CS_DiceRoller.PowerRoll(stats.Might + 10);
+        int tier = CS_DiceRoller.PowerRoll(stats.Might, data.edges, data.banes);
 
         switch (tier)
         {
@@ -324,9 +305,7 @@ public class A_SpearCharge : CS_Ability
 
 
 
-        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges);
-
-        Debug.Log("Melee Free Strike " + data.target.entity + "A tier " + tier);
+        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges, data.banes);
 
         switch (tier)
         {

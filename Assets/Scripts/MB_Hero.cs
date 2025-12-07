@@ -10,12 +10,9 @@ public class MB_Hero : MB_Actor
 
     protected override void Awake()
     {
+        
         base.Awake();
-        abilities.Add(new A_MeleeFreeStrike());
-        abilities.Add(new A_RangedFreeStrike());
-        abilities.Add(new A_Lightfall());
-        abilities.Add(new A_CatchBreath());
-        abilities.Add(new A_StrikeNow());
+        recoveryValue = stamina / 3;
         Team.actorsUnderControl.Add(this);
         recoveries = MaxRecoveries;
     }
@@ -35,6 +32,7 @@ public class MB_Hero : MB_Actor
         recoveries -= 1;
 
         stamina += recoveryValue;
+        StaminaDisplay.text = stamina.ToString();
         return true;
     }
 

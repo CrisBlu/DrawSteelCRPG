@@ -58,11 +58,33 @@ public class CS_AbilityParser
         }
 
         int edges = 0;
+        int banes = 0;
         //Check for flanking
-        if(ability.Effects.Contains("melee") && ability.Effects.Contains("strike") && CS_GridUtility.CheckForFlanking(activeActor, activeTarget)) { edges++; }
+        if (ability.Effects.Contains("melee") && ability.Effects.Contains("strike") && CS_GridUtility.CheckForFlanking(activeActor, activeTarget)) { edges++; }
+
+        if(ability.Effects.Contains("ranged"))
+        {
+            //Code to determine if you get a bane while doing a ranged attack; almost certain should be somewhere where any ranged ability could access it ----------------------------------------------------------
+            List<Tile> nextTo = activeActor.currentTile.FindNeighbors(activeActor.gridSystem);
+            
+
+            foreach (Tile neighbor in nextTo)
+            {
+                //This sucks and really, I should just be able to use tags
+                if (neighbor.entity && neighbor.entity.GetType().IsSubclassOf(typeof(MB_Actor)))
+                {
+                    //If actor has different tag from entity in neighbor tile
+                    if (!activeActor.CompareTag(neighbor.entity.tag))
+                    {
+                        banes = 1;
+                        break;
+                    }
+                }
+            }
+        }
 
 
-        CS_AbilityReturnData returnData = ability.Use(new CS_AbilityInputData(activeActor, activeTarget, action, edges));
+        CS_AbilityReturnData returnData = ability.Use(new CS_AbilityInputData(activeActor, activeTarget, action, edges, banes));
 
 
 
