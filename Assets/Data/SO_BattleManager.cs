@@ -1,7 +1,5 @@
-using Mono.Cecil.Cil;
-using NUnit.Framework;
+
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -33,11 +31,13 @@ public class SO_BattleManager : ScriptableObject
     [HideInInspector] public UnityEvent<CS_ActorTurnStats> EventActivateActor;
 
     //Do we need an event or do we just need a reference to the grid?
+    [HideInInspector] public UnityEvent EventSelectStateActor;
     [HideInInspector] public UnityEvent<CS_Ability> EventSelectStateTarget;
     [HideInInspector] public UnityEvent EventSelectStateAction;
     [HideInInspector] public UnityEvent<int> EventSelectStateMove;
     [HideInInspector] public UnityEvent EventSelectStateCell;
     [HideInInspector] public UnityEvent EventTurnEnd;
+
 
 
 
@@ -76,7 +76,7 @@ public class SO_BattleManager : ScriptableObject
         {
             case E_SelectState.LookingForActor:
                 if (selectState != E_SelectState.None) { return false; }
-
+                EventSelectStateActor.Invoke();
                 break;
 
             case E_SelectState.LookingForAction:
@@ -442,6 +442,7 @@ public class SO_BattleManager : ScriptableObject
     private void OnDisable()
     {
         EventActivateActor?.RemoveAllListeners();
+        EventSelectStateActor.RemoveAllListeners();
         EventSelectStateTarget?.RemoveAllListeners();
         EventSelectStateMove?.RemoveAllListeners();
         EventSelectStateCell?.RemoveAllListeners();

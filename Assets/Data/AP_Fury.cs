@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
+
 
 [CreateAssetMenu(fileName = "AP_Fury", menuName = "Scriptable Objects/Ability Packs/Classes/Fury")]
 public class AP_Fury : SO_AbilityPack
