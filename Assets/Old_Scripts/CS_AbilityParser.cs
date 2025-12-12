@@ -32,7 +32,7 @@ public class CS_AbilityParser
         this.action = action;
     }
 
-    public bool TryAbility(CS_Ability ability, MB_Actor activeActor, Tile activeTarget)
+    public bool TryAbility(CS_Ability ability, MB_Old_Actor activeActor, Tile activeTarget)
     {
         //Try ability happens everytime the user fufills a step required for an ability to activate; once that certain ability has enough information
         //it'll trigger and return true
@@ -71,7 +71,7 @@ public class CS_AbilityParser
             foreach (Tile neighbor in nextTo)
             {
                 //This sucks and really, I should just be able to use tags
-                if (neighbor.entity && neighbor.entity.GetType().IsSubclassOf(typeof(MB_Actor)))
+                if (neighbor.entity && neighbor.entity.GetType().IsSubclassOf(typeof(MB_Old_Actor)))
                 {
                     //If actor has different tag from entity in neighbor tile
                     if (!activeActor.CompareTag(neighbor.entity.tag))

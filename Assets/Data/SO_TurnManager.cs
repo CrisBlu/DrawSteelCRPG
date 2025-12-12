@@ -1,33 +1,17 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 
 
-public class C_MoveScore
-{
-    public MB_Actor unit;
-    public Tile position;
-    public float score;
 
 
-    public C_MoveScore(MB_Actor unitMakingPlay, Tile positionUnitGoesTo, float scoreGiven)
-    {
-        unit = unitMakingPlay;
-        position = positionUnitGoesTo;
-        score = scoreGiven;
-    }
-}
-
-
-[CreateAssetMenu(fileName = "SO_TurnManager", menuName = "Scriptable Objects/SO_TurnManager")]
-public class SO_TurnManager : ScriptableObject
+[CreateAssetMenu(fileName = "SO_Old_TurnManager", menuName = "Scriptable Objects/SO_Old_TurnManager")]
+public class SO_Old_TurnManager : ScriptableObject
 {
     public string role; 
-    public List<MB_Actor> actorsUnderControl = new List<MB_Actor>();
+    public List<MB_Old_Actor> actorsUnderControl = new List<MB_Old_Actor>();
     public bool finished;
 
  
@@ -36,7 +20,7 @@ public class SO_TurnManager : ScriptableObject
     private SO_BattleManager battleManager;
     private List<C_MoveScore> possiblePlays = new List<C_MoveScore>(); 
 
-    Dictionary<MB_Actor, List<Tile>> possibleTargets = new Dictionary<MB_Actor, List<Tile>>();
+    Dictionary<MB_Old_Actor, List<Tile>> possibleTargets = new Dictionary<MB_Old_Actor, List<Tile>>();
     List<Tile> possibleSteps;
 
 
@@ -67,7 +51,7 @@ public class SO_TurnManager : ScriptableObject
         battleManager = BattleManager;
         //For each Unit Possible
         //This is for each unit to "see" where the heroes are but ulimtely this is probably unneeded
-        foreach (MB_Actor unit in actorsUnderControl) 
+        foreach (MB_Old_Actor unit in actorsUnderControl) 
         {
             if(unit.turnTaken)
             {
@@ -93,7 +77,7 @@ public class SO_TurnManager : ScriptableObject
 
         //Best play in the scope of using this turn
         C_MoveScore bestPlay = new C_MoveScore(null, null, 9999);
-        foreach (MB_Actor unit in actorsUnderControl)
+        foreach (MB_Old_Actor unit in actorsUnderControl)
         {
             MB_Monster monster = (MB_Monster)unit;
             if (unit.turnTaken)
@@ -236,6 +220,22 @@ public class SO_TurnManager : ScriptableObject
 
 
 
+}
+
+
+public class C_MoveScore
+{
+    public MB_Old_Actor unit;
+    public Tile position;
+    public float score;
+
+
+    public C_MoveScore(MB_Old_Actor unitMakingPlay, Tile positionUnitGoesTo, float scoreGiven)
+    {
+        unit = unitMakingPlay;
+        position = positionUnitGoesTo;
+        score = scoreGiven;
+    }
 }
 
 /*

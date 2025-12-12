@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class MB_Monster : MB_Actor
+public class MB_Monster : MB_Old_Actor
 {
-    [SerializeField] private SO_TurnManager Team;
+    [SerializeField] private SO_Old_TurnManager Team;
     public bool advancing = true;
     public bool watching = false;
     public bool gaurding = false;

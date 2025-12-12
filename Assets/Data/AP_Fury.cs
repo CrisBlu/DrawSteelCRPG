@@ -21,7 +21,7 @@ public class A_BrutalSlam : CS_Ability
     {
 
         CS_Characteristics stats = data.actor.sheet.stats;
-        MB_Actor targetActor = (MB_Actor)data.target.entity;
+        MB_Old_Actor targetActor = (MB_Old_Actor)data.target.entity;
         Queue<CS_CallbackData> callbackQueue = new Queue<CS_CallbackData>();
         int favoredStat = stats.Might;
 
@@ -57,7 +57,7 @@ public class A_BrutalSlam : CS_Ability
         return new CS_AbilityReturnData(true, callbackQueue);
     }
 
-    private void KnockbackActor(MB_Actor target, Tile destination)
+    private void KnockbackActor(MB_Old_Actor target, Tile destination)
     {
         target.ForcedMovement(destination, distance);
     }

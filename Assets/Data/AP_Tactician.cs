@@ -50,9 +50,9 @@ public class A_BattleGrace : CS_Ability
 
     }
 
-    void Dance(MB_Actor self, Tile unwillingPartner)
+    void Dance(MB_Old_Actor self, Tile unwillingPartner)
     {
-        MB_Actor target = (MB_Actor)unwillingPartner.entity;
+        MB_Old_Actor target = (MB_Old_Actor)unwillingPartner.entity;
         Vector2Int lastPos = new Vector2Int(self.X, self.Y);
         self.X = unwillingPartner.position.x;
         self.Y = unwillingPartner.position.y;
@@ -108,7 +108,7 @@ public class A_TwoShot : CS_Ability
         return new CS_AbilityReturnData(true, callbackQueue);
     }
 
-    void SecondShot(MB_Actor attacker, Tile target)
+    void SecondShot(MB_Old_Actor attacker, Tile target)
     {
         if(target.entity)
         {

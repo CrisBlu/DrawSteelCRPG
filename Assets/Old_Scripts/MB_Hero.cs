@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class MB_Hero : MB_Actor
+public class MB_Hero : MB_Old_Actor
 {
-    [SerializeField] private SO_TurnManager Team;
+    [SerializeField] private SO_Old_TurnManager Team;
     [SerializeField] private int MaxRecoveries;
     private int recoveries;
     private int recoveryValue = 5;

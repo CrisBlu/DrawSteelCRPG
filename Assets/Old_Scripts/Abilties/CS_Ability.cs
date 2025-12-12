@@ -18,13 +18,13 @@ public abstract class CS_Ability
 }
 public class CS_AbilityInputData
 {
-    public MB_Actor actor;
+    public MB_Old_Actor actor;
     public Tile target;
     public Action<CS_ActorTurnStats> addActorToTurn;
     public int edges;
     public int banes;
 
-    public CS_AbilityInputData(MB_Actor actorUsingAbility, Tile targetedTile, Action<CS_ActorTurnStats> addActorToTurn = null, int edges = 0, int banes = 0)
+    public CS_AbilityInputData(MB_Old_Actor actorUsingAbility, Tile targetedTile, Action<CS_ActorTurnStats> addActorToTurn = null, int edges = 0, int banes = 0)
     {
         actor = actorUsingAbility;
         target = targetedTile;
@@ -49,12 +49,12 @@ public class CS_AbilityReturnData
 
 public class CS_CallbackData
 {
-    public Action<MB_Actor, Tile> abilityCallback = null;
-    public MB_Actor target = null;
+    public Action<MB_Old_Actor, Tile> abilityCallback = null;
+    public MB_Old_Actor target = null;
     public List<Tile> validTiles = null;
 
 
-    public CS_CallbackData(Action<MB_Actor, Tile> callback = null, MB_Actor currentTarget = null, List<Tile> validTiles = null)
+    public CS_CallbackData(Action<MB_Old_Actor, Tile> callback = null, MB_Old_Actor currentTarget = null, List<Tile> validTiles = null)
     {
         abilityCallback = callback;
         target = currentTarget;
@@ -161,7 +161,7 @@ public class A_Knockback : CS_Ability
     public override CS_AbilityReturnData Use(CS_AbilityInputData data)
     {
         Queue<CS_CallbackData> callbackList = new();
-        MB_Actor targetActor = (MB_Actor)data.target.entity;
+        MB_Old_Actor targetActor = (MB_Old_Actor)data.target.entity;
         CS_Characteristics stats = data.actor.sheet.stats;
         distance = 0;
 
@@ -193,7 +193,7 @@ public class A_Knockback : CS_Ability
         return new CS_AbilityReturnData(true, callbackList);
     }
 
-    private void KnockbackActor(MB_Actor target, Tile destination)
+    private void KnockbackActor(MB_Old_Actor target, Tile destination)
     {
         target.ForcedMovement(destination, distance);
     }
@@ -210,7 +210,7 @@ public class A_Advance : CS_Ability
 
     public override CS_AbilityReturnData Use(CS_AbilityInputData data)
     {
-        MB_Actor movingActor = (MB_Actor)data.target.entity;
+        MB_Old_Actor movingActor = (MB_Old_Actor)data.target.entity;
         movingActor.movement = movingActor.Speed;
         return new CS_AbilityReturnData(true);
     }
@@ -243,7 +243,7 @@ public class A_Charge : CS_Ability
 
 
     private Action<CS_ActorTurnStats> addActorToTurn;
-    private MB_Actor actor;
+    private MB_Old_Actor actor;
     public override CS_AbilityReturnData Use(CS_AbilityInputData data)
     {
 
@@ -256,7 +256,7 @@ public class A_Charge : CS_Ability
         return new CS_AbilityReturnData(true, callbackQueue);
     }
 
-    void Charge(MB_Actor self, Tile destination)
+    void Charge(MB_Old_Actor self, Tile destination)
     {
         List<Tile> path = CS_GridUtility.GridMakePath(destination, self.currentTile);
         self.movement += path.Count;
@@ -281,7 +281,7 @@ public class A_StrikeNow : CS_Ability
 
     public override CS_AbilityReturnData Use(CS_AbilityInputData data)
     {
-        data.addActorToTurn(new CS_ActorTurnStats((MB_Actor)data.target.entity, 1, 0, 0, "signature"));
+        data.addActorToTurn(new CS_ActorTurnStats((MB_Old_Actor)data.target.entity, 1, 0, 0, "signature"));
         return new CS_AbilityReturnData(true);
     }
 

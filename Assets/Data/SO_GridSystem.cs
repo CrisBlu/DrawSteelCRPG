@@ -31,7 +31,7 @@ public class SO_GridSystem : ScriptableObject
             for (int j = 0; j < size; j++)
             {
                 GridMatrix[i, j] = new Tile();
-                GridMatrix[i, j].parentGrid = this;
+                //GridMatrix[i, j].parentGrid = this;
                 GridMatrix[i, j].position = new Vector2Int(i, j);
             }
         }
@@ -114,10 +114,10 @@ public class SO_GridSystem : ScriptableObject
         }
 
 
-        if (entityInSpace is MB_Actor)
+        if (entityInSpace is MB_Old_Actor)
         {
             //Activate an Actor
-            if (BattleManager.SetActiveActor((MB_Actor)entityInSpace))
+            if (BattleManager.SetActiveActor((MB_Old_Actor)entityInSpace))
             {
                 GridUpdateBFS(BattleManager.activeActor.Speed);
             }

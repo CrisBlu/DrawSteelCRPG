@@ -11,7 +11,7 @@ public static class CS_GridUtility
     public static CS_AoeReturnData GetTilesAndActorsWithin(Tile origin, int distance, bool straightLine = false)
     {
         List<Tile> targetedTiles = new List<Tile>();
-        List<MB_Actor> targetedActors = new List<MB_Actor>();
+        List<MB_Old_Actor> targetedActors = new List<MB_Old_Actor>();
         Queue<Tile> openSet = new Queue<Tile>();
         openSet.Enqueue(origin);
         origin.cost = 0;
@@ -42,7 +42,7 @@ public static class CS_GridUtility
 
                     if (neighbor.entity && neighbor.entity.isActor)
                     {
-                        targetedActors.Add((MB_Actor)neighbor.entity);
+                        targetedActors.Add((MB_Old_Actor)neighbor.entity);
                     }
                 }
                 // Validating Function -----------------------------------------------------------------------------------
@@ -225,7 +225,7 @@ public static class CS_GridUtility
         return true;
     }
 
-    public static bool CheckForFlanking(MB_Actor attacker, Tile target)
+    public static bool CheckForFlanking(MB_Old_Actor attacker, Tile target)
     {
         //Take the distance between attacker and target, move one more in that direction, check if there's an actor Ally there
         Vector2Int directionFromAttackerToTarget = target.position - attacker.currentTile.position;
@@ -256,9 +256,9 @@ public static class CS_GridUtility
 public class CS_AoeReturnData
 {
     public List<Tile> affectedArea;
-    public List<MB_Actor> affectedActors;
+    public List<MB_Old_Actor> affectedActors;
 
-    public CS_AoeReturnData(List<Tile> affectedArea, List<MB_Actor> affectedActors)
+    public CS_AoeReturnData(List<Tile> affectedArea, List<MB_Old_Actor> affectedActors)
     {
         this.affectedArea = affectedArea;
         this.affectedActors = affectedActors;

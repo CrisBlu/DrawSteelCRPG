@@ -26,7 +26,7 @@ public class A_Lightfall : CS_Ability
     {
         Queue<CS_CallbackData> callbackQueue = new();
         List<Tile> targetedTiles;
-        List<MB_Actor> targetedActors;
+        List<MB_Old_Actor> targetedActors;
         CS_Characteristics stats = data.actor.sheet.stats;
         int damage = 0;
         int distance = 2;
@@ -54,7 +54,7 @@ public class A_Lightfall : CS_Ability
         targetedTiles = TilesAndActors.affectedArea;
 
 
-        foreach(MB_Actor target in targetedActors)
+        foreach(MB_Old_Actor target in targetedActors)
         {
             if(data.actor.CompareTag(target.tag))
             {
@@ -71,7 +71,7 @@ public class A_Lightfall : CS_Ability
 
     }
 
-    private void TeleportActor(MB_Actor target, Tile destination)
+    private void TeleportActor(MB_Old_Actor target, Tile destination)
     {
         target.Teleport(destination.position);
     }

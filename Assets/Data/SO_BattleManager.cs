@@ -10,13 +10,13 @@ using UnityEngine.Events;
 public class SO_BattleManager : ScriptableObject
 {
 
-    [HideInInspector] public SO_TurnManager activePlayer;
+    [HideInInspector] public SO_Old_TurnManager activePlayer;
     private int activePlayerIndex;
-    [SerializeField] private List<SO_TurnManager> Players = new List<SO_TurnManager>();
+    [SerializeField] private List<SO_Old_TurnManager> Players = new List<SO_Old_TurnManager>();
 
     [HideInInspector] private List<CS_ActorTurnStats> activeActors = new List<CS_ActorTurnStats>();
     [HideInInspector] public CS_ActorTurnStats temporaryReferenceToActiveActor;
-    [HideInInspector] public MB_Actor activeActor;
+    [HideInInspector] public MB_Old_Actor activeActor;
     [HideInInspector] public Tile activeTarget;
     [HideInInspector] public CS_Ability activeAbility;
 
@@ -127,7 +127,7 @@ public class SO_BattleManager : ScriptableObject
         return true;
     }
 
-    public bool SetActiveActor(MB_Actor actor)
+    public bool SetActiveActor(MB_Old_Actor actor)
     {
         if(actor.turnTaken)
         {
@@ -148,6 +148,8 @@ public class SO_BattleManager : ScriptableObject
   
 
     }
+
+    
 
     public void AddActorToTurn(CS_ActorTurnStats actorTurnInstance)
     {
@@ -346,10 +348,10 @@ public class SO_BattleManager : ScriptableObject
 
     public void TopOfTheRound()
     {
-        foreach(SO_TurnManager player in Players)
+        foreach(SO_Old_TurnManager player in Players)
         {
             player.finished = false;
-            foreach(MB_Actor actor in player.actorsUnderControl)
+            foreach(MB_Old_Actor actor in player.actorsUnderControl)
             {
                 actor.SetTurnTaken(false);
             }
@@ -423,9 +425,9 @@ public class SO_BattleManager : ScriptableObject
 
     }
 
-    private bool CheckIfAllActorsWent(SO_TurnManager next)
+    private bool CheckIfAllActorsWent(SO_Old_TurnManager next)
     {
-        foreach(MB_Actor actor in next.actorsUnderControl)
+        foreach(MB_Old_Actor actor in next.actorsUnderControl)
         {
             if(!actor.turnTaken)
             {
@@ -454,7 +456,7 @@ public class SO_BattleManager : ScriptableObject
 
 public class CS_ActorTurnStats
 {
-    public MB_Actor actor;
+    public MB_Old_Actor actor;
     public int main;
     public int manuever;
     public int move;
@@ -462,7 +464,7 @@ public class CS_ActorTurnStats
     public Tile activeTarget = null;
     public CS_Ability activeAbility = null;
 
-    public CS_ActorTurnStats(MB_Actor actor, int main = 1, int manuever = 1, int move = 1, string abilityTagRestrict = null)
+    public CS_ActorTurnStats(MB_Old_Actor actor, int main = 1, int manuever = 1, int move = 1, string abilityTagRestrict = null)
     {
         this.actor = actor;
         this.main = main;

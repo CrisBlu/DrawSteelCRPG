@@ -9,7 +9,7 @@ public class Tile
     public Vector2Int position;
     public int cost;
 
-    public SO_GridSystem parentGrid;
+    public SO_GridData parentGrid;
 
 
     public List<Tile> FindNeighbors(SO_GridSystem gridSystem = null /*Obsolete*/)

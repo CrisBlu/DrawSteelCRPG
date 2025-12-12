@@ -15,12 +15,13 @@ public class MB_GridSystem : MonoBehaviour
 
     InputAction selectAction;
     private void Awake()
-    {
+    {/*
         selectAction = InputSystem.actions.FindAction("Select");
         selectAction.performed += CellSelect;
 
         data.EventGridUpdate.AddListener(ColorCells);
         BattleManager.EventTurnEnd.AddListener(ClearGridColors);
+        */
 
         GenerateGrid();
     }
