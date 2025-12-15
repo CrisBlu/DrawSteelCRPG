@@ -12,7 +12,7 @@ public class Tile
     public SO_GridData parentGrid;
 
 
-    public List<Tile> FindNeighbors(SO_GridSystem gridSystem = null /*Obsolete*/)
+    public List<Tile> FindNeighbors()
     {
         List<Tile> neighbors = new List<Tile>();
         for (int i = -1; i <= 1; i++)

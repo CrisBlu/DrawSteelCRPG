@@ -4,12 +4,15 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [CreateAssetMenu(fileName = "SO_GridData", menuName = "Scriptable Objects/GridData")]
-//Meant for keeping track and storing information about what is on the battle grid
+//Meant for storing information about what is on the battle grid and validating against conflicts
 
 public class SO_GridData : ScriptableObject
 {
     public readonly int size = 100;
     public Tile[,] GridMatrix;
+
+    //Suspect but arguably grid data should probably contain a reference to it's map
+    [HideInInspector] public Mesh mesh;
 
     private void OnEnable()
     {
@@ -26,4 +29,22 @@ public class SO_GridData : ScriptableObject
         }
     }
 
+
+    public Tile GetTile(Vector2Int pos)
+    {
+        if(GridMatrix[pos.x, pos.y] != null)
+        {
+            return GridMatrix[pos.x, pos.y];
+        }
+        else { return null; }
+    }
+
+    public void AddToGrid(Tile tile, MB_Entity entity)
+    {
+        if (!tile.entity) { tile.entity = entity; }
+        else
+        {
+            throw new System.Exception("Two entities exist within the same grid");
+        }
+    }
 }

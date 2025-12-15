@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 174415ff9d8c64c4181ea787d453c0c2, type: 3}
+  m_Name: John
+  m_EditorClassIdentifier: 
+  stats:
+    Might: 0
+    Agility: 0
+    Reason: 0
+    Intuition: 0
+    Presence: 0
+  abilityPacks:
+  - {fileID: 11400000, guid: 36b892ec0d9e54e47b202956cea39e3d, type: 2}

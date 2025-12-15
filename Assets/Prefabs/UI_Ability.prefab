@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7603727450329463466}
   - component: {fileID: 1009488929371814639}
   - component: {fileID: 7550682498729385315}
-  - component: {fileID: 2990315259841584672}
+  - component: {fileID: 8725821152987942732}
   m_Layer: 5
   m_Name: UI_Ability
   m_TagString: Untagged
@@ -123,7 +123,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &2990315259841584672
+--- !u!114 &8725821152987942732
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -132,12 +132,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 383431724692452835}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42202a0685008c24f849331e2684c7ca, type: 3}
+  m_Script: {fileID: 11500000, guid: eb96d5c1d0860a349b21c775ffb7f368, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Title: {fileID: 3484576182125196776}
   Description: {fileID: 3385161744261039041}
-  BattleManager: {fileID: 11400000, guid: a538f5743be27d54892a29555c6b2b63, type: 2}
 --- !u!1 &1075998067134025521
 GameObject:
   m_ObjectHideFlags: 0
