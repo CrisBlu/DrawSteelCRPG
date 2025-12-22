@@ -7,7 +7,10 @@ public class Tile
     public Tile parent;
     public MB_Entity entity = null;
     public Vector2Int position;
-    public int cost;
+    public int costFromOrigin = 0;
+    public float costToDestination = 0;
+    public int terrainCost = 0;
+    public float TotalCost { get { return costFromOrigin + costToDestination + terrainCost; } }
 
     public SO_GridData parentGrid;
 

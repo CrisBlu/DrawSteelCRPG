@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 public class MB_AbilityUI : MonoBehaviour
 {
     [SerializeField] Transform ContentHolder;
@@ -9,7 +10,9 @@ public class MB_AbilityUI : MonoBehaviour
     [SerializeField] SO_ActorEvents ActorEvents;
     [SerializeField] GameObject Sidebar;
 
-    private E_ActionType typeToDisplay = E_ActionType.move;
+    [SerializeField] SO_User Player;
+
+    private E_ActionType typeToDisplay = E_ActionType.main;
     private List<GameObject> displayedAbilties = new List<GameObject>();
 
     public void Awake()
@@ -32,8 +35,8 @@ public class MB_AbilityUI : MonoBehaviour
 
         foreach (CS_Ability ability in turn.actor.abilities)
         {
-            /*if (ability.Type != typeToDisplay)
-            { continue; }*/
+            if (ability.Type != typeToDisplay)
+            { continue; }
 
             if (turn.abilityTagRestrict != null && !ability.Tags.Contains(turn.abilityTagRestrict))
             { continue; }
@@ -43,8 +46,12 @@ public class MB_AbilityUI : MonoBehaviour
             Button abilityButton = obj.GetComponent<Button>();
             abilityButton.onClick.AddListener(delegate { PlayerInputInterpreter.SelectingAbility(ability, turn); });
 
+
+
+
             MB_AbilityItem abilityInstance = obj.GetComponent<MB_AbilityItem>();
             abilityInstance.Ability = ability;
+            abilityInstance.Actor = turn.actor;
 
             abilityInstance.UpdateText();
 
@@ -70,13 +77,13 @@ public class MB_AbilityUI : MonoBehaviour
         Sidebar.SetActive(state);
     }
 
-    /*public void SetAbilityType(SO_AbilityType newType)
+    public void SetAbilityType(SO_ActionType newType)
     {
         typeToDisplay = newType.actionType;
-        if (BattleManager.activeActor != null)
+        if (Player.activeTurn != null)
         {
-            LoadAbilities(BattleManager.temporaryReferenceToActiveActor);
+            LoadAbilities(Player.activeTurn);
         }
 
-    }*/
+    }
 }

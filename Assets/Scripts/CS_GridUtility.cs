@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-
 using UnityEngine;
 
 
@@ -14,7 +13,7 @@ public static class CS_GridUtility
         List<MB_Actor> targetedActors = new List<MB_Actor>();
         Queue<Tile> openSet = new Queue<Tile>();
         openSet.Enqueue(origin);
-        origin.cost = 0;
+        origin.costFromOrigin = 0;
 
         while (openSet.Count > 0)
         {
@@ -25,9 +24,9 @@ public static class CS_GridUtility
                 if (openSet.Contains(neighbor))
                     continue;
 
-                neighbor.cost = currentCell.cost + 1;
+                neighbor.costFromOrigin = currentCell.costFromOrigin + 1;
                 // Validating Function -----------------------------------------------------------------------------------
-                if (neighbor.cost <= distance && !targetedTiles.Contains(neighbor))
+                if (neighbor.costFromOrigin <= distance && !targetedTiles.Contains(neighbor))
                 {
                     if (straightLine)
                     {
@@ -75,7 +74,7 @@ public static class CS_GridUtility
         }
 
         openSet.Enqueue(target);
-        target.cost = 0;
+        target.costFromOrigin = 0;
 
         while (openSet.Count > 0)
         {
@@ -86,7 +85,7 @@ public static class CS_GridUtility
                 if (openSet.Contains(neighbor))
                     continue;
 
-                neighbor.cost = currentCell.cost + 1;
+                neighbor.costFromOrigin = currentCell.costFromOrigin + 1;
 
 
                 // Validating Function -----------------------------------------------------------------------------------
@@ -116,7 +115,7 @@ public static class CS_GridUtility
 
                     
                     //Check if this is a new push location and check if it's within distance (techincally)
-                    if (!validPushLocations.Contains(neighbor) && neighbor.cost <= distance)
+                    if (!validPushLocations.Contains(neighbor) && neighbor.costFromOrigin <= distance)
                     {
                         validPushLocations.Add(neighbor);
                         openSet.Enqueue(neighbor);
@@ -136,7 +135,7 @@ public static class CS_GridUtility
     {
         Queue<Tile> openSet = new Queue<Tile>();
         List<Tile> possibilities = new List<Tile>();
-        origin.cost = 0;
+        origin.costFromOrigin = 0;
         openSet.Enqueue(origin);
 
         while (openSet.Count > 0)
@@ -148,12 +147,12 @@ public static class CS_GridUtility
                 if (openSet.Contains(neighbor))
                     continue;
 
-                neighbor.cost = currentCell.cost + 1;
+                neighbor.costFromOrigin = currentCell.costFromOrigin + 1;
                
 
                 // Validating Function -----------------------------------------------------------------------------------
                 //If Cell is full or If We've already decided Cell is a walkable tile or if cell is too far
-                if (neighbor.entity != null || possibilities.Contains(neighbor) || neighbor.cost > distance) { continue; }
+                if (neighbor.entity != null || possibilities.Contains(neighbor) || neighbor.costFromOrigin > distance) { continue; }
 
                 neighbor.parent = currentCell;
 
@@ -172,6 +171,50 @@ public static class CS_GridUtility
         }
 
         return possibilities;
+    }
+
+    public static CS_AbilityTargetingData GetTilesAndAllWithin(Tile origin, int distance, bool straightLine = true)
+    {
+        List<Tile> targetedTiles = new List<Tile>();
+        List<Tile> validTargets = new List<Tile>();
+        Queue<Tile> openSet = new Queue<Tile>();
+        openSet.Enqueue(origin);
+        origin.costFromOrigin = 0;
+
+        while (openSet.Count > 0)
+        {
+            Tile currentCell = openSet.Dequeue();
+
+            foreach (Tile neighbor in currentCell.FindNeighbors())
+            {
+                if (openSet.Contains(neighbor))
+                    continue;
+
+                neighbor.costFromOrigin = currentCell.costFromOrigin + 1;
+                // Validating Function -----------------------------------------------------------------------------------
+                if (neighbor.costFromOrigin <= distance && !targetedTiles.Contains(neighbor))
+                {
+                    if (straightLine)
+                    {
+                        if (!CheckForLineOfSight(origin, neighbor)) { continue; }
+                    }
+
+
+                    targetedTiles.Add(neighbor);
+                    openSet.Enqueue(neighbor);
+
+
+
+                    if (neighbor.entity)
+                    {
+                        validTargets.Add(neighbor);
+                    }
+                }
+                // Validating Function -----------------------------------------------------------------------------------
+            }
+        }
+
+        return new CS_AbilityTargetingData(targetedTiles, validTargets);
     }
 
     public static List<Tile> GridMakePath(Tile cellToMoveTo, Tile origin)
@@ -196,6 +239,53 @@ public static class CS_GridUtility
         stepsToTake.Reverse();
 
         return stepsToTake;
+
+    }
+
+    public static List<Tile> FindPath(Tile destination, Tile origin)
+    {
+
+        List<Tile> openSet = new List<Tile>();
+        List<Tile> closedSet = new List<Tile>();
+
+        openSet.Add(origin);
+        origin.costFromOrigin = 0;
+
+        int tileDistance = (int)Vector2Int.Distance(origin.position, destination.position);
+
+        while (openSet.Count > 0)
+        {
+            openSet.Sort((x, y) => x.TotalCost.CompareTo(y.TotalCost));
+            Tile currentTile = openSet[0];
+
+            openSet.Remove(currentTile);
+            closedSet.Add(currentTile);
+
+            //Destination reached
+            if (currentTile == destination)
+            {
+                return GridMakePath(destination, origin);
+            }
+
+            foreach (Tile neighbor in currentTile.FindNeighbors())
+            {
+                if (closedSet.Contains(neighbor))
+                    continue;
+
+                int costToNeighbor = currentTile.costFromOrigin + neighbor.terrainCost + tileDistance;
+                if (costToNeighbor < neighbor.costFromOrigin || !openSet.Contains(neighbor))
+                {
+                    neighbor.costFromOrigin = costToNeighbor;
+                    neighbor.costToDestination = (int)Vector2Int.Distance(neighbor.position, destination.position);
+                    neighbor.parent = currentTile;
+
+                    if (!openSet.Contains(neighbor))
+                        openSet.Add(neighbor);
+                }
+            }
+        }
+
+        return null;
 
     }
 

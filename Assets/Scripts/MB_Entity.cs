@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class MB_Entity : MonoBehaviour
 {
@@ -29,13 +30,20 @@ public class MB_Entity : MonoBehaviour
         return tile;
     }
 
-    public void UpdatePosition(Tile newTile)
+    public bool UpdatePosition(Tile newTile)
     {
-        currentTile.entity = null;
-        transform.position = new Vector3(newTile.position.x, 0, newTile.position.y);
-        currentTile = newTile;
+       
+        if(gridData.AddToGrid(newTile, this))
+        {
+            //If GridData tells us that our desired tile is empty
+            currentTile.entity = null;
+            currentTile = newTile;
+            transform.position = new Vector3(newTile.position.x, 0, newTile.position.y);
 
-        gridData.AddToGrid(currentTile, this);
+            return true;
+        }
+
+        return false;
     }
 
     public void TakeDamage(int damage)

@@ -6,15 +6,20 @@ using UnityEngine;
 public static class PlayerInputInterpreter
 {
     
-    public static TurnData ProcessInput(Tile input, SO_User user, SO_TurnManager TM)
+    public static void ProcessInput(Tile input, SO_User user, SO_TurnManager TM)
     {
+        if(input == null)
+        {
+            return;
+        }
+
         //If there is no turn for user currently 
         if (user.activeTurn == null)
         {
             //AND valid actor is in selected Tile
             MB_Actor validActor = SelectYourActor(input, user);
             //Create a turn and return
-            if (validActor != null) { return TM.CreateAndStoreTurn(validActor); } else { return null; }
+            if (validActor != null) { TM.CreateAndStoreTurn(validActor); return; } else { return; }
         }
 
         
@@ -25,18 +30,19 @@ public static class PlayerInputInterpreter
                 break;
 
             case E_TurnState.SelectingAbility:
+                ReturnToMove(user.activeTurn);
                 break;
 
             case E_TurnState.UsingAbility:
+                SelectingTarget(user.activeTurn, input);
                 break;
 
             case E_TurnState.ResolvingAbility:
+                ResolvingAbility(user.activeTurn, input);
                 break;
 
         }
 
-
-        return user.activeTurn;
     }
 
     // will be in state class when that gets made
@@ -61,17 +67,58 @@ public static class PlayerInputInterpreter
         {
             turn.turnState = E_TurnState.SelectingAbility;
         }
-        if(turn.validTiles.Contains(input))
+
+        else if(turn.validTiles.Contains(input))
         {
-            turn.actor.StartWalking(input);
+            turn.StartWalking(input);
         }
+
+        
     }
     
+    private static void ReturnToMove(TurnData turn)
+    {
+        turn.turnState = E_TurnState.SelectingMove;
+    }
 
     public static void SelectingAbility(CS_Ability ability, TurnData turn)
     {
+        if (turn.actions[ability.Type] <= 0)
+        {
+            return;
+        }
+   
+
         turn.usingAbiliy = ability;
         turn.turnState = E_TurnState.UsingAbility;
+    }
+
+
+    private static void SelectingTarget(TurnData turn, Tile input)
+    {
+        if(!turn.validTiles.Contains(input))
+        {
+            turn.turnState = E_TurnState.SelectingAbility;
+            return;
+        }
+        turn.UseAbility(input);
+    }
+
+    private static void ResolvingAbility(TurnData turn, Tile input)
+    {
+        if(!turn.validTiles.Contains(input)) {return; }
+        turn.ResolveAbility(input);
+    }
+
+
+    public static void HoveringOverAbility(CS_Ability ability, Tile origin)
+    {
+        CS_AbilityTargetingData output = ability.Target(origin);
+        CS_ColorGrid.ColorCells(output.validArea, Color.magenta);
+    }
+    public static void HoverOffAbility(SO_GridData grid)
+    {
+        CS_ColorGrid.ClearGridColors(grid);
     }
 
 
@@ -79,3 +126,5 @@ public static class PlayerInputInterpreter
 
 
 }
+
+// Every turn state must 

@@ -9,9 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7aa072d3d93bb9e4b858fc8ef12cffda, type: 3}
-  m_Name: U_Player
+  m_Script: {fileID: 11500000, guid: 174415ff9d8c64c4181ea787d453c0c2, type: 3}
+  m_Name: GoblinWarrior
   m_EditorClassIdentifier: 
-  TurnManager: {fileID: 11400000, guid: d6980629fac7f6944a2666a6fc53a6bb, type: 2}
-  actorsUnderControl:
-  - {fileID: 0}
+  stats:
+    Might: 0
+    Agility: 0
+    Reason: 0
+    Intuition: 0
+    Presence: 0
+  abilityPacks: []
+  behaviors:
+  - {fileID: 11400000, guid: 514fb32adff511046a371d0438ae8f20, type: 2}

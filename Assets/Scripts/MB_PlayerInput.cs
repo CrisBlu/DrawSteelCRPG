@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 
@@ -11,6 +12,7 @@ public class MB_PlayerInput : MonoBehaviour
     [SerializeField] Camera SceneCamera;
     [SerializeField] Grid Map;
     [SerializeField] SO_User Player;
+    [SerializeField] SO_ZipperInit Zipper;
 
     
     private InputAction selectAction;
@@ -32,8 +34,14 @@ public class MB_PlayerInput : MonoBehaviour
 
     void TileSelect(InputAction.CallbackContext context)
     {
+        //Block input if it's not your turn
+        if(Zipper.activeUser != Player)
+        {
+            return;
+        }
+
         Vector2Int TwoDTile = new Vector2Int(currentTileMouseOver.x, currentTileMouseOver.z);
-        Player.activeTurn = PlayerInputInterpreter.ProcessInput(GridData.GetTile(TwoDTile), Player, TurnManager);
+        PlayerInputInterpreter.ProcessInput(GridData.GetTile(TwoDTile), Player, TurnManager);
     }
 
 
@@ -41,14 +49,17 @@ public class MB_PlayerInput : MonoBehaviour
     public Vector3 MapPositionFromMouse(Camera sceneCamera)
     {
         Vector3 mousePos = Input.mousePosition;
-
-        mousePos.z = sceneCamera.nearClipPlane;
-        Ray ray = sceneCamera.ScreenPointToRay(mousePos);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 100))
+        if (!EventSystem.current.IsPointerOverGameObject())
         {
-            return hit.point;
+            mousePos.z = sceneCamera.nearClipPlane;
+            Ray ray = sceneCamera.ScreenPointToRay(mousePos);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 100))
+            {
+                return hit.point;
+            }
         }
+      
         return new Vector3(999, 999, 999);
     }
 

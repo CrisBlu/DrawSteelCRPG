@@ -12,4 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aa072d3d93bb9e4b858fc8ef12cffda, type: 3}
   m_Name: U_Enemy
   m_EditorClassIdentifier: 
-  actorsUnderControl: []
+  TurnManager: {fileID: 11400000, guid: a0bd2ca1b00a61645ab56125e4ef9cde, type: 2}
+  EventTurnUpdate:
+    m_PersistentCalls:
+      m_Calls: []
+  finished: 0
+  AI: 1
+  actorsUnderControl:
+  - {fileID: 0}

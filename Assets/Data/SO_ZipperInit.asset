@@ -9,9 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7aa072d3d93bb9e4b858fc8ef12cffda, type: 3}
-  m_Name: U_Player
+  m_Script: {fileID: 11500000, guid: 3cd228c564933d94cbf36afaee1098f9, type: 3}
+  m_Name: SO_ZipperInit
   m_EditorClassIdentifier: 
+  users:
+  - {fileID: 11400000, guid: e42ec5aa33741e145aca8c721977ce73, type: 2}
+  - {fileID: 11400000, guid: e137cd085d97b084f94259a14e6f363d, type: 2}
   TurnManager: {fileID: 11400000, guid: d6980629fac7f6944a2666a6fc53a6bb, type: 2}
-  actorsUnderControl:
-  - {fileID: 0}

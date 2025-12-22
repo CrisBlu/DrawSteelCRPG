@@ -32,19 +32,29 @@ public class SO_GridData : ScriptableObject
 
     public Tile GetTile(Vector2Int pos)
     {
-        if(GridMatrix[pos.x, pos.y] != null)
-        {
-            return GridMatrix[pos.x, pos.y];
-        }
-        else { return null; }
+        if(pos.x >= size || pos.y >= size) { return null; }
+
+        return GridMatrix[pos.x, pos.y];
     }
 
-    public void AddToGrid(Tile tile, MB_Entity entity)
+    public bool AddToGrid(Tile tile, MB_Entity entity)
     {
-        if (!tile.entity) { tile.entity = entity; }
-        else
+        if (!tile.entity) 
         {
-            throw new System.Exception("Two entities exist within the same grid");
+            tile.entity = entity;
+            return true;
         }
+        else { return false; }
+    }
+
+    public bool AddToGridByVector(Vector2Int tilePos, MB_Entity entity)
+    {
+        Tile tile = GetTile(tilePos);
+        if (!tile.entity)
+        {
+            tile.entity = entity;
+            return true;
+        }
+        else { return false; }
     }
 }

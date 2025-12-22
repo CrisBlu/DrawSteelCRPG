@@ -12,29 +12,27 @@ public abstract class CS_Ability
     public abstract List<string> Tags { get; }
     public abstract int Range { get; }
 
-    //The tile array will be used for extra data for the abilities that need it
-    //This will have to get more complicated but for now, Tile[0] the main target, Tile[1] is reserved for Forced Movement, and Tile[2] and on is for
+    
     public abstract CS_AbilityReturnData Use(TurnData data);
+
+    public abstract CS_AbilityTargetingData Target(Tile origin);
     
 
 }
 
 
-public class CS_AbilityInputData
+public class CS_AbilityTargetingData
 {
-    public MB_Actor actor;
-    public Tile target;
-    //public Action<CS_ActorTurnStats> addActorToTurn;
-    public int edges;
-    public int banes;
+    //Valid Area is the ability's range
+    public List<Tile> validArea;
 
-    public CS_AbilityInputData(MB_Actor actorUsingAbility, Tile targetedTile, /*Action<CS_ActorTurnStats> addActorToTurn = null*/ int edges = 0, int banes = 0)
+    //Valid targets are the tiles that are valid to click on
+    public List<Tile> validTargets;
+
+    public CS_AbilityTargetingData(List<Tile> validArea, List<Tile> validTargets)
     {
-        actor = actorUsingAbility;
-        target = targetedTile;
-        //this.addActorToTurn = addActorToTurn;
-        this.edges = edges;
-        this.banes = banes;
+        this.validArea = validArea;
+        this.validTargets = validTargets;
     }
 }
 
@@ -53,12 +51,12 @@ public class CS_AbilityReturnData
 
 public class CS_CallbackData
 {
-    public Action<MB_Actor, Tile> abilityCallback = null;
+    public Action<TurnData, Tile> abilityCallback = null;
     public MB_Actor target = null;
     public List<Tile> validTiles = null;
 
 
-    public CS_CallbackData(Action<MB_Actor, Tile> callback = null, MB_Actor currentTarget = null, List<Tile> validTiles = null)
+    public CS_CallbackData(Action<TurnData, Tile> callback = null, MB_Actor currentTarget = null, List<Tile> validTiles = null)
     {
         abilityCallback = callback;
         target = currentTarget;
@@ -106,6 +104,11 @@ public class A_MeleeFreeStrike : CS_Ability
 
         return new CS_AbilityReturnData(true);
     }
+
+    public override CS_AbilityTargetingData Target(Tile origin)
+    {
+        return CS_GridUtility.GetTilesAndAllWithin(origin, Range, true);
+    }
 }
 /*
 
@@ -151,18 +154,18 @@ public class A_RangedFreeStrike: CS_Ability
         return new CS_AbilityReturnData(true);
     }
 
-}
+}*/
 
 public class A_Knockback : CS_Ability
 {
     public override string Name => "Knockback";
     public override string Description => "Push your target back";
-    public override E_ActionType Type => E_ActionType.manuever;
-    public override List<string> Effects => new List<string> { "push" };
+    public override E_ActionType Type => E_ActionType.maneuver;
+    public override List<string> Tags => new List<string> { "push" };
     public override int Range => 1;
 
     private int distance = 0;
-    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
+    public override CS_AbilityReturnData Use(TurnData data)
     {
         Queue<CS_CallbackData> callbackList = new();
         MB_Actor targetActor = (MB_Actor)data.target.entity;
@@ -197,12 +200,19 @@ public class A_Knockback : CS_Ability
         return new CS_AbilityReturnData(true, callbackList);
     }
 
-    private void KnockbackActor(MB_Actor target, Tile destination)
+    public override CS_AbilityTargetingData Target(Tile origin)
     {
-        target.ForcedMovement(destination, distance);
+        //Push should only target actors but w/e for now
+        return CS_GridUtility.GetTilesAndAllWithin(origin, Range, true);
+    }
+
+    private void KnockbackActor(TurnData data, Tile destination)
+    {
+        MB_Actor targetActor = (MB_Actor)data.target.entity;
+        targetActor.ForcedMovement(destination, distance);
     }
 }
-
+/*
 public class A_Advance : CS_Ability
 {
     public override string Name => "Advance";
@@ -235,45 +245,52 @@ public class A_CatchBreath : CS_Ability
         hero.SpendRecovery();
         return new CS_AbilityReturnData(true);
     }
-}
+}*/
 
 public class A_Charge : CS_Ability
 {
     public override string Name => "Charge";
-    public override string Description => "Move up to you speed in a straight and free strike";
+    public override string Description => "Move up to your speed in a straight and free strike";
     public override E_ActionType Type => E_ActionType.main;
-    public override List<string> Effects => new();
+    public override List<string> Tags => new();
     public override int Range => 0;
 
-
-    private Action<CS_ActorTurnStats> addActorToTurn;
     private MB_Actor actor;
-    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
+    public override CS_AbilityReturnData Use(TurnData data)
     {
-
-        addActorToTurn = data.addActorToTurn;
         actor = data.actor;
         Queue<CS_CallbackData> callbackQueue = new Queue<CS_CallbackData> ();
-        List<Tile> validCharge = CS_GridUtility.GetMovementArea(data.target, data.actor.Speed, true);
+
+        List<Tile> validCharge = CS_GridUtility.GetTilesFromOrigin(data.target, data.actor.Speed, true);
         callbackQueue.Enqueue(new CS_CallbackData(Charge, data.actor, validCharge));
 
         return new CS_AbilityReturnData(true, callbackQueue);
     }
 
-    void Charge(MB_Actor self, Tile destination)
+    public override CS_AbilityTargetingData Target(Tile origin)
     {
-        List<Tile> path = CS_GridUtility.GridMakePath(destination, self.currentTile);
-        self.movement += path.Count;
-        self.ActorStartWalking(path, EndOfChargeAttack);
+        MB_Actor self = (MB_Actor)origin.entity;
+        //Display charge range, but click on actor to use
+        return new CS_AbilityTargetingData(CS_GridUtility.GetTilesFromOrigin(origin, self.Speed, true), new List<Tile>() { origin });
+    }
+
+
+    void Charge(TurnData data, Tile destination)
+    {
+        int path = CS_GridUtility.GridMakePath(destination, data.actor.currentTile).Count;
+        TurnData newTurn = data.TurnManager.CreateAndStoreTurn(data.actor, 1, 0, path, "charge");
+        
+        newTurn.actor.StartMovementInBattle(destination, newTurn);
     }
 
     void EndOfChargeAttack()
     {
-        addActorToTurn(new CS_ActorTurnStats(actor, 1, 0, 0, "charge"));
+        //addActorToTurn(new CS_ActorTurnStats(actor, 1, 0, 0, "charge"));
+
 
     }
 }
-
+/*
 public class A_StrikeNow : CS_Ability
 {
     public override string Name => "Strike Now!";

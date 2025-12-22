@@ -27,16 +27,36 @@ public class SO_CharacterSheet : ScriptableObject
 {
     public CS_Characteristics stats = new CS_Characteristics();
     public List<SO_AbilityPack> abilityPacks;
+    public List<SO_AI> behaviors;
 
 
     public List<CS_Ability> LoadAbilities()
     {
-        List<CS_Ability> abilties = new List<CS_Ability>();
+        List<CS_Ability> abilities = new List<CS_Ability>();
         foreach(SO_AbilityPack abilityPack in abilityPacks)
         {
-            abilties.AddRange(abilityPack.Abilities);
+            abilities.AddRange(abilityPack.Abilities);
         }
 
-        return abilties;
+        return abilities;
+    }
+
+    public List<Play> EvaluateOptions(MB_Actor self, List<MB_Actor> potentialTargets)
+    {
+        List<Play> options = new List<Play>();
+        foreach(MB_Actor target in potentialTargets)
+        {
+            foreach (SO_AI ai in behaviors)
+            {
+                options.Add(ai.RunBehavior(self, target));
+            }
+        }
+
+        return options;
+        
     }
 }
+
+/// return a list of action commands to the ui?
+/// move: tile, selectAbility: ability, target: tile, resolve: tile
+///

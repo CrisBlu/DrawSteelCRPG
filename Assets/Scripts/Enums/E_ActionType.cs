@@ -4,7 +4,7 @@ using UnityEngine;
 public enum E_ActionType
 {
     main,
-    manuever,
+    maneuver,
     move,
     trigger
 }
