@@ -19,11 +19,28 @@ public class Play
 
     
 
-    public Play(MB_Actor unit, float score = -99)
+    public Play(MB_Actor unit, float score = -10)
     {
         this.unit = unit;
 
         this.score = score;
+    }
+}
+
+public class SquadPlay
+{
+    public List<Play> playForEachActor = new List<Play>();
+
+    public float totalScore = 0;
+    public float score = 0;
+
+    public void AddPlay(Play play)
+    {
+        playForEachActor.Add(play);
+
+        totalScore += play.score;
+        score = totalScore / playForEachActor.Count;
+
     }
 }
 
@@ -78,46 +95,56 @@ public abstract class GameInput
 
 public class CS_UserAI
 {
-    public Play StartAI(List<MB_Squad> squadsUnderControl, List<MB_Actor> targets)
+    public List<Play> StartAI(List<MB_Squad> squadsUnderControl, List<MB_Actor> targets)
     {
-        
-        //A sense of who is being targeted and by which of your creatures
-        List<Play> plays = new List<Play>();
 
-        foreach(MB_Squad squad in squadsUnderControl)
+        List<SquadPlay> squadPlays = new List<SquadPlay>();
+
+
+        foreach (MB_Squad squad in squadsUnderControl)
         {
+            SquadPlay squadPlay = new SquadPlay();
             foreach (MB_Actor actor in squad.actorsInSquad)
             {
                 if (actor.turnTaken)
                 {
                     continue;
                 }
+                List<Play> plays = new List<Play>() { new Play(actor) };
 
-                //At least one play for each actor under control, that play is worth -99 points and will just be to pass their turn
-                plays.Add(new Play(actor));
+                //At least one play for each actor under control, that play is worth -10 points and will just be to pass their turn
+
 
                 plays.AddRange(actor.sheet.EvaluateOptions(actor, targets));
 
+                Play bestPlayForActor = null;
+                foreach (Play play in plays)
+                {
+                    if (bestPlayForActor == null || bestPlayForActor.score < play.score) { bestPlayForActor = play; }
+
+                }
+
+                squadPlay.AddPlay(bestPlayForActor);
 
             }
 
+            if (squadPlay.playForEachActor.Count > 0) { squadPlays.Add(squadPlay); }
+
 
         }
-        
 
-        Play bestPlay = null;
-        foreach(Play play in plays)
+
+        SquadPlay bestSquadPlay = null;
+        foreach (SquadPlay play in squadPlays)
         {
-            if (bestPlay == null || bestPlay.score < play.score){ bestPlay = play; }
-
+            if (bestSquadPlay == null || bestSquadPlay.score < play.score) { bestSquadPlay = play; }
 
         }
 
+        return bestSquadPlay.playForEachActor;
 
 
-        return bestPlay;
 
-
-        
     }
+
 }

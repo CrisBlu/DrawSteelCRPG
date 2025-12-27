@@ -63,15 +63,17 @@ public class SO_User : ScriptableObject
     //... ideally
 
     public CS_UserAI userAI;
-    private Play aiAction;
+    private List<Play> aiActions;
 
     public void EnableAI(List<MB_Actor> targets)
     {
-        aiAction = userAI.StartAI(squadsUnderControl, targets);
+        aiActions = userAI.StartAI(squadsUnderControl, targets);
 
-        //For each actor in squad
-        TurnManager.CreateAndStoreTurn(aiAction.squad.actorsInSquad[0], turnState: E_TurnState.HoldingForAnimation);
-        activeTurn.turnState = aiAction.inputs[0].state;
+        foreach(Play aiAction in aiActions)
+        {
+            TurnManager.CreateAndStoreTurn(aiAction.unit, turnState: aiAction.inputs[0].state);
+        }
+        
     }
 
     private void OnTurnStateUpdate(E_TurnState state, bool enter)
@@ -80,20 +82,27 @@ public class SO_User : ScriptableObject
 
         if (state == E_TurnState.HoldingForAnimation) return;
 
-        GameInput input;
-        if (aiAction.inputs.Count > 0)
+
+        
+        foreach(Play aiAction in aiActions)
         {
-            input = aiAction.inputs[0];
-        }
-        else
-        {
-            TurnManager.EndCurrentTurn();
-            return;
-        }
+            GameInput input;
+            if (aiAction.inputs.Count > 0)
+            {
+                input = aiAction.inputs[0];
+            }
+            else
+            {
+                TurnManager.EndCurrentTurn();
+                return;
+            }
 
 
-        aiAction.inputs.RemoveAt(0);
-        activeTurn.InvokeState(input.data, input.state);
+            aiAction.inputs.RemoveAt(0);
+            activeTurn.InvokeState(input.data, input.state);
+
+        }
+        
 
 
         
