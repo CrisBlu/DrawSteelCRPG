@@ -35,6 +35,7 @@ public class SO_User : ScriptableObject
 
     }
     public List<MB_Actor> actorsUnderControl = new List<MB_Actor>();
+    public List<MB_Squad> squadsUnderControl = new List<MB_Squad>();
 
 
 
@@ -66,8 +67,10 @@ public class SO_User : ScriptableObject
 
     public void EnableAI(List<MB_Actor> targets)
     {
-        aiAction = userAI.StartAI(actorsUnderControl, targets);
-        TurnManager.CreateAndStoreTurn(aiAction.unit, turnState: E_TurnState.HoldingForAnimation);
+        aiAction = userAI.StartAI(squadsUnderControl, targets);
+
+        //For each actor in squad
+        TurnManager.CreateAndStoreTurn(aiAction.squad.actorsInSquad[0], turnState: E_TurnState.HoldingForAnimation);
         activeTurn.turnState = aiAction.inputs[0].state;
     }
 
@@ -84,17 +87,16 @@ public class SO_User : ScriptableObject
         }
         else
         {
+            TurnManager.EndCurrentTurn();
             return;
         }
-        
-        //if state is not correct change it
-        if (state == input.state)
-        {
-            aiAction.inputs.RemoveAt(0);
-            activeTurn.InvokeState(input.data);
-        }
 
-        //If state is correct follow input
+
+        aiAction.inputs.RemoveAt(0);
+        activeTurn.InvokeState(input.data, input.state);
+
+
+        
     }
 
 

@@ -29,6 +29,14 @@ public class MB_PlayerInput : MonoBehaviour
     {
         Vector3 mousePosition = MapPositionFromMouse(SceneCamera);
         currentTileMouseOver = Map.WorldToCell(mousePosition);
+
+        /*Vector2Int TwoDTile = new Vector2Int(currentTileMouseOver.x, currentTileMouseOver.z);
+        Tile tile = GridData.GetTile(TwoDTile);
+        if (tile != null && Player.activeTurn != null)
+        {
+            illustrator.IllustratePath(CS_GridUtility.FindPath(tile, Player.activeTurn.actor.currentTile));
+        }*/
+
         //Debug.Log(currentTileMouseOver);
     }
 
@@ -68,4 +76,5 @@ public class MB_PlayerInput : MonoBehaviour
     //Probably belongs localized in some sort of battle manager
     [SerializeField] SO_TurnManager TurnManager;
     [SerializeField] SO_GridData GridData;
+    [SerializeField] MB_PathIllustrator illustrator;
 }

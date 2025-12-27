@@ -6,5 +6,6 @@ public enum E_TurnState
     SelectingAbility,
     UsingAbility,
     ResolvingAbility,
-    HoldingForAnimation
+    HoldingForAnimation,
+    None
 }

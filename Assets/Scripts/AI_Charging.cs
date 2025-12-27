@@ -20,27 +20,74 @@ public class AI_Charging : SO_AI //Scriptable objects because I would like these
         int tileCount = pathToTarget.Count;
 
         //If next to, want to attack
-        if(tileCount == self.abilities[2].Range)
+        if(tileCount <= self.abilities[2].Range)
         {
-            currentPlay.score += 1;
+            currentPlay.score += 2;
 
             //Should be spear charge
             currentPlay.inputs.AddRange(AttackInput(self, target.currentTile));
-        }
-        else if(tileCount <= self.Speed + self.abilities[2].Range)
-        {
 
-            currentPlay.score += 1;
+            return currentPlay;
+        }
+
+
+
+        //Targeting from target means we have all (most) valid tiles a charge could be initated from
+        List<Tile> targeting = CS_GridUtility.GetTilesFromOrigin(target.currentTile, self.Speed, true);
+
+        Tile closestTile = null;
+        foreach (Tile tile in targeting)
+        {
+            if(tile.entity && tile.entity != self) { continue; }
+
+            if (closestTile == null || (self.currentTile.position - tile.position).magnitude < (self.currentTile.position - closestTile.position).magnitude) { closestTile = tile; }
+
+        }
+
+        List<Tile> pathToClosest = CS_GridUtility.FindPath(closestTile, self.currentTile);
+        
+
+        //if targeting reveals that our monster is at most one step away from being in the valid area, charge 
+        if (pathToClosest.Count <= 1)
+        {
+            currentPlay.score += 2;
+
+            pathToTarget = CS_GridUtility.FindPath(target.currentTile, closestTile);
 
             currentPlay.inputs.AddRange(ChargeInput(self, pathToTarget[^2]));
             currentPlay.inputs.AddRange(AttackInput(self, target.currentTile));
         }
-        /*else if(tileCount <= 2 * self.Speed + self.abilities[3].Range)
+        else
         {
-            //Walk into range, then charge
+            
+            //If closest is outside of range, get as close as you can to the closest chargable tile
+            if(pathToClosest.Count > self.Speed)
+            {
+                currentPlay.inputs.Add(new TileInput(E_TurnState.SelectingMove, pathToClosest[self.Speed-1]));
+            }
+            else //If closest is within range, move to it and then initate charge from that tile
+            {
+                currentPlay.score += 1;
+                
+                pathToTarget = CS_GridUtility.FindPath(target.currentTile, closestTile);
+
+                currentPlay.inputs.Add(new TileInput(E_TurnState.SelectingMove, closestTile));
+                currentPlay.inputs.AddRange(ChargeInput(self, pathToTarget[^2]));
+                currentPlay.inputs.AddRange(AttackInput(self, target.currentTile));
 
 
-        }*/
+            }
+            
+
+            
+
+            
+            
+        }
+
+            
+        
+
 
 
         return currentPlay;
@@ -51,6 +98,7 @@ public class AI_Charging : SO_AI //Scriptable objects because I would like these
 
     private List<GameInput> ChargeInput(MB_Actor self, Tile destination)
     {
+ 
         List<GameInput> chargeInputs = new List<GameInput>() { new AbilityInput(self.abilities[1]), 
             new TileInput(E_TurnState.UsingAbility, self.currentTile), 
             new TileInput(E_TurnState.ResolvingAbility, destination) };

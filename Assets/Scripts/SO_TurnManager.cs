@@ -138,11 +138,15 @@ public class TurnData //Store all the data associated with an actor's single tur
 
     }
 
-    public void InvokeState(object input)
+    public void InvokeState(object input, E_TurnState stateToInvoke = E_TurnState.None)
     {
 
+        if(stateToInvoke == E_TurnState.None)
+        {
+            stateToInvoke = _turnState;
+        }
 
-        switch (_turnState)
+        switch (stateToInvoke)
         {
             case E_TurnState.SelectingMove:
                 StartWalking((Tile) input);
@@ -208,7 +212,7 @@ public class TurnData //Store all the data associated with an actor's single tur
  
     
 
-    //TODO: Remove function below and place within a validation script
+    //TODO: Remove functions below and place within a validation script
 
     public void StartWalking(Tile input)
     {
@@ -337,6 +341,25 @@ public class SO_TurnManager : ScriptableObject
             PassToOpponent(actor);
         }
     }
+
+    /*public void ForceEndTurn()
+    {
+        MB_Actor activeActor = null;
+        while(turnsToResolve.Count > 0)
+        {
+            TurnData turn = turnsToResolve.Pop();
+
+            if (turnsToResolve.Count == 0)
+            {
+                activeActor = turn.actor;
+                break;
+            }
+        }
+
+        PassToOpponent(activeActor);
+            
+        
+    }*/
 
     //passing actor as a reference solely so that I can mark it as having taken it's turn
     public void PassToOpponent(MB_Actor actor)

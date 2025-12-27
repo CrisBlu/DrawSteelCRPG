@@ -152,7 +152,7 @@ public static class CS_GridUtility
 
                 // Validating Function -----------------------------------------------------------------------------------
                 //If Cell is full or If We've already decided Cell is a walkable tile or if cell is too far
-                if (neighbor.entity != null || possibilities.Contains(neighbor) || neighbor.costFromOrigin > distance) { continue; }
+                if (possibilities.Contains(neighbor) || neighbor.costFromOrigin > distance) { continue; }
 
                 neighbor.parent = currentCell;
 
@@ -163,8 +163,8 @@ public static class CS_GridUtility
 
                 // Validating Function --------------------------------------------------------------------------------------
 
-
-                openSet.Enqueue(neighbor);
+                if(!neighbor.entity) { openSet.Enqueue(neighbor); }
+                
                 possibilities.Add(neighbor);
 
             }
@@ -251,7 +251,7 @@ public static class CS_GridUtility
         openSet.Add(origin);
         origin.costFromOrigin = 0;
 
-        int tileDistance = (int)Vector2Int.Distance(origin.position, destination.position);
+        
 
         while (openSet.Count > 0)
         {
@@ -269,10 +269,16 @@ public static class CS_GridUtility
 
             foreach (Tile neighbor in currentTile.FindNeighbors())
             {
-                if (closedSet.Contains(neighbor))
+                //If neighbor has an entity in it, and it's not the entity you wanted a path to
+                if (neighbor.entity && neighbor != destination)
                     continue;
 
-                int costToNeighbor = currentTile.costFromOrigin + neighbor.terrainCost + tileDistance;
+
+                if (closedSet.Contains(neighbor) )
+                    continue;
+
+                float tileDistance = Vector2Int.Distance(origin.position, neighbor.position);
+                float costToNeighbor = currentTile.costFromOrigin + neighbor.terrainCost + tileDistance;
                 if (costToNeighbor < neighbor.costFromOrigin || !openSet.Contains(neighbor))
                 {
                     neighbor.costFromOrigin = costToNeighbor;

@@ -8,7 +8,7 @@ using UnityEngine;
 //Score right now is based in possible damage
 public class Play
 {
-    //Monster taking their turn
+
     public MB_Actor unit;
 
     //The list of inputs to follow if this is selected
@@ -78,26 +78,32 @@ public abstract class GameInput
 
 public class CS_UserAI
 {
-    public Play StartAI(List<MB_Actor> actorsUnderControl, List<MB_Actor> targets)
+    public Play StartAI(List<MB_Squad> squadsUnderControl, List<MB_Actor> targets)
     {
         
         //A sense of who is being targeted and by which of your creatures
         List<Play> plays = new List<Play>();
 
-        foreach (MB_Actor actor in actorsUnderControl)
+        foreach(MB_Squad squad in squadsUnderControl)
         {
-            if(actor.turnTaken)
+            foreach (MB_Actor actor in squad.actorsInSquad)
             {
-                continue;
+                if (actor.turnTaken)
+                {
+                    continue;
+                }
+
+                //At least one play for each actor under control, that play is worth -99 points and will just be to pass their turn
+                plays.Add(new Play(actor));
+
+                plays.AddRange(actor.sheet.EvaluateOptions(actor, targets));
+
+
             }
-
-            //At least one play for each actor under control, that play is worth -99 points and will just be to pass their turn
-            plays.Add(new Play(actor));
-
-            plays.AddRange(actor.sheet.EvaluateOptions(actor, targets));
 
 
         }
+        
 
         Play bestPlay = null;
         foreach(Play play in plays)
@@ -106,6 +112,8 @@ public class CS_UserAI
 
 
         }
+
+
 
         return bestPlay;
 
