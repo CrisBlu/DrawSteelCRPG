@@ -7,8 +7,10 @@ using UnityEngine.Events;
 public class TurnData //Store all the data associated with an actor's single turn with no reason to exist beyond that
 {
     public MB_Actor actor;
-    public CS_Ability usingAbiliy;
+    public CS_Ability usingAbility;
     public SO_TurnManager TurnManager;
+    public bool fullTurn;
+
 
     //I'm Suspect that these belong here
     public Tile target;
@@ -35,6 +37,9 @@ public class TurnData //Store all the data associated with an actor's single tur
             { E_ActionType.move, movement}
 
         };
+
+        if(mainAction >= 1 && maneuverAction >= 1 && movement == -1) {fullTurn = true; }
+        else { fullTurn = false; }
 
 
         //If movement has a value input by the turn creator
@@ -76,7 +81,7 @@ public class TurnData //Store all the data associated with an actor's single tur
                     break;
 
                 case E_TurnState.UsingAbility:
-                    usingAbiliy = null;
+                    usingAbility = null;
                     CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
                     validTiles.Clear();
 
@@ -114,10 +119,10 @@ public class TurnData //Store all the data associated with an actor's single tur
                     break;
 
                 case E_TurnState.UsingAbility:
-                    CS_AbilityTargetingData targetOutput = usingAbiliy.Target(actor.currentTile);
+                    /*CS_AbilityTargetingData targetOutput = usingAbility.Target(actor.currentTile);
                     validTiles = targetOutput.validTargets;
 
-                    CS_ColorGrid.ColorCells(targetOutput.validArea, Color.red);
+                    CS_ColorGrid.ColorCells(targetOutput.validArea, Color.red);*/
 
                     break;
 
@@ -154,7 +159,7 @@ public class TurnData //Store all the data associated with an actor's single tur
                 break;
 
             case E_TurnState.SelectingAbility:
-                usingAbiliy = (CS_Ability)input;
+                usingAbility = (CS_Ability)input;
                 turnState = E_TurnState.UsingAbility;
 
                 break;
@@ -225,24 +230,13 @@ public class TurnData //Store all the data associated with an actor's single tur
         actor.StartMovementInBattle(input, this); 
     }
 
-    public void UseAbility(Tile input)
+    public void UseAbility(Tile input, CS_Ability ability = null)
     {
-        CS_Ability ability = usingAbiliy;
-
-        /*
-        if(ability.Type == E_ActionType.main && mainAction <= 0)
+        if(ability == null)
         {
-            return;
-        }
-        else if (ability.Type == E_ActionType.maneuver && maneuverAction <= 0)
-        {
-            return;
+            ability = usingAbility;
         }
 
-        if(!validTiles.Contains(input))
-        {
-            return;
-        }*/
 
         if (actions[ability.Type] <= 0)
         {
@@ -323,12 +317,14 @@ public class SO_TurnManager : ScriptableObject
             //Temp so ui elements do not stick around
         discardedTurn.turnState = E_TurnState.HoldingForAnimation;
 
-       WakeUpTurn(discardedTurn.actor);
+        if(discardedTurn.fullTurn) { discardedTurn.actor.turnTaken = true; }
+
+       WakeUpTurn();
 
         
     }
 
-    public void WakeUpTurn(MB_Actor actor)
+    public void WakeUpTurn()
     {
         //Set the state of the new active turn, potentially discarding it if it's empty
         TurnData activeTurn;
@@ -338,7 +334,7 @@ public class SO_TurnManager : ScriptableObject
         }
         else
         {
-            PassToOpponent(actor);
+            PassToOpponent();
         }
     }
 
@@ -362,9 +358,8 @@ public class SO_TurnManager : ScriptableObject
     }*/
 
     //passing actor as a reference solely so that I can mark it as having taken it's turn
-    public void PassToOpponent(MB_Actor actor)
+    public void PassToOpponent()
     {
-        actor.turnTaken = true;
         EventPassInitative.Invoke();
     }
 

@@ -23,7 +23,6 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
         
         abilities.Add(new A_Knockback());
         abilities.Add(new A_Charge());
-        abilities.Add(new A_MeleeFreeStrike());
 
         abilities.AddRange(sheet.LoadAbilities());
         Controller.actorsUnderControl.Add(this);

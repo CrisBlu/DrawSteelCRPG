@@ -15,7 +15,7 @@ public abstract class CS_Ability
     
     public abstract CS_AbilityReturnData Use(TurnData data);
 
-    public abstract CS_AbilityTargetingData Target(Tile origin);
+    public virtual CS_AbilityTargetingData Target(Tile origin) { return null; }
     
 
 }
@@ -274,7 +274,7 @@ public class A_Charge : CS_Ability
         return new CS_AbilityTargetingData(CS_GridUtility.GetTilesFromOrigin(origin, self.Speed, true), new List<Tile>() { origin });
     }
 
-
+    //TODO: This callback isn't required, just fold charge into the main Use function
     void Charge(TurnData data, Tile destination)
     {
         Debug.Log("Charging");

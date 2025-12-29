@@ -89,7 +89,7 @@ public static class PlayerInputInterpreter
         }
    
 
-        turn.usingAbiliy = ability;
+        turn.usingAbility = ability;
         turn.turnState = E_TurnState.UsingAbility;
     }
 

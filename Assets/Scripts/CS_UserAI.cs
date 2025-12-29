@@ -95,53 +95,33 @@ public abstract class GameInput
 
 public class CS_UserAI
 {
-    public List<Play> StartAI(List<MB_Squad> squadsUnderControl, List<MB_Actor> targets)
+    public List<MB_Actor> StartAI(List<MB_Squad> squadsUnderControl, List<MB_Actor> targets)
     {
 
         List<SquadPlay> squadPlays = new List<SquadPlay>();
 
-
+        MB_Squad currentSquad = null;
         foreach (MB_Squad squad in squadsUnderControl)
         {
-            SquadPlay squadPlay = new SquadPlay();
-            foreach (MB_Actor actor in squad.actorsInSquad)
+            if (!squad.actorsInSquad[0].turnTaken)
             {
-                if (actor.turnTaken)
-                {
-                    continue;
-                }
-                List<Play> plays = new List<Play>() { new Play(actor) };
-
-                //At least one play for each actor under control, that play is worth -10 points and will just be to pass their turn
-
-
-                plays.AddRange(actor.sheet.EvaluateOptions(actor, targets));
-
-                Play bestPlayForActor = null;
-                foreach (Play play in plays)
-                {
-                    if (bestPlayForActor == null || bestPlayForActor.score < play.score) { bestPlayForActor = play; }
-
-                }
-
-                squadPlay.AddPlay(bestPlayForActor);
-
+                currentSquad = squad;
+                break;
             }
-
-            if (squadPlay.playForEachActor.Count > 0) { squadPlays.Add(squadPlay); }
-
-
         }
 
-
-        SquadPlay bestSquadPlay = null;
-        foreach (SquadPlay play in squadPlays)
+        if(currentSquad == null)
         {
-            if (bestSquadPlay == null || bestSquadPlay.score < play.score) { bestSquadPlay = play; }
-
+            Debug.LogError("AI was asked to find a squad to activate but thinks all squads have taken their turn");
+            return null;
         }
 
-        return bestSquadPlay.playForEachActor;
+
+        return currentSquad.actorsInSquad;
+
+
+
+       
 
 
 

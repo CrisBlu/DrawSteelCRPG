@@ -57,55 +57,58 @@ public class SO_User : ScriptableObject
     private void OnDisable()
     {
         actorsUnderControl.Clear();
+        squadsUnderControl.Clear();
     }
 
     //Below will be on another script that inherents from user
     //... ideally
 
     public CS_UserAI userAI;
-    private List<Play> aiActions;
+    private List<MB_Actor> actingActors;
+    private List<MB_Actor> targets;
+
+    List<GameInput> aiActions;
 
     public void EnableAI(List<MB_Actor> targets)
     {
-        aiActions = userAI.StartAI(squadsUnderControl, targets);
 
-        foreach(Play aiAction in aiActions)
+        aiActions = null;
+
+        actingActors = userAI.StartAI(squadsUnderControl, targets);
+        this.targets = targets;
+  
+        foreach(MB_Actor actor in actingActors)
         {
-            TurnManager.CreateAndStoreTurn(aiAction.unit, turnState: aiAction.inputs[0].state);
+            TurnManager.CreateAndStoreTurn(actor, turnState: E_TurnState.HoldingForAnimation);
         }
+
+        activeTurn.DefaultToState();
         
+
     }
 
     private void OnTurnStateUpdate(E_TurnState state, bool enter)
     {
         if (!enter) return;
-
         if (state == E_TurnState.HoldingForAnimation) return;
 
 
-        
-        foreach(Play aiAction in aiActions)
+        if (aiActions == null || aiActions.Count <= 0)
         {
-            GameInput input;
-            if (aiAction.inputs.Count > 0)
-            {
-                input = aiAction.inputs[0];
-            }
-            else
+            aiActions = activeTurn.actor.sheet.RunBehavior(this, targets);
+            if (aiActions == null)
             {
                 TurnManager.EndCurrentTurn();
                 return;
             }
-
-
-            aiAction.inputs.RemoveAt(0);
-            activeTurn.InvokeState(input.data, input.state);
-
         }
-        
+   
+        GameInput currentInput = aiActions[0];
+        aiActions.RemoveAt(0);
 
+        activeTurn.InvokeState(currentInput.data, currentInput.state);
+ 
 
-        
     }
 
 

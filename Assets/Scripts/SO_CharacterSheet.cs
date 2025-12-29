@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 [System.Serializable]
 public class CS_Characteristics
@@ -41,18 +42,46 @@ public class SO_CharacterSheet : ScriptableObject
         return abilities;
     }
 
-    public List<Play> EvaluateOptions(MB_Actor self, List<MB_Actor> potentialTargets)
+    public List<GameInput> RunBehavior(SO_User user, List<MB_Actor> potentialTargets)
     {
-        List<Play> options = new List<Play>();
-        foreach(MB_Actor target in potentialTargets)
+        //Target hero which is in closest range
+
+        //Take preferred move and do closest square calculations out here, to then pass in
+
+        //Attack closest target
+        MB_Actor self = user.activeTurn.actor;
+        MB_Actor target = null;
+        int closestCount = 999;
+
+        foreach(MB_Actor actor in potentialTargets)
         {
-            foreach (SO_AI ai in behaviors)
+
+            int distanceCount = CS_GridUtility.FindPath(actor.currentTile, self.currentTile).Count;
+
+            if(distanceCount < closestCount)
             {
-                options.Add(ai.RunBehavior(self, target));
+                target = actor;
+                closestCount = distanceCount;
             }
+            
         }
 
-        return options;
+
+        for (int i = 0; i < behaviors.Count; i++)
+        {
+            //Run through the behaivor list again until all behaviors come up false;
+
+
+            List<GameInput> aiActions = behaviors[i].RunBehavior(user.activeTurn, target);
+
+            if (aiActions != null) { return aiActions; }
+
+        }
+
+
+
+        return null;
+
         
     }
 }
