@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "AI_WalkIntoRange", menuName = "Scriptable Objects/Behaviors/WalkIntoRange")]
-public class AI_WalkIntoRange : SO_AI
+[CreateAssetMenu(fileName = "AI_WalkIntoChargeRange", menuName = "Scriptable Objects/Behaviors/WalkIntoChargeRange")]
+public class AI_WalkIntoChargeRange : SO_AI
 {
     public override List<GameInput> RunBehavior(TurnData turn, MB_Actor target)
     {
@@ -10,7 +10,7 @@ public class AI_WalkIntoRange : SO_AI
         MB_Actor self = turn.actor;
 
         //This works for charge and not a goddamn thing else
-        List<Tile> targeting = CS_GridUtility.GetTilesFromOrigin(target.currentTile, self.abilities[self.sheet.preferredAttack].Range, true);
+        List<Tile> targeting = CS_GridUtility.GetTilesFromOrigin(target.currentTile, self.Speed + 1, true);
 
         Tile closestTile = null;
 

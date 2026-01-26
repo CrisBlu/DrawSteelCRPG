@@ -10,11 +10,11 @@ public class AI_RangedAttack : SO_AI
         if (turn.actions[E_ActionType.main] <= 0) { return null; }
 
         MB_Actor self = turn.actor;
-        List<Tile> pathToTarget = CS_GridUtility.FindPath(target.currentTile, self.currentTile);
+        List<Tile> pathToTarget = CS_GridUtility.FindShortestPath(target.currentTile, self.currentTile);
         int tileCount = pathToTarget.Count;
 
         //If next to, attack
-        if (tileCount <= self.abilities[2].Range)
+        if (tileCount <= self.abilities[self.sheet.preferredAttack].Range)
         {
             return AttackInput(self, target.currentTile);
         }
@@ -24,7 +24,7 @@ public class AI_RangedAttack : SO_AI
 
     private List<GameInput> AttackInput(MB_Actor self, Tile target)
     {
-        List<GameInput> attackInputs = new List<GameInput>() { new AbilityInput(self.abilities[2]),
+        List<GameInput> attackInputs = new List<GameInput>() { new AbilityInput(self.abilities[self.sheet.preferredAttack]),
             new TileInput(E_TurnState.UsingAbility, target)};
 
 

@@ -36,13 +36,13 @@ public class AI_Charging : SO_AI //Scriptable objects because I would like these
 
         }
 
-        List<Tile> pathToClosest = CS_GridUtility.FindPath(closestTile, self.currentTile);
+        List<Tile> pathToClosest = CS_GridUtility.FindShortestPath(closestTile, self.currentTile);
 
         //if targeting reveals that our monster is in the valid area
         if (pathToClosest.Count <= 0)
         {
 
-            List<Tile> pathToTarget = CS_GridUtility.FindPath(target.currentTile, closestTile);
+            List<Tile> pathToTarget = CS_GridUtility.FindShortestPath(target.currentTile, closestTile);
 
 
 
@@ -59,7 +59,7 @@ public class AI_Charging : SO_AI //Scriptable objects because I would like these
     private List<GameInput> ChargeInput(MB_Actor self, Tile destination)
     {
  
-        List<GameInput> chargeInputs = new List<GameInput>() { new AbilityInput(self.abilities[1]), 
+        List<GameInput> chargeInputs = new List<GameInput>() { new AbilityInput(self.abilities["Charge"]), 
             new TileInput(E_TurnState.UsingAbility, self.currentTile), 
             new TileInput(E_TurnState.ResolvingAbility, destination) };
 

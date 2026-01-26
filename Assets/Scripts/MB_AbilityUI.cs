@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,7 +34,8 @@ public class MB_AbilityUI : MonoBehaviour
         }
         ToggleSidebar(true);
 
-        foreach (CS_Ability ability in turn.actor.abilities)
+        List<CS_Ability> abilities = turn.actor.abilities.Values.ToList();
+        foreach (CS_Ability ability in abilities)
         {
             if (ability.Type != typeToDisplay)
             { continue; }

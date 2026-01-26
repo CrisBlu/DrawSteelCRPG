@@ -95,7 +95,7 @@ public class SO_User : ScriptableObject
 
         if (aiActions == null || aiActions.Count <= 0)
         {
-            aiActions = activeTurn.actor.sheet.RunBehavior(this, targets);
+            aiActions = activeTurn.actor.sheet.RunBehavior(activeTurn, targets);
             if (aiActions == null)
             {
                 TurnManager.EndCurrentTurn();
@@ -107,6 +107,7 @@ public class SO_User : ScriptableObject
         aiActions.RemoveAt(0);
 
         activeTurn.InvokeState(currentInput.data, currentInput.state);
+
  
 
     }

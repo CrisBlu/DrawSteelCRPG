@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 23921815519202503}
   - component: {fileID: 5480527591728943469}
   - component: {fileID: 1850505134571251419}
-  - component: {fileID: 2911228610925858535}
   m_Layer: 0
   m_Name: GO_Monster
   m_TagString: Monster
@@ -89,33 +88,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &2911228610925858535
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2142787290736224595}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 206064ff01559b148a5be29696e8f84a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gridSystem: {fileID: 11400000, guid: 8b0da9658adb0804885fe3f9d859a48f, type: 2}
-  stamina: 3
-  X: 1
-  Y: 1
-  isActor: 0
-  sheet: {fileID: 0}
-  ActorModel: {fileID: 5091461543585492864}
-  StaminaDisplay: {fileID: 3457789806675921666}
-  Speed: 5
-  movement: 0
-  turnTaken: 0
-  Team: {fileID: 11400000, guid: 4de04bca931517c42a8bc5e3747f9822, type: 2}
-  advancing: 1
-  watching: 0
-  gaurding: 0
 --- !u!1 &2697960761041239631
 GameObject:
   m_ObjectHideFlags: 0
@@ -128,7 +100,6 @@ GameObject:
   - component: {fileID: 8239441904758817920}
   - component: {fileID: 1623125026618822253}
   - component: {fileID: 2073473778264103030}
-  - component: {fileID: 5091461543585492864}
   m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
@@ -225,18 +196,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5091461543585492864
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2697960761041239631}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f486d95b12aa4442a2bc1a5f4d8dc63, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6510633736959411792
 GameObject:
   m_ObjectHideFlags: 0

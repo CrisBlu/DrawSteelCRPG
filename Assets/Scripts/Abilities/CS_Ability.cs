@@ -278,7 +278,7 @@ public class A_Charge : CS_Ability
     void Charge(TurnData data, Tile destination)
     {
         Debug.Log("Charging");
-        int path = CS_GridUtility.FindPath(destination, data.actor.currentTile).Count;
+        int path = CS_GridUtility.FindShortestPath(destination, data.actor.currentTile).Count;
         TurnData newTurn = data.TurnManager.CreateAndStoreTurn(data.actor, 1, 0, path, "charge", E_TurnState.HoldingForAnimation);
         
         newTurn.actor.StartMovementInBattle(destination, newTurn);

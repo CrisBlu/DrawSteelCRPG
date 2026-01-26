@@ -43,7 +43,7 @@ public class MB_PlayerInput : MonoBehaviour
     void TileSelect(InputAction.CallbackContext context)
     {
         //Block input if it's not your turn
-        if(Zipper.activeUser != Player)
+        if(Zipper.activeUser != Player && Player.activeTurn == null)
         {
             return;
         }

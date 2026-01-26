@@ -12,7 +12,8 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
     //Temp
     public bool turnTaken = false;
 
-    public List<CS_Ability> abilities = new List<CS_Ability>();
+    //public List<CS_Ability> abilities = new List<CS_Ability>();
+    public Dictionary<string, CS_Ability> abilities = new Dictionary<string, CS_Ability>();
     public SO_CharacterSheet sheet;
 
 
@@ -21,11 +22,14 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
     {
         base.Start();
         
-        abilities.Add(new A_Knockback());
-        abilities.Add(new A_Charge());
+        abilities.Add("Knockback" ,new A_Knockback());
+        abilities.Add("Charge", new A_Charge());
 
-        abilities.AddRange(sheet.LoadAbilities());
+        sheet.character = this;
+        sheet.LoadAbilities(abilities);
+
         Controller.actorsUnderControl.Add(this);
+
     }
 
 
@@ -60,7 +64,7 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
     private IEnumerator MovementInBattle(List<Tile> stepsToTake, TurnData turn, Action callbackAtEnd = null)
     {
         //isWalking = true;
-        turn.turnState = E_TurnState.HoldingForAnimation;
+        //turn.turnState = E_TurnState.HoldingForAnimation;
 
         yield return new WaitForSeconds(1f);
         while (stepsToTake.Count > 0)
@@ -86,6 +90,26 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
         callbackAtEnd?.Invoke();
 
 
+
+        yield return null;
+    }
+
+
+    public void StartAnimationWalking(List<Vector2Int> stepsTaken)
+    {
+        StartCoroutine(AnimationWalking(stepsTaken));
+    }
+
+    private IEnumerator AnimationWalking(List<Vector2Int> stepsTaken)
+    {
+        yield return new WaitForSeconds(1f);
+
+        for (int i = 1; i < stepsTaken.Count; i++)
+        {
+            Vector2 position = Vector2.Lerp(stepsTaken[i - 1], stepsTaken[i], 1);
+            transform.position = new Vector3(position.x, 0, position.y);
+            yield return new WaitForSeconds(.2f);
+        }
 
         yield return null;
     }

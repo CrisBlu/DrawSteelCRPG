@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 174415ff9d8c64c4181ea787d453c0c2, type: 3}
   m_Name: GoblinWarrior
   m_EditorClassIdentifier: 
+  character: {fileID: 0}
   stats:
     Might: -2
     Agility: 2
@@ -20,7 +21,9 @@ MonoBehaviour:
     Presence: -1
   abilityPacks:
   - {fileID: 11400000, guid: c27b468b8d9ba134590281c7060c4ca5, type: 2}
+  BattleEvents: {fileID: 11400000, guid: d3f20eab4781bb447a2a2b32a56fb261, type: 2}
   behaviors:
   - {fileID: 11400000, guid: 0f98f415e9d0df54cb72456f2fb5bfd5, type: 2}
   - {fileID: 11400000, guid: 514fb32adff511046a371d0438ae8f20, type: 2}
   - {fileID: 11400000, guid: 4029b81582544c247a0888888c5707f9, type: 2}
+  preferredAttack: Spear Charge

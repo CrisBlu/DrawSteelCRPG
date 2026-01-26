@@ -217,7 +217,7 @@ public static class CS_GridUtility
         return new CS_AbilityTargetingData(targetedTiles, validTargets);
     }
 
-    public static List<Tile> GridMakePath(Tile cellToMoveTo, Tile origin)
+    public static List<Tile> GetStepsToTake(Tile cellToMoveTo, Tile origin)
     {
 
 
@@ -242,7 +242,7 @@ public static class CS_GridUtility
 
     }
 
-    public static List<Tile> FindPath(Tile destination, Tile origin)
+    public static List<Tile> FindShortestPath(Tile destination, Tile origin)
     {
 
         List<Tile> openSet = new List<Tile>();
@@ -264,7 +264,7 @@ public static class CS_GridUtility
             //Destination reached
             if (currentTile == destination)
             {
-                return GridMakePath(destination, origin);
+                return GetStepsToTake(destination, origin);
             }
 
             foreach (Tile neighbor in currentTile.FindNeighbors())

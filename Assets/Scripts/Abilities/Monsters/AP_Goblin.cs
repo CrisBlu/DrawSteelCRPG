@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static A_Bow;
 
-[CreateAssetMenu(fileName = "AP_Goblin", menuName = "Scriptable Objects/Ability Packs/Monsters/Goblins")]
+[CreateAssetMenu(fileName = "AP_Goblin", menuName = "Scriptable Objects/AbilityPacks/Monsters/Goblins")]
 public class AP_Goblin : SO_AbilityPack
 {
     public bool warrior = true;
     public bool sniper = false;
-    public override List<CS_Ability> Abilities => new List<CS_Ability> { ClassGoblin() };
+    public override List<CS_Ability> Abilities => new List<CS_Ability> {new A_GoblinFreeStrike(), ClassGoblin() };
     private CS_Ability ClassGoblin()
     {
         if (warrior)
@@ -104,4 +105,51 @@ public class A_Bow : CS_Ability
 
         return new CS_AbilityReturnData(true);
     }
+
+    public interface ITrigger
+    {
+        public void SetTrigger(SO_BattleEvents events, MB_Actor user);
+    }
+
+    public class A_GoblinFreeStrike : CS_Ability, ITrigger
+    {
+        public override string Name => "Free Strike";
+        public override string Description => "a pot shot";
+        public override E_ActionType Type => E_ActionType.trigger;
+        public override List<string> Tags => new List<string> { "charge", "melee", "strike" };
+        public override int Range => 1;
+
+        MB_Actor user;
+
+        public override CS_AbilityReturnData Use(TurnData data)
+        {
+
+            Debug.Log("Free strike");
+            //data.target.entity.TakeDamage(2);
+
+            return new CS_AbilityReturnData(true);
+        }
+
+        public void Trigger(Tile position, MB_Actor actor)
+        {
+
+            if(CS_GridUtility.FindShortestPath(position, user.currentTile).Count > Range) { return; }
+
+            if(!actor.CompareTag(user.tag))
+            {
+                actor.TakeDamage(2);
+            }
+
+            
+
+        }
+
+        public void SetTrigger(SO_BattleEvents events, MB_Actor user)
+        {
+            this.user = user;
+            events.EventActorLeftTile += Trigger;
+            
+        }
+    }
+
 }

@@ -9,6 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 261a7e4135dc14a46aff8340a27e344a, type: 3}
-  m_Name: AI_WalkIntoRange
+  m_Script: {fileID: 11500000, guid: 070d3d40de1d6ed4e8f9ab8c39faf182, type: 3}
+  m_Name: AI_WalkIntoChargeRange
   m_EditorClassIdentifier: 

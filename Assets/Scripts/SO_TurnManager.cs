@@ -1,4 +1,5 @@
 using NUnit.Framework.Interfaces;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -222,10 +223,10 @@ public class TurnData //Store all the data associated with an actor's single tur
     public void StartWalking(Tile input)
     {
         
-        if(actions[E_ActionType.move] <= 0) 
+        /*if(actions[E_ActionType.move] <= 0) 
         {
             return;
-        }
+        }*/
 
         actor.StartMovementInBattle(input, this); 
     }
@@ -270,7 +271,6 @@ public class TurnData //Store all the data associated with an actor's single tur
 public class SO_TurnManager : ScriptableObject
 {
     public Stack<TurnData> turnsToResolve = new Stack<TurnData>();
-
     //When one user stops acting and another starts
     [HideInInspector] public UnityEvent EventPassInitative;
 
@@ -283,7 +283,6 @@ public class SO_TurnManager : ScriptableObject
         TurnData turnForActor = new TurnData(actor, this, mainAction, maneuverAction, movement, abilityTagRestrict, turnState);
         turnsToResolve.Push(turnForActor);
 
-        
       
         return turnForActor;
     }
@@ -365,7 +364,7 @@ public class SO_TurnManager : ScriptableObject
 
     private void OnDisable()
     {
-        turnsToResolve?.Clear();
+        //turnsToResolve?.Clear();
         EventPassInitative.RemoveAllListeners();
     }
 }

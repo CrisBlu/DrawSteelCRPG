@@ -5,9 +5,10 @@ public class MB_Entity : MonoBehaviour
 {
 
     [SerializeField] protected SO_GridData gridData;
-    [SerializeField] protected int stamina = 10;
+    public int stamina = 10;
 
-    Vector2Int position;
+    //I think this can just get transform position and cast it into a Vector2Int
+    [HideInInspector] public Vector2Int position;
     public Tile currentTile = null;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
