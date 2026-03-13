@@ -120,10 +120,17 @@ public class TurnData //Store all the data associated with an actor's single tur
                     break;
 
                 case E_TurnState.UsingAbility:
-                    CS_AbilityTargetingData targetOutput = usingAbility.Target(actor.currentTile);
-                    validTiles = targetOutput.validTargets;
 
-                    CS_ColorGrid.ColorCells(targetOutput.validArea, Color.red);
+
+
+                    CS_AbilityTargetingData targetOutput = usingAbility.Target(actor.currentTile);
+
+                    if(targetOutput != null)
+                    {
+                        validTiles = targetOutput.validTargets;
+                        CS_ColorGrid.ColorCells(targetOutput.validArea, Color.red);
+                    }
+                    
 
                     break;
 
