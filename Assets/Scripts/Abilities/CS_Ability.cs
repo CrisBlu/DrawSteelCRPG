@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows;
 
 public abstract class CS_Ability
 {
@@ -275,13 +276,14 @@ public class A_Charge : CS_Ability
     }
 
     //TODO: This callback isn't required, just fold charge into the main Use function
-    void Charge(TurnData data, Tile destination)
+    async void Charge(TurnData data, Tile destination)
     {
         Debug.Log("Charging");
         int path = CS_GridUtility.FindShortestPath(destination, data.actor.currentTile).Count;
         TurnData newTurn = data.TurnManager.CreateAndStoreTurn(data.actor, 1, 0, path, "charge", E_TurnState.HoldingForAnimation);
         
-        newTurn.actor.StartMovementInBattle(destination, newTurn);
+        await Movement.ActorMovement(newTurn, destination);
+        newTurn.DefaultToState();
     }
 
     void EndOfChargeAttack()

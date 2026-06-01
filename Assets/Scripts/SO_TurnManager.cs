@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+//Could TurnData be a struct? 
 
 public class TurnData //Store all the data associated with an actor's single turn with no reason to exist beyond that
 {
@@ -26,7 +27,7 @@ public class TurnData //Store all the data associated with an actor's single tur
 
     public Dictionary<E_ActionType, int> actions;
 
-
+    
     public TurnData(MB_Actor actingActor, SO_TurnManager turnManager, int mainAction = 1, int maneuverAction = 1, int movement = -1, string abilityTagRestrict = null, E_TurnState turnState = E_TurnState.SelectingMove)
     {
         actor = actingActor;
@@ -53,6 +54,8 @@ public class TurnData //Store all the data associated with an actor's single tur
          AbilityHandler = new CS_AbilityParser();
 
     }
+
+
 
 
 
@@ -151,7 +154,11 @@ public class TurnData //Store all the data associated with an actor's single tur
 
     }
 
-    public void InvokeState(object input, E_TurnState stateToInvoke = E_TurnState.None)
+
+    //This is currently, only used for AI behaviors, where the AI inputs a turn states and the system knows what to do because of that
+    //Frankly, this is completely opposite to how the player input works, that reads the turn state and understands the player input through what it read
+    //It seems to me that these concepts shouldn't be related in the way that they are
+    public async void InvokeState(object input, E_TurnState stateToInvoke = E_TurnState.None)
     {
 
         if(stateToInvoke == E_TurnState.None)
@@ -162,7 +169,8 @@ public class TurnData //Store all the data associated with an actor's single tur
         switch (stateToInvoke)
         {
             case E_TurnState.SelectingMove:
-                StartWalking((Tile) input);
+                await Movement.ActorMovement(this, (Tile)input);
+                DefaultToState();
 
                 break;
 
@@ -227,16 +235,6 @@ public class TurnData //Store all the data associated with an actor's single tur
 
     //TODO: Remove functions below and place within a validation script
 
-    public void StartWalking(Tile input)
-    {
-        
-        /*if(actions[E_ActionType.move] <= 0) 
-        {
-            return;
-        }*/
-
-        actor.StartMovementInBattle(input, this); 
-    }
 
     public void UseAbility(Tile input, CS_Ability ability = null)
     {

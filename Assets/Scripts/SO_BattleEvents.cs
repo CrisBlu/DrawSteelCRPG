@@ -6,14 +6,20 @@ using UnityEngine.Events;
 public class SO_BattleEvents : ScriptableObject
 {
 
-    [HideInInspector] public event Action<Tile, MB_Actor> EventActorLeftTile;
+    [HideInInspector] public event Action<Tile, Tile, MB_Actor> EventActorLeftTile;
     private void OnEnable()
     {
         CS_BattleLog.BattleEvents = this;
     }
 
-    public void Trigger(Tile tilePos, MB_Actor actor)
+    public void TriggerActorLeftTileEvents(Tile exit, Tile entered, MB_Actor actor)
     {
-        EventActorLeftTile.Invoke(tilePos, actor);
+        //Will ask all enemies with triggers that trigger when an enemy enters or leaves a space to check their triggers
+        EventActorLeftTile.Invoke(exit, entered, actor);
+    }
+
+    private void OnDisable()
+    {
+        EventActorLeftTile = null;
     }
 }

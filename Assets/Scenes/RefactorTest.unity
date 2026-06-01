@@ -313,6 +313,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridData: {fileID: 11400000, guid: acebcf824761e8f489fe14b137176944, type: 2}
   stamina: 10
+  position: {x: 0, y: 0}
   Controller: {fileID: 11400000, guid: e137cd085d97b084f94259a14e6f363d, type: 2}
   ActorEvents: {fileID: 11400000, guid: 7347c0d9ced81ce4fa24f2b31fc98934, type: 2}
   turnTaken: 0
@@ -694,6 +695,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridData: {fileID: 11400000, guid: acebcf824761e8f489fe14b137176944, type: 2}
   stamina: 30
+  position: {x: 0, y: 0}
   Controller: {fileID: 11400000, guid: e42ec5aa33741e145aca8c721977ce73, type: 2}
   ActorEvents: {fileID: 11400000, guid: 7347c0d9ced81ce4fa24f2b31fc98934, type: 2}
   turnTaken: 0
@@ -1959,6 +1961,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridData: {fileID: 11400000, guid: acebcf824761e8f489fe14b137176944, type: 2}
   stamina: 30
+  position: {x: 0, y: 0}
   Controller: {fileID: 11400000, guid: e42ec5aa33741e145aca8c721977ce73, type: 2}
   ActorEvents: {fileID: 11400000, guid: 7347c0d9ced81ce4fa24f2b31fc98934, type: 2}
   turnTaken: 0
@@ -1998,6 +2001,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridData: {fileID: 11400000, guid: acebcf824761e8f489fe14b137176944, type: 2}
   stamina: 10
+  position: {x: 0, y: 0}
 --- !u!65 &839272885
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2097,7 +2101,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 23921815519202503, guid: 0daf8f3c56e6b404b918e0ad9d98ef55, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 23921815519202503, guid: 0daf8f3c56e6b404b918e0ad9d98ef55, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2187,6 +2191,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridData: {fileID: 11400000, guid: acebcf824761e8f489fe14b137176944, type: 2}
   stamina: 10
+  position: {x: 0, y: 0}
   Controller: {fileID: 11400000, guid: e137cd085d97b084f94259a14e6f363d, type: 2}
   ActorEvents: {fileID: 11400000, guid: 7347c0d9ced81ce4fa24f2b31fc98934, type: 2}
   turnTaken: 0
@@ -2484,6 +2489,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridData: {fileID: 11400000, guid: acebcf824761e8f489fe14b137176944, type: 2}
   stamina: 10
+  position: {x: 0, y: 0}
 --- !u!65 &928858877
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2938,6 +2944,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridData: {fileID: 11400000, guid: acebcf824761e8f489fe14b137176944, type: 2}
   stamina: 10
+  position: {x: 0, y: 0}
 --- !u!65 &1473653642
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3328,6 +3335,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridData: {fileID: 11400000, guid: acebcf824761e8f489fe14b137176944, type: 2}
   stamina: 10
+  position: {x: 0, y: 0}
   Controller: {fileID: 11400000, guid: e137cd085d97b084f94259a14e6f363d, type: 2}
   ActorEvents: {fileID: 11400000, guid: 7347c0d9ced81ce4fa24f2b31fc98934, type: 2}
   turnTaken: 0

@@ -63,7 +63,6 @@ public static class PlayerInputInterpreter
 
     private static async void SelectingMove(TurnData turn, Tile input)
     {
-        CS_Tempname movement = new CS_Tempname();
 
         if(input == turn.actor.currentTile)
         {
@@ -73,8 +72,8 @@ public static class PlayerInputInterpreter
         else if(turn.validTiles.Contains(input))
         {
             turn.turnState = E_TurnState.HoldingForAnimation;
-            //turn.StartWalking(input);
-            await movement.ActorMovement(turn, input);
+        
+            await Movement.ActorMovement(turn, input);
 
             turn.DefaultToState();
         }

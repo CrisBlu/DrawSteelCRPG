@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using static A_Bow;
+
 
 [System.Serializable]
 public class CS_Characteristics

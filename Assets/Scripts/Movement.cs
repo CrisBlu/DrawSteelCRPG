@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class CS_Tempname
+public static class Movement
 {
     
 
-    public bool UpdateEntityPosition(MB_Entity actor, Tile newTile)
+    public static bool UpdateEntityPosition(MB_Entity actor, Tile newTile)
     {
         //Add to grid will update this in grid data, I think I do not like this
         if (newTile.parentGrid.AddToGrid(newTile, actor))
@@ -29,7 +29,7 @@ public class CS_Tempname
         return false;
     }
 
-    public async Task ActorMovement(TurnData turn, Tile destination)
+    public static async Task ActorMovement(TurnData turn, Tile destination)
     {
         MB_Actor actor = turn.actor;
         Dictionary<E_ActionType, int> actions = turn.actions;
@@ -48,7 +48,7 @@ public class CS_Tempname
 
             actions[E_ActionType.move]--;
 
-            CS_BattleLog.lol(actor.currentTile, stepsToTake[i], actor);
+            CS_BattleLog.BattleEvents.TriggerActorLeftTileEvents(actor.currentTile, stepsToTake[i], actor);
             UpdateEntityPosition(actor, stepsToTake[i]);
             
             stepsTaken.Add(stepsToTake[i].position);
@@ -69,7 +69,7 @@ public class CS_Tempname
     }
 
     //I do not think it is wise to only trigger animation walking at the ned
-    private async Task AnimationWalking(MB_Actor actor, List<Vector2Int> stepsTaken)
+    private static async Task AnimationWalking(MB_Actor actor, List<Vector2Int> stepsTaken)
     {
         await Task.Delay(1000);
 
@@ -94,18 +94,21 @@ public class CS_Tempname
 // Position (If position is changed directly, UpdateEntityPosition must be called after it and transform.position must be also updated)
 // Status (Dead, Prone, Bleeding, Poisoned)
 
-public class CS_Variables
+public struct CS_Variables
 {
     public MB_Actor actor;
     public int stamina;
+    public E_TurnState turnState;
     //public int recoveries;
     public Dictionary<E_ActionType, int> actions;
     public Vector2Int position;
 
     public CS_Variables(TurnData turn)
     {
+
         actor = turn.actor;
         stamina = turn.actor.stamina;
+        turnState = turn.turnState;
         //this.recoveries = recoveries;
         actions = turn.actions;
         position = turn.actor.position;
