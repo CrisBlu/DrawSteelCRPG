@@ -52,7 +52,13 @@ public static class PlayerInputInterpreter
         //Does (MB_Actor) on null throw an error?
         if((MB_Actor)tile.entity && user.actorsUnderControl.Contains((MB_Actor)tile.entity))
         {
-            return (MB_Actor)tile.entity;
+            MB_Actor actor = (MB_Actor)tile.entity;
+
+            //turn taken check
+            if(!actor.turnTaken)
+                return actor;
+            else return null;
+
         }
         else
         {

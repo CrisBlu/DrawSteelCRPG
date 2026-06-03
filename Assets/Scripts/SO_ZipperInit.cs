@@ -1,7 +1,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
+
 
 [CreateAssetMenu(fileName = "SO_ZipperInit", menuName = "Scriptable Objects/ZipperInit")]
 public class SO_ZipperInit : ScriptableObject
@@ -56,6 +56,7 @@ public class SO_ZipperInit : ScriptableObject
 
         if (activeUser.AI)
         {
+            //Hardcoded, target the first user (player)'s characters
             activeUser.EnableAI(users[0].actorsUnderControl);
         }
        
@@ -73,6 +74,8 @@ public class SO_ZipperInit : ScriptableObject
 
             roundTracker[user] = false;
         }
+
+        userIndex = 0;
     }
 
     public bool CheckIfUserDone(SO_User user)
