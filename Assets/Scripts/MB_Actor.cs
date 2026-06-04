@@ -70,6 +70,12 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
         //UpdatePosition(origin);
     }
 
+    public override void TakeDamage(int damage)
+    {
+        base.TakeDamage(damage);
+        SO_BattleEvents.TriggerActorTookDamageEvents(damage, this);
+    }
+
     public void DisplayAbilties(TurnData turn)
     {
         ActorEvents.TriggerDisplayAbilities(turn);

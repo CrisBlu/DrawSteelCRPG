@@ -1,5 +1,5 @@
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
+
 
 public class MB_Entity : MonoBehaviour
 {
@@ -47,7 +47,7 @@ public class MB_Entity : MonoBehaviour
         return false;
     }
 
-    public void TakeDamage(int damage)
+    public virtual void TakeDamage(int damage)
     {
         stamina -= damage;
 

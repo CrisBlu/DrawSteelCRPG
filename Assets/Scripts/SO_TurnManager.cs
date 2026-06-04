@@ -59,7 +59,7 @@ public class TurnData //Store all the data associated with an actor's single tur
 
 
 
-    //TODO: State Class which gets this stuff out of this script
+    //This feels like an inherently user based feature, given the fact that it's only relevant to the player and AI doesn't even need this
     private E_TurnState _turnState;
     public E_TurnState turnState
     {
@@ -100,7 +100,6 @@ public class TurnData //Store all the data associated with an actor's single tur
                     break;
             }
 
-            TurnManager.EventTurnStateUpdate.Invoke(_turnState, false);
             _turnState = value;
 
             //Enter
@@ -147,7 +146,8 @@ public class TurnData //Store all the data associated with an actor's single tur
                     break;
             }
 
-            TurnManager.EventTurnStateUpdate.Invoke(_turnState, true);
+            if(_turnState != E_TurnState.HoldingForAnimation)
+                TurnManager.EventNotifyAI.Invoke();
 
 
         }
@@ -279,8 +279,7 @@ public class SO_TurnManager : ScriptableObject
     //When one user stops acting and another starts
     [HideInInspector] public UnityEvent EventPassInitative;
 
-    //TurnState Events
-    [HideInInspector] public UnityEvent<E_TurnState, bool> EventTurnStateUpdate;
+    [HideInInspector] public UnityEvent EventNotifyAI;
     
    
     public TurnData CreateAndStoreTurn(MB_Actor actor, int mainAction = 1, int maneuverAction = 1, int movement = -1, string abilityTagRestrict = null, E_TurnState turnState = E_TurnState.SelectingMove)

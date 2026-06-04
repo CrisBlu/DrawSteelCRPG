@@ -68,6 +68,29 @@ public static class Movement
         return;
     }
 
+    //A variant that can be used to move off turn
+    public static async Task ActorMovement(MB_Actor actor, Tile destination)
+    {
+
+
+        List<Tile> stepsToTake = CS_GridUtility.GetStepsToTake(destination, actor.currentTile);
+        List<Vector2Int> stepsTaken = new List<Vector2Int>() { actor.currentTile.position };
+
+        for (int i = 0; i < stepsToTake.Count; i++)
+        {
+
+            CS_BattleLog.BattleEvents.TriggerActorLeftTileEvents(actor.currentTile, stepsToTake[i], actor);
+            UpdateEntityPosition(actor, stepsToTake[i]);
+
+            stepsTaken.Add(stepsToTake[i].position);
+
+        }
+
+        await AnimationWalking(actor, stepsTaken);
+
+        return;
+    }
+
     //I do not think it is wise to only trigger animation walking at the ned
     private static async Task AnimationWalking(MB_Actor actor, List<Vector2Int> stepsTaken)
     {

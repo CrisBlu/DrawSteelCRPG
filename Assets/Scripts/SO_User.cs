@@ -45,7 +45,7 @@ public class SO_User : ScriptableObject
         if(AI)
         {
             userAI = new CS_UserAI();
-            TurnManager.EventTurnStateUpdate.AddListener(OnTurnStateUpdate);
+            TurnManager.EventNotifyAI.AddListener(OnTurnStateUpdate);
         }
 
         
@@ -87,10 +87,9 @@ public class SO_User : ScriptableObject
 
     }
 
-    private void OnTurnStateUpdate(E_TurnState state, bool enter)
+    
+    private void OnTurnStateUpdate()
     {
-        if (!enter) return;
-        if (state == E_TurnState.HoldingForAnimation) return;
 
 
         if (aiActions == null || aiActions.Count <= 0)

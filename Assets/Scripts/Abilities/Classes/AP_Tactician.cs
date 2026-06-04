@@ -9,7 +9,7 @@ public class AP_Tactician : SO_AbilityPack
 }
 
 
-public class A_Parry : CS_Ability
+public class A_Parry : CS_Ability, ITrigger
 {
     public override string Name => "Parry";
     public override string Description => "You lost the moment you entered these woods";
@@ -17,7 +17,7 @@ public class A_Parry : CS_Ability
     public override List<string> Tags => new List<string> { "weapon", "melee"};
     public override int Range => 2;
 
-
+    MB_Actor user;
 
 
     public override CS_AbilityReturnData Use(TurnData data)
@@ -27,5 +27,34 @@ public class A_Parry : CS_Ability
         Debug.Log("Parry!");
 
         return new CS_AbilityReturnData(true);
+    }
+
+    private async void Trigger(int damage, MB_Actor target)
+    {
+        //Disregard is damaged target is not ally
+        if (!target.CompareTag(user.tag))
+            return;
+
+        List<Tile> PathToFriend = CS_GridUtility.FindShortestPath(target.currentTile, user.currentTile);
+
+        //If target out of range disregard
+        if (PathToFriend.Count > Range) { return; }
+
+        if(PathToFriend.Count > 1)
+        {
+            await Movement.ActorMovement(user, PathToFriend[PathToFriend.Count - 2]);
+        }
+
+        
+
+        Debug.Log("Parry!");
+
+    }
+
+    public void SetTrigger(SO_BattleEvents events, MB_Actor user)
+    {
+        this.user = user;
+        SO_BattleEvents.EventActorTookDamage += Trigger;
+
     }
 }

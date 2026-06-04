@@ -7,6 +7,7 @@ public class SO_BattleEvents : ScriptableObject
 {
 
     [HideInInspector] public event Action<Tile, Tile, MB_Actor> EventActorLeftTile;
+    [HideInInspector] public static event Action<int, MB_Actor> EventActorTookDamage;
     private void OnEnable()
     {
         CS_BattleLog.BattleEvents = this;
@@ -18,8 +19,16 @@ public class SO_BattleEvents : ScriptableObject
         EventActorLeftTile.Invoke(exit, entered, actor);
     }
 
+    public static void TriggerActorTookDamageEvents(int damage, MB_Actor actor)
+    {
+         EventActorTookDamage.Invoke(damage, actor);
+    }
+
+
+
     private void OnDisable()
     {
         EventActorLeftTile = null;
+        EventActorTookDamage = null;
     }
 }
