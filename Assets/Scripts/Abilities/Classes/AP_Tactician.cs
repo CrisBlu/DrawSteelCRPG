@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 [CreateAssetMenu(fileName = "AP_Tactician", menuName = "Scriptable Objects/AbilityPacks/Classes/Tactician")]
 public class AP_Tactician : SO_AbilityPack
@@ -25,14 +27,19 @@ public class A_Parry : CS_Ability, ITrigger
     public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
 
+        //List<Tile> PathToFriend = CS_GridUtility.FindShortestPath(target.currentTile, user.currentTile);
 
-        Debug.Log("Parry!");
+     
+
 
         return new CS_AbilityReturnData(true);
     }
 
     private async Task Trigger(int damage, MB_Actor target)
     {
+        if (user.trigger == false)
+            return;
+
         //Disregard is damaged target is not ally
         if (!target.CompareTag(user.tag))
             return;
@@ -42,14 +49,15 @@ public class A_Parry : CS_Ability, ITrigger
         //If target out of range disregard
         if (PathToFriend.Count > Range) { return; }
 
-        if(PathToFriend.Count > 1)
-        {
-            await Movement.ActorMovement(user, PathToFriend[PathToFriend.Count - 2]);
-        }
+
+
 
         UserService userService = new UserService();
         // Begin waiting for the user's confirmation.
-       /* Task<bool> confirmationTask = userService.WaitForUserConfirmation();
+
+        SO_BattleEvents.triggers.Enqueue(userService);
+
+        Task<bool> confirmationTask = userService.WaitForUserConfirmation();
 
         // This line will await the user's confirmation.
         bool confirmed = await confirmationTask;
@@ -57,14 +65,15 @@ public class A_Parry : CS_Ability, ITrigger
         // Now you can use the user's confirmation.
         if (confirmed)
         {
-            Console.WriteLine("User confirmed!");
-        }
-        else
-        {
-            Console.WriteLine("User didn't confirm.");
-        }*/
+            if (PathToFriend.Count > 1)
+            {
+                await Movement.ActorMovement(user, PathToFriend[PathToFriend.Count - 2]);
+                target.Heal(damage / 2);
+                user.trigger = false;
+            }
 
-        Debug.Log("Parry!");
+        }
+
 
     }
 

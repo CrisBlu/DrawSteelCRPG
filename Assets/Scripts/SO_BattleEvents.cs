@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -24,7 +26,7 @@ public class SO_BattleEvents : ScriptableObject
          await EventActorTookDamage.Invoke(damage, actor);
     }
 
-
+    public static Queue<UserService> triggers = new Queue<UserService>();
 
     private void OnDisable()
     {

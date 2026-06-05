@@ -19,6 +19,7 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
 
 
     public int Speed = 5;
+    public bool trigger;
     protected override void Start()
     {
         base.Start();
@@ -28,6 +29,8 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
 
         sheet.character = this;
         sheet.LoadAbilities(abilities);
+
+        trigger = true;
 
         Controller.actorsUnderControl.Add(this);
 
@@ -75,6 +78,12 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
     {
         await base.TakeDamage(damage);
         await SO_BattleEvents.TriggerActorTookDamageEvents(damage, this);
+    }
+
+    //TODO: Implement Cap
+    public void Heal(int heals)
+    {
+        stamina += heals;
     }
 
     public void DisplayAbilties(TurnData turn)

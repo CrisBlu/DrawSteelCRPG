@@ -70,6 +70,7 @@ public class SO_ZipperInit : ScriptableObject
             foreach (MB_Actor actor in user.actorsUnderControl)
             {
                 actor.turnTaken = false;
+                actor.trigger = true;
             }
 
             roundTracker[user] = false;
