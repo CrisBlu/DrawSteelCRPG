@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AP_Tactician", menuName = "Scriptable Objects/AbilityPacks/Classes/Tactician")]
@@ -15,12 +17,12 @@ public class A_Parry : CS_Ability, ITrigger
     public override string Description => "You lost the moment you entered these woods";
     public override E_ActionType Type => E_ActionType.trigger;
     public override List<string> Tags => new List<string> { "weapon", "melee"};
-    public override int Range => 2;
+    public override int Range => 3;
 
     MB_Actor user;
 
 
-    public override CS_AbilityReturnData Use(TurnData data)
+    public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
 
 
@@ -29,7 +31,7 @@ public class A_Parry : CS_Ability, ITrigger
         return new CS_AbilityReturnData(true);
     }
 
-    private async void Trigger(int damage, MB_Actor target)
+    private async Task Trigger(int damage, MB_Actor target)
     {
         //Disregard is damaged target is not ally
         if (!target.CompareTag(user.tag))
@@ -45,7 +47,22 @@ public class A_Parry : CS_Ability, ITrigger
             await Movement.ActorMovement(user, PathToFriend[PathToFriend.Count - 2]);
         }
 
-        
+        UserService userService = new UserService();
+        // Begin waiting for the user's confirmation.
+       /* Task<bool> confirmationTask = userService.WaitForUserConfirmation();
+
+        // This line will await the user's confirmation.
+        bool confirmed = await confirmationTask;
+
+        // Now you can use the user's confirmation.
+        if (confirmed)
+        {
+            Console.WriteLine("User confirmed!");
+        }
+        else
+        {
+            Console.WriteLine("User didn't confirm.");
+        }*/
 
         Debug.Log("Parry!");
 

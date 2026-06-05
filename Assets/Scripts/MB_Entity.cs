@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using UnityEngine;
 
 
@@ -47,7 +48,9 @@ public class MB_Entity : MonoBehaviour
         return false;
     }
 
-    public virtual void TakeDamage(int damage)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    public virtual async Task TakeDamage(int damage)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         stamina -= damage;
 

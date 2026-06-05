@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
-using static A_Bow;
 
 [CreateAssetMenu(fileName = "AP_Goblin", menuName = "Scriptable Objects/AbilityPacks/Monsters/Goblins")]
 public class AP_Goblin : SO_AbilityPack
@@ -34,7 +34,7 @@ public class A_SpearCharge : CS_Ability
     public override int Range => 1;
 
 
-    public override CS_AbilityReturnData Use(TurnData data)
+    public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
         CS_Characteristics stats = data.actor.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
@@ -42,22 +42,24 @@ public class A_SpearCharge : CS_Ability
 
 
         int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges, data.banes);
-
+        int damage = 0;
         switch (tier)
         {
             case 1:
-                data.target.entity.TakeDamage(1 + favoredStat);
+                damage = 1;
                 break;
 
             case 2:
-                data.target.entity.TakeDamage(2 + favoredStat);
+                damage = 2;
                 break;
 
             case 3 or 4:
-                data.target.entity.TakeDamage(3 + favoredStat);
+                damage = 3;
                 break;
 
         }
+
+        await data.target.entity.TakeDamage(damage + favoredStat);//
 
         return new CS_AbilityReturnData(true);
     }
@@ -72,7 +74,7 @@ public class A_Bow : CS_Ability
     public override int Range => 10;
 
 
-    public override CS_AbilityReturnData Use(TurnData data)
+    public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
         CS_Characteristics stats = data.actor.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
@@ -86,23 +88,23 @@ public class A_Bow : CS_Ability
         }
 
         int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges + edge, data.banes);
-
+        int damage = 0;
         switch (tier)
         {
             case 1:
-                data.target.entity.TakeDamage(2);
+                damage = 2;
                 break;
 
             case 2:
-                data.target.entity.TakeDamage(4);
+                damage = 4;
                 break;
 
             case 3 or 4:
-                data.target.entity.TakeDamage(5);
+                damage = 5;
                 break;
 
         }
-
+        await data.target.entity.TakeDamage(damage);
         return new CS_AbilityReturnData(true);
     }
 }
@@ -122,7 +124,7 @@ public class A_GoblinFreeStrike : CS_Ability, ITrigger
 
     MB_Actor user;
 
-    public override CS_AbilityReturnData Use(TurnData data)
+    public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
 
         Debug.Log("Free strike");
@@ -131,7 +133,7 @@ public class A_GoblinFreeStrike : CS_Ability, ITrigger
         return new CS_AbilityReturnData(true);
     }
 
-    public void Trigger(Tile exit, Tile entered, MB_Actor actor)
+    public async void Trigger(Tile exit, Tile entered, MB_Actor actor)
     {
         //This should be, check your neighbors and see if the tile exited is one of yours, then see if the tile entered is also one of yours
         //This ends up finding the path from every enemy to the user's tile exited and entered, which will probably be more work than the former approach.
@@ -143,7 +145,7 @@ public class A_GoblinFreeStrike : CS_Ability, ITrigger
 
         if (!actor.CompareTag(user.tag))
         {
-            actor.TakeDamage(2);
+            await actor.TakeDamage(2);
         }
 
 

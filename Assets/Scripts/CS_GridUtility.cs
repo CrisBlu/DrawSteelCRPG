@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 
@@ -340,9 +341,26 @@ public static class CS_GridUtility
 
     }
 
+
+
+
 }
 
+public class UserService
+{
+    private TaskCompletionSource<bool> _tcs;
 
+    public Task<bool> WaitForUserConfirmation()
+    {
+        _tcs = new TaskCompletionSource<bool>();
+        return _tcs.Task;
+    }
+
+    public void OnUserActionCompleted(bool isConfirmed)
+    {
+        _tcs.SetResult(isConfirmed);
+    }
+}
 
 
 

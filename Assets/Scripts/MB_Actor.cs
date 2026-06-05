@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class MB_Actor : MB_Entity //All functions relating and requiring a certain instance of actor
@@ -34,7 +35,7 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
 
 
 
-    public void ForcedMovement(Tile pushedInto, int distance)
+    public async void ForcedMovement(Tile pushedInto, int distance)
     {
         //Shoves the actor into the next square to their destination, up to the distance
         //If something exists in that space, take damage and don't move 
@@ -59,9 +60,9 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
 
             if(!UpdatePosition(gridData.GetTile(nextCell)))
             {
-                TakeDamage(1);
+                await TakeDamage(1);
 
-                gridData.GetTile(nextCell).entity.TakeDamage(1);
+                await gridData.GetTile(nextCell).entity.TakeDamage(1);
 
                 nextCell = currentTile.position;
             }
@@ -70,10 +71,10 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
         //UpdatePosition(origin);
     }
 
-    public override void TakeDamage(int damage)
+    public override async Task TakeDamage(int damage)
     {
-        base.TakeDamage(damage);
-        SO_BattleEvents.TriggerActorTookDamageEvents(damage, this);
+        await base.TakeDamage(damage);
+        await SO_BattleEvents.TriggerActorTookDamageEvents(damage, this);
     }
 
     public void DisplayAbilties(TurnData turn)

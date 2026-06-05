@@ -236,7 +236,7 @@ public class TurnData //Store all the data associated with an actor's single tur
     //TODO: Remove functions below and place within a validation script
 
 
-    public void UseAbility(Tile input, CS_Ability ability = null)
+    public async void UseAbility(Tile input, CS_Ability ability = null)
     {
         if(ability == null)
         {
@@ -253,7 +253,7 @@ public class TurnData //Store all the data associated with an actor's single tur
 
         
 
-        if (AbilityHandler.TryAbility(ability, actor, input, this))
+        if (await AbilityHandler.TryAbility(ability, actor, input, this))
         {
             actions[ability.Type] -= 1;
         }

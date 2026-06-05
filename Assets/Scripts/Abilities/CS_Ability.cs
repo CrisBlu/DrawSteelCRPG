@@ -1,8 +1,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Windows;
+
 
 public abstract class CS_Ability
 {
@@ -14,7 +15,7 @@ public abstract class CS_Ability
     public abstract int Range { get; }
 
     
-    public abstract CS_AbilityReturnData Use(TurnData data);
+    public abstract Task<CS_AbilityReturnData> Use(TurnData data);
 
     public virtual CS_AbilityTargetingData Target(Tile origin) { return null; }
     
@@ -76,7 +77,7 @@ public class A_MeleeFreeStrike : CS_Ability
     public override int Range => 1;
 
 
-    public override CS_AbilityReturnData Use(TurnData data)
+    public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
         CS_Characteristics stats = data.actor.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
@@ -86,25 +87,29 @@ public class A_MeleeFreeStrike : CS_Ability
         int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges);
 
         Debug.Log("Melee Free Strike " + data.target.entity + "A tier " + tier);
-
+        int damage = 0;
         switch (tier)
         {
             case 1:
-                data.target.entity.TakeDamage(2 + favoredStat);
+                damage = 2;
                 break;
 
             case 2:
-                data.target.entity.TakeDamage(5 + favoredStat);
+                damage = 5;
                 break;
 
             case 3 or 4:
-                data.target.entity.TakeDamage(7 + favoredStat);
+                damage = 7;
                 break;
 
         }
 
+        await data.target.entity.TakeDamage(damage + favoredStat);
+
         return new CS_AbilityReturnData(true);
     }
+
+   
 
     public override CS_AbilityTargetingData Target(Tile origin)
     {
@@ -166,7 +171,7 @@ public class A_Knockback : CS_Ability
     public override int Range => 1;
 
     private int distance = 0;
-    public override CS_AbilityReturnData Use(TurnData data)
+    public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
         Queue<CS_CallbackData> callbackList = new();
         MB_Actor targetActor = (MB_Actor)data.target.entity;
@@ -257,7 +262,7 @@ public class A_Charge : CS_Ability
     public override int Range => 0;
 
     private MB_Actor actor;
-    public override CS_AbilityReturnData Use(TurnData data)
+    public override Task<CS_AbilityReturnData> Use(TurnData data)
     {
         actor = data.actor;
         Queue<CS_CallbackData> callbackQueue = new Queue<CS_CallbackData> ();
@@ -265,7 +270,7 @@ public class A_Charge : CS_Ability
         List<Tile> validCharge = CS_GridUtility.GetTilesFromOrigin(data.target, data.actor.Speed, true);
         callbackQueue.Enqueue(new CS_CallbackData(Charge, data.actor, validCharge));
 
-        return new CS_AbilityReturnData(true, callbackQueue);
+        return Task.FromResult(new CS_AbilityReturnData(true, callbackQueue));
     }
 
     public override CS_AbilityTargetingData Target(Tile origin)

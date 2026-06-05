@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class CS_AbilityParser
@@ -22,7 +23,7 @@ public class CS_AbilityParser
     }
 
 
-    public bool TryAbility(CS_Ability ability, MB_Actor activeActor, Tile activeTarget, TurnData turn)
+    public async Task<bool> TryAbility(CS_Ability ability, MB_Actor activeActor, Tile activeTarget, TurnData turn)
     {
 
         activeTurn = turn;
@@ -52,7 +53,7 @@ public class CS_AbilityParser
         }
 
 
-        CS_AbilityReturnData returnData = ability.Use(turn);
+        CS_AbilityReturnData returnData = await ability.Use(turn);
 
 
 
