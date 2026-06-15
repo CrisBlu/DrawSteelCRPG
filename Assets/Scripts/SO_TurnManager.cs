@@ -11,6 +11,7 @@ public class TurnData //Store all the data associated with an actor's single tur
     public MB_Actor actor;
     public CS_Ability usingAbility;
     public SO_TurnManager TurnManager;
+    public SO_User TurnController;
     public bool fullTurn;
 
 
@@ -32,6 +33,7 @@ public class TurnData //Store all the data associated with an actor's single tur
     {
         actor = actingActor;
         TurnManager = turnManager;
+        TurnController = actor.Controller;
         actions = new Dictionary<E_ActionType, int>
         {
             { E_ActionType.main, mainAction },
@@ -146,7 +148,7 @@ public class TurnData //Store all the data associated with an actor's single tur
                     break;
             }
 
-            if(_turnState != E_TurnState.HoldingForAnimation)
+            if(TurnController.AI && _turnState != E_TurnState.HoldingForAnimation)
                 TurnManager.EventNotifyAI.Invoke();
 
 
@@ -280,8 +282,14 @@ public class SO_TurnManager : ScriptableObject
     [HideInInspector] public UnityEvent EventPassInitative;
 
     [HideInInspector] public UnityEvent EventNotifyAI;
-    
-   
+
+    public static SO_TurnManager Instance;
+    private void OnEnable()
+    {
+        Instance = this;
+    }
+
+
     public TurnData CreateAndStoreTurn(MB_Actor actor, int mainAction = 1, int maneuverAction = 1, int movement = -1, string abilityTagRestrict = null, E_TurnState turnState = E_TurnState.SelectingMove)
     {
         TurnData turnForActor = new TurnData(actor, this, mainAction, maneuverAction, movement, abilityTagRestrict, turnState);

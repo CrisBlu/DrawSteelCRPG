@@ -20,6 +20,8 @@ public class MB_AbilityUI : MonoBehaviour
     {
         ActorEvents.DisplayAbilities.AddListener(LoadAbilities);
         ActorEvents.HideAbilities.AddListener(UnloadAbilities);
+
+        SO_BattleEvents.EventPotentialTriggerAdded += LoadTriggers;
     }
 
     public void LoadAbilities(TurnData turn)
@@ -87,5 +89,38 @@ public class MB_AbilityUI : MonoBehaviour
             LoadAbilities(Player.activeTurn);
         }
 
+    }
+
+    public void LoadTriggers()
+    {
+
+        ClearAbilities();
+
+  
+        ToggleSidebar(true);
+
+       //List<CS_Ability> abilities = actor.abilities.Values.ToList();
+        foreach (AwaitTrigger trigger in SO_BattleEvents.triggers)
+        {
+
+            /*if (turn.abilityTagRestrict != null && !ability.Tags.Contains(turn.abilityTagRestrict))
+            { continue; }*/
+
+            GameObject obj = Instantiate(AbilityPrefab, ContentHolder);
+
+            Button abilityButton = obj.GetComponent<Button>();
+            abilityButton.onClick.AddListener(delegate { trigger.user.trigger = false; SO_BattleEvents.RemoveFromTriggerList(trigger); trigger.OnUserActionCompleted(true); LoadTriggers(); });
+
+
+
+
+            MB_AbilityItem abilityInstance = obj.GetComponent<MB_AbilityItem>();
+            abilityInstance.Ability = trigger.ability;
+            abilityInstance.Actor = trigger.user;
+
+            abilityInstance.UpdateText();
+
+            displayedAbilties.Add(obj);
+        }
     }
 }

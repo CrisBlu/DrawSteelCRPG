@@ -90,6 +90,9 @@ public class SO_User : ScriptableObject
     
     private void OnTurnStateUpdate()
     {
+        //For now this will work but won't for more than one AI controlled party
+        if (!AI)
+            return;
 
 
         if (aiActions == null || aiActions.Count <= 0)

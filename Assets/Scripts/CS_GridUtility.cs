@@ -53,6 +53,52 @@ public static class CS_GridUtility
     }
 
 
+    public static CS_AbilityTargetingData GetFriendsWithin(Tile origin, int distance, string tag, bool straightLine = false)
+    {
+        List<Tile> targetedTiles = new List<Tile>();
+        List<Tile> targetedActors = new List<Tile>();
+        Queue<Tile> openSet = new Queue<Tile>();
+        openSet.Enqueue(origin);
+        origin.costFromOrigin = 0;
+
+        while (openSet.Count > 0)
+        {
+            Tile currentCell = openSet.Dequeue();
+
+            foreach (Tile neighbor in currentCell.FindNeighbors())
+            {
+                if (openSet.Contains(neighbor))
+                    continue;
+
+                neighbor.costFromOrigin = currentCell.costFromOrigin + 1;
+                // Validating Function -----------------------------------------------------------------------------------
+                if (neighbor.costFromOrigin <= distance && !targetedTiles.Contains(neighbor))
+                {
+                    if (straightLine)
+                    {
+                        if (!CheckForLineOfSight(origin, neighbor)) { continue; }
+                    }
+
+
+                    targetedTiles.Add(neighbor);
+                    openSet.Enqueue(neighbor);
+
+
+
+                    if (neighbor.entity is MB_Actor && neighbor.entity.CompareTag(tag))
+                    {
+                        targetedActors.Add(neighbor);
+                    }
+                }
+                // Validating Function -----------------------------------------------------------------------------------
+            }
+        }
+
+        return new CS_AbilityTargetingData(targetedTiles, targetedActors);
+    }
+
+
+
     public static List<Tile> GetValidPushArea(Tile pusher, Tile target, int distance)
     {
         List<Tile> validPushLocations = new();
@@ -346,12 +392,21 @@ public static class CS_GridUtility
 
 }
 
-public class UserService
+public class AwaitTrigger
 {
     private TaskCompletionSource<bool> _tcs;
+    public CS_Ability ability;
+    public MB_Actor user;
+
+    public AwaitTrigger(CS_Ability ability, MB_Actor user)
+    {
+        this.ability = ability;
+        this.user = user;
+    }
 
     public Task<bool> WaitForUserConfirmation()
     {
+        
         _tcs = new TaskCompletionSource<bool>();
         return _tcs.Task;
     }
@@ -361,6 +416,24 @@ public class UserService
         _tcs.SetResult(isConfirmed);
     }
 }
+
+public class UserService
+{
+    private TaskCompletionSource<bool> _tcs;
+
+    public Task<bool> WaitForUserConfirmation()
+    {
+
+        _tcs = new TaskCompletionSource<bool>();
+        return _tcs.Task;
+    }
+
+    public void OnUserActionCompleted(bool isConfirmed)
+    {
+        _tcs.SetResult(isConfirmed);
+    }
+}
+
 
 
 

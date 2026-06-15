@@ -15,6 +15,7 @@ public abstract class CS_Ability
     public abstract int Range { get; }
 
     
+    //This should be virtual
     public abstract Task<CS_AbilityReturnData> Use(TurnData data);
 
     public virtual CS_AbilityTargetingData Target(Tile origin) { return null; }

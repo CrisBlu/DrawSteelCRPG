@@ -8,8 +8,83 @@ using static UnityEngine.GraphicsBuffer;
 [CreateAssetMenu(fileName = "AP_Tactician", menuName = "Scriptable Objects/AbilityPacks/Classes/Tactician")]
 public class AP_Tactician : SO_AbilityPack
 {
-    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_Parry() };
+    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_StrikeNow(), new A_Parry() };
 
+}
+
+public class A_StrikeNow : CS_Ability
+{
+    public override string Name => "Strike Now";
+    public override string Description => "Your foe left an opening";
+    public override E_ActionType Type => E_ActionType.main;
+    public override List<string> Tags => new List<string> { "ranged" };
+    public override int Range => 10;
+
+    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    {
+
+        MB_Actor TargetActor = (MB_Actor)data.target.entity;
+
+        SO_TurnManager.Instance.CreateAndStoreTurn(TargetActor, 1, 0, 0, "signature", E_TurnState.SelectingAbility);
+
+        return new CS_AbilityReturnData(true);
+    }
+
+    public override CS_AbilityTargetingData Target(Tile origin)
+    {
+        return CS_GridUtility.GetFriendsWithin(origin, Range, origin.entity.tag, true);
+    }
+}
+
+public class A_BattleGrace: CS_Ability
+{
+    public override string Name => "Battle Grace";
+    public override string Description => "Fient and Spin";
+    public override E_ActionType Type => E_ActionType.main;
+    public override List<string> Tags => new List<string> { "melee", "signature", "strike" };
+    public override int Range => 1;
+
+    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    {
+
+        CS_Characteristics stats = data.actor.sheet.stats;
+        Queue<CS_CallbackData> callbackQueue = new Queue<CS_CallbackData>();
+        int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
+
+        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges, data.banes);
+
+        int damage = 0;
+
+        switch (tier)
+        {
+            case 1:
+                damage = 5 + favoredStat;
+                break;
+
+            case 2:
+                damage = 8 + favoredStat;
+                Dance(data.actor, data.target);
+                break;
+
+            case 3 or 4:
+                damage = 11 + favoredStat;
+                Dance(data.actor, data.target);
+                break;
+
+        }
+
+        await data.target.entity.TakeDamage(damage);
+
+
+        return new CS_AbilityReturnData(true);
+    }
+
+    void Dance(MB_Actor self, Tile unwillingPartner)
+    {
+        MB_Actor target = (MB_Actor)unwillingPartner.entity;
+        //ActorWalking isn't the correct play here but it might work for now
+
+    }
 }
 
 
@@ -19,7 +94,7 @@ public class A_Parry : CS_Ability, ITrigger
     public override string Description => "You lost the moment you entered these woods";
     public override E_ActionType Type => E_ActionType.trigger;
     public override List<string> Tags => new List<string> { "weapon", "melee"};
-    public override int Range => 3;
+    public override int Range => 2;
 
     MB_Actor user;
 
@@ -52,12 +127,15 @@ public class A_Parry : CS_Ability, ITrigger
 
 
 
-        UserService userService = new UserService();
+        AwaitTrigger userService = new AwaitTrigger(this, user);
         // Begin waiting for the user's confirmation.
+        
 
-        SO_BattleEvents.triggers.Enqueue(userService);
+        SO_BattleEvents.AddToTriggerList(userService);
 
         Task<bool> confirmationTask = userService.WaitForUserConfirmation();
+
+
 
         // This line will await the user's confirmation.
         bool confirmed = await confirmationTask;
@@ -65,12 +143,15 @@ public class A_Parry : CS_Ability, ITrigger
         // Now you can use the user's confirmation.
         if (confirmed)
         {
+
             if (PathToFriend.Count > 1)
             {
-                await Movement.ActorMovement(user, PathToFriend[PathToFriend.Count - 2]);
-                target.Heal(damage / 2);
-                user.trigger = false;
+                PathToFriend.RemoveAt(PathToFriend.Count - 1);
+                await Movement.ActorMovement(user, PathToFriend);
             }
+
+            target.Heal(damage / 2);
+            user.trigger = false;
 
         }
 

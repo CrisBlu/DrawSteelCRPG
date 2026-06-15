@@ -69,11 +69,11 @@ public static class Movement
     }
 
     //A variant that can be used to move off turn
-    public static async Task ActorMovement(MB_Actor actor, Tile destination)
+    public static async Task ActorMovement(MB_Actor actor, List<Tile> stepsToTake)
     {
 
 
-        List<Tile> stepsToTake = CS_GridUtility.GetStepsToTake(destination, actor.currentTile);
+        //List<Tile> stepsToTake = CS_GridUtility.GetStepsToTake(destination, actor.currentTile);
         List<Vector2Int> stepsTaken = new List<Vector2Int>() { actor.currentTile.position };
 
         for (int i = 0; i < stepsToTake.Count; i++)

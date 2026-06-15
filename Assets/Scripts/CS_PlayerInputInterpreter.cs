@@ -49,8 +49,7 @@ public static class PlayerInputInterpreter
     private static MB_Actor SelectYourActor(Tile tile, SO_User user)
     {
         //If actor in tile exists and is your unit
-        //Does (MB_Actor) on null throw an error?
-        if((MB_Actor)tile.entity && user.actorsUnderControl.Contains((MB_Actor)tile.entity))
+        if(tile.entity is MB_Actor && user.actorsUnderControl.Contains((MB_Actor)tile.entity))
         {
             MB_Actor actor = (MB_Actor)tile.entity;
 

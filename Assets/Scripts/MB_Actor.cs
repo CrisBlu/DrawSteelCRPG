@@ -7,7 +7,7 @@ using UnityEngine;
 public class MB_Actor : MB_Entity //All functions relating and requiring a certain instance of actor
 {
     
-    [SerializeField] private SO_User Controller;
+    [SerializeField] public SO_User Controller;
     [SerializeField] private SO_ActorEvents ActorEvents;
 
     //Temp
