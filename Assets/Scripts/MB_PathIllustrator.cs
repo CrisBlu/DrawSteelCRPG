@@ -24,4 +24,5 @@ public class MB_PathIllustrator : MonoBehaviour
             line.SetPosition(i, linePos);
         }
     }
+
 }

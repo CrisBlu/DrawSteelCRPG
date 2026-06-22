@@ -27,6 +27,7 @@ public class MB_PlayerInput : MonoBehaviour
 
     void Update()
     {
+
         Vector3 mousePosition = MapPositionFromMouse(SceneCamera);
         currentTileMouseOver = Map.WorldToCell(mousePosition);
 
@@ -34,7 +35,7 @@ public class MB_PlayerInput : MonoBehaviour
         Tile tile = GridData.GetTile(TwoDTile);
         if (tile != null && Player.activeTurn != null)
         {
-            illustrator.IllustratePath(CS_GridUtility.FindPath(tile, Player.activeTurn.actor.currentTile));
+            illustrator.IllustratePath(CS_GridUtility.FindShortestPath(tile, Player.activeTurn.actor.currentTile));
         }*/
 
         //Debug.Log(currentTileMouseOver);
@@ -42,8 +43,8 @@ public class MB_PlayerInput : MonoBehaviour
 
     void TileSelect(InputAction.CallbackContext context)
     {
-        //Block input if it's not your turn
-        if(Zipper.activeUser != Player && Player.activeTurn == null)
+        //Block input if it's not your turn and player doesn't have an owned turn
+        if(Zipper.activeUser != Player && Player.activeTurn.TurnController.AI)
         {
             return;
         }

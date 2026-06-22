@@ -268,7 +268,7 @@ public class A_Charge : CS_Ability
         actor = data.actor;
         Queue<CS_CallbackData> callbackQueue = new Queue<CS_CallbackData> ();
 
-        List<Tile> validCharge = CS_GridUtility.GetTilesFromOrigin(data.target, data.actor.Speed, true);
+        List<Tile> validCharge = CS_GridUtility.GetWalkableTilesFromOrigin(data.target, data.actor.Speed, true);
         callbackQueue.Enqueue(new CS_CallbackData(Charge, data.actor, validCharge));
 
         return Task.FromResult(new CS_AbilityReturnData(true, callbackQueue));
@@ -278,7 +278,7 @@ public class A_Charge : CS_Ability
     {
         MB_Actor self = (MB_Actor)origin.entity;
         //Display charge range, but click on actor to use
-        return new CS_AbilityTargetingData(CS_GridUtility.GetTilesFromOrigin(origin, self.Speed, true), new List<Tile>() { origin });
+        return new CS_AbilityTargetingData(CS_GridUtility.GetWalkableTilesFromOrigin(origin, self.Speed, true), new List<Tile>() { origin });
     }
 
     //TODO: This callback isn't required, just fold charge into the main Use function
@@ -292,13 +292,10 @@ public class A_Charge : CS_Ability
         newTurn.DefaultToState();
     }
 
-    void EndOfChargeAttack()
-    {
-        //addActorToTurn(new CS_ActorTurnStats(actor, 1, 0, 0, "charge"));
 
-
-    }
 }
+
+
 /*
 public class A_StrikeNow : CS_Ability
 {

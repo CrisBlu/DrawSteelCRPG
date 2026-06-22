@@ -21,7 +21,7 @@ public class MB_AbilityUI : MonoBehaviour
         ActorEvents.DisplayAbilities.AddListener(LoadAbilities);
         ActorEvents.HideAbilities.AddListener(UnloadAbilities);
 
-        SO_BattleEvents.EventPotentialTriggerAdded += LoadTriggers;
+        SO_BattleEvents.EventPotentialTriggersChanged += LoadTriggers;
     }
 
     public void LoadAbilities(TurnData turn)
@@ -91,12 +91,15 @@ public class MB_AbilityUI : MonoBehaviour
 
     }
 
+    //I have some issues with the relationship between this UI and SO_BattleEvents; BattleEvents contains an event that is and will proably only be 
+    //invoked here, what this connection should be is a serialized field on this Monobehavior combined with passing the MB reference to BattleEvents on enable.
+
     public void LoadTriggers()
     {
 
         ClearAbilities();
 
-  
+        
         ToggleSidebar(true);
 
        //List<CS_Ability> abilities = actor.abilities.Values.ToList();
@@ -109,7 +112,7 @@ public class MB_AbilityUI : MonoBehaviour
             GameObject obj = Instantiate(AbilityPrefab, ContentHolder);
 
             Button abilityButton = obj.GetComponent<Button>();
-            abilityButton.onClick.AddListener(delegate { trigger.user.trigger = false; SO_BattleEvents.RemoveFromTriggerList(trigger); trigger.OnUserActionCompleted(true); LoadTriggers(); });
+            abilityButton.onClick.AddListener(delegate { trigger.OnUserActionCompleted(true); UnloadAbilities(); });
 
 
 

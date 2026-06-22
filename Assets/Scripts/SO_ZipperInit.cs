@@ -26,10 +26,12 @@ public class SO_ZipperInit : ScriptableObject
         foreach(SO_User user in users)
         {
             roundTracker.Add( user, false);
-            user.TurnManager.EventPassInitative.AddListener(ShiftInitiative);
+            
         }
 
-        
+        SO_TurnManager.Instance.EventPassInitative.AddListener(ShiftInitiative);
+
+
     }
 
    private void ShiftInitiative()

@@ -11,6 +11,7 @@ public class MB_EndTurnButton : MonoBehaviour
     private void Start()
     {
         button = GetComponent<Button>();
+        TurnManager.EventPassInitative.AddListener(ManageButtonInteract);
     }
 
     //Better ways of doing this, there probably will be an event system coming from turn manager, but I'm not building for this
@@ -20,7 +21,6 @@ public class MB_EndTurnButton : MonoBehaviour
 
         if (turnCount > 0)
         {
-            button.interactable = true;
             
             if(turnCount == 1)
             {
@@ -30,6 +30,15 @@ public class MB_EndTurnButton : MonoBehaviour
             {
                 text.text = "Done";
             }
+        }
+
+    }
+
+    private void ManageButtonInteract()
+    {
+        if(!TurnManager.turnsToResolve.Peek().TurnController.AI)
+        {
+            button.interactable = true;
         }
         else
         {

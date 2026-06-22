@@ -110,7 +110,7 @@ public class TurnData //Store all the data associated with an actor's single tur
                 case E_TurnState.SelectingMove:
 
                     
-                    validTiles = CS_GridUtility.GetTilesFromOrigin(actor.currentTile, actions[E_ActionType.move], false);
+                    validTiles = CS_GridUtility.GetWalkableTilesFromOrigin(actor.currentTile, actions[E_ActionType.move], false);
                     if (validTiles.Count != 0)
                     {
                         CS_ColorGrid.ColorCells(validTiles, Color.green);

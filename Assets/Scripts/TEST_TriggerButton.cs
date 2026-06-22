@@ -3,10 +3,11 @@ using UnityEngine;
 public class TEST_TriggerButton : MonoBehaviour
 {
     [SerializeField] GameObject Button;
+    [SerializeField] MB_AbilityUI UI;
 
     private void OnEnable()
     {
-        SO_BattleEvents.EventPotentialTriggerAdded += EnableButton;
+        SO_BattleEvents.EventPotentialTriggersChanged += EnableButton;
     }
 
     //Temp as hell
@@ -24,9 +25,17 @@ public class TEST_TriggerButton : MonoBehaviour
 
     public void ConfirmButton()
     {
-       // UserService userService = SO_BattleEvents.triggers.Dequeue();
+        /*foreach (AwaitTrigger trigger in SO_BattleEvents.triggers)
+        {
+            trigger.OnUserActionCompleted(false);
+        }*/
 
-       // userService.OnUserActionCompleted(true);
+        while (SO_BattleEvents.triggers.Count != 0)
+        {
+            SO_BattleEvents.triggers[0].OnUserActionCompleted(false);
+        }
+
+        UI.UnloadAbilities();
 
     }
 

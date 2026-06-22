@@ -220,6 +220,51 @@ public static class CS_GridUtility
         return possibilities;
     }
 
+
+    public static List<Tile> GetWalkableTilesFromOrigin(Tile origin, int distance, bool straightLine)
+    {
+        Queue<Tile> openSet = new Queue<Tile>();
+        List<Tile> possibilities = new List<Tile>();
+        origin.costFromOrigin = 0;
+        openSet.Enqueue(origin);
+
+        while (openSet.Count > 0)
+        {
+            Tile currentCell = openSet.Dequeue();
+
+            foreach (Tile neighbor in currentCell.FindNeighbors())
+            {
+                if (openSet.Contains(neighbor))
+                    continue;
+
+                neighbor.costFromOrigin = currentCell.costFromOrigin + 1;
+
+
+                // Validating Function -----------------------------------------------------------------------------------
+                //If Cell is full or If We've already decided Cell is a walkable tile or if cell is too far
+                if (possibilities.Contains(neighbor) || neighbor.costFromOrigin > distance) { continue; }
+
+                neighbor.parent = currentCell;
+
+                if (straightLine)
+                {
+                    if (!CheckForLineOfSight(origin, neighbor)) { continue; }
+                }
+
+                // Validating Function --------------------------------------------------------------------------------------
+
+                if (neighbor.entity) { continue; }
+
+                openSet.Enqueue(neighbor);
+
+                possibilities.Add(neighbor);
+
+            }
+        }
+
+        return possibilities;
+    }
+
     public static CS_AbilityTargetingData GetTilesAndAllWithin(Tile origin, int distance, bool straightLine = true)
     {
         List<Tile> targetedTiles = new List<Tile>();

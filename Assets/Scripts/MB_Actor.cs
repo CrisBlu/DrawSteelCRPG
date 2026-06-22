@@ -36,6 +36,13 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
 
     }
 
+    [SerializeField] TMPro.TextMeshPro HealthText;
+
+    void Update()
+    {
+        HealthText.text = stamina.ToString();
+    }
+
 
 
     public async void ForcedMovement(Tile pushedInto, int distance)

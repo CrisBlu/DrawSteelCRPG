@@ -110,7 +110,7 @@ public class A_Parry : CS_Ability, ITrigger
         return new CS_AbilityReturnData(true);
     }
 
-    private async Task Trigger(int damage, MB_Actor target)
+    private async void Trigger(int damage, MB_Actor target)
     {
         if (user.trigger == false)
             return;
@@ -155,7 +155,15 @@ public class A_Parry : CS_Ability, ITrigger
 
         }
 
+        SO_BattleEvents.RemoveFromTriggerList(userService);
 
+
+    }
+
+    public override CS_AbilityTargetingData Target(Tile origin)
+    {
+ 
+        return new CS_AbilityTargetingData(CS_GridUtility.GetTilesFromOrigin(origin, Range, true), new List<Tile>() { origin });
     }
 
     public void SetTrigger(SO_BattleEvents events, MB_Actor user)

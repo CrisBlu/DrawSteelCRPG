@@ -9,9 +9,9 @@ public class SO_BattleEvents : ScriptableObject
 {
 
     [HideInInspector] public event Action<Tile, Tile, MB_Actor> EventActorLeftTile;
-    [HideInInspector] public static event Func<int, MB_Actor, Task> EventActorTookDamage;
+    [HideInInspector] public static event Action<int, MB_Actor> EventActorTookDamage;
 
-    [HideInInspector] public static event Action EventPotentialTriggerAdded;
+    [HideInInspector] public static event Action EventPotentialTriggersChanged;
 
     static private UserService HoldOnTriggerList;
     private void OnEnable()
@@ -42,10 +42,6 @@ public class SO_BattleEvents : ScriptableObject
         }
             
 
-        
-
-
-
     }
 
     public static List<AwaitTrigger> triggers = new List<AwaitTrigger>();
@@ -53,33 +49,30 @@ public class SO_BattleEvents : ScriptableObject
     public static void AddToTriggerList(AwaitTrigger trigger)
     {
         triggers.Add(trigger);
-        EventPotentialTriggerAdded.Invoke();
+        EventPotentialTriggersChanged.Invoke();
     }
 
-    public async static void RemoveFromTriggerList(AwaitTrigger trigger)
+    public static void RemoveFromTriggerList(AwaitTrigger trigger)
     {
+        //Remove from trigger list should probably just trigger the menu again
         triggers.Remove(trigger);
+        
 
-        await CheckTriggerList();
 
-
-    }
-
-    private static async Task CheckTriggerList()
-    {
         if (triggers.Count == 0)
-        {
-            //Work around so that the enemy AI doesn't start as soon as the list is cleared
-            await Task.Delay(1000);
             HoldOnTriggerList.OnUserActionCompleted(true);
-        }
+        else
+            EventPotentialTriggersChanged.Invoke();
+
+
     }
+
 
 
     private void OnDisable()
     {
         EventActorLeftTile = null;
         EventActorTookDamage = null;
-        EventPotentialTriggerAdded = null;
+        EventPotentialTriggersChanged = null;
     }
 }
