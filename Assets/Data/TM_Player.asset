@@ -12,3 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ad4d0d2c9091334a84c548864387c32, type: 3}
   m_Name: TM_Player
   m_EditorClassIdentifier: 
+  EventNotifyAI:
+    m_PersistentCalls:
+      m_Calls: []
+  usersInBattle:
+  - {fileID: 11400000, guid: e42ec5aa33741e145aca8c721977ce73, type: 2}
+  - {fileID: 11400000, guid: e137cd085d97b084f94259a14e6f363d, type: 2}

@@ -1,8 +1,10 @@
 using NUnit.Framework.Interfaces;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 //Could TurnData be a struct? 
 
@@ -113,7 +115,8 @@ public class TurnData //Store all the data associated with an actor's single tur
                     validTiles = CS_GridUtility.GetWalkableTilesFromOrigin(actor.currentTile, actions[E_ActionType.move], false);
                     if (validTiles.Count != 0)
                     {
-                        CS_ColorGrid.ColorCells(validTiles, Color.green);
+                        Color green = new Color(0, 1, 0, .25f);
+                        CS_ColorGrid.ColorCells(validTiles, green);
                     }
           
 
@@ -277,16 +280,34 @@ public class TurnData //Store all the data associated with an actor's single tur
 [CreateAssetMenu(fileName = "SO_TurnManager", menuName = "Scriptable Objects/TurnManager")]
 public class SO_TurnManager : ScriptableObject
 {
+
     public Stack<TurnData> turnsToResolve = new Stack<TurnData>();
-    //When one user stops acting and another starts
-    [HideInInspector] public UnityEvent EventPassInitative;
+    
+    //Responsible for letting the rest of the game know that this user is now taking their turn
+    [HideInInspector] public event Action<SO_User> EventActivateUser;
 
     [HideInInspector] public UnityEvent EventNotifyAI;
 
+    private ZipperInit Initative;
+
     public static SO_TurnManager Instance;
+    [SerializeField] private List<SO_User> usersInBattle;
     private void OnEnable()
     {
-        Instance = this;
+        Instance = this; //
+
+        
+        Initative = new ZipperInit();
+
+        InputSystem.actions.FindAction("Select").performed += StartBattle;
+
+    }
+
+    //On Battle Start temp
+    private void StartBattle(InputAction.CallbackContext context)
+    {
+        InputSystem.actions.FindAction("Select").performed -= StartBattle;
+        EventActivateUser.Invoke(Initative.EnableInitative(usersInBattle));
     }
 
 
@@ -368,15 +389,14 @@ public class SO_TurnManager : ScriptableObject
         
     }*/
 
-    //passing actor as a reference solely so that I can mark it as having taken it's turn
     public void PassToOpponent()
     {
-        EventPassInitative.Invoke();
+        EventActivateUser.Invoke(Initative.ShiftInitiative(usersInBattle));
     }
 
     private void OnDisable()
     {
         //turnsToResolve?.Clear();
-        EventPassInitative.RemoveAllListeners();
+        EventActivateUser = null;
     }
 }

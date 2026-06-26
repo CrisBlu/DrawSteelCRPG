@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class CS_ColorGrid
 {
-    public static void ColorCells(List<Tile> cellsToColor, Color color)
+    public static void ColorCells(List<Tile> cellsToColor, Color color, bool resetColors = true)
     {
         if (cellsToColor.Count == 0)
         {
@@ -12,8 +12,14 @@ public static class CS_ColorGrid
 
         //Get grid tile is apart of and clear any color
         SO_GridData grid = cellsToColor[0].parentGrid;
-        int size = grid.size + 1;
-        Color[] colors = ClearGridColors(grid);
+        int size = grid.size;
+
+
+        Color[] colors;
+        if (resetColors) 
+            colors = ClearGridColors(grid);
+        else
+            colors = grid.mesh.colors;
 
 
         foreach (Tile cell in cellsToColor)
@@ -22,11 +28,12 @@ public static class CS_ColorGrid
 
             int x = cellPosition.x;
             int y = cellPosition.y;
+            int cellIndex = ((y * size) + x) * 4;
 
-            int bottomLeftVert = (y * size) + x;
-            int bottomRightVert = (y * size) + (x + 1);
-            int topLeftVert = ((y + 1) * size) + x;
-            int topRightVert = ((y + 1) * size) + (x + 1);
+            int bottomLeftVert = cellIndex;
+            int bottomRightVert = cellIndex + 1;
+            int topLeftVert = cellIndex + 2;
+            int topRightVert = cellIndex + 3;
 
             colors[bottomLeftVert] = colors[topLeftVert] = colors[bottomRightVert] = colors[topRightVert] = color;
         }
@@ -36,11 +43,11 @@ public static class CS_ColorGrid
 
     public static Color[] ClearGridColors(SO_GridData grid)
     {
-        int size = grid.size + 1;
+        int size = grid.size;
 
-        Color[] colors = new Color[(size) * (size)];
+        Color[] colors = new Color[(size) * (size) * 4];
         for (int i = 0; i < colors.Length; i++)
-            colors[i] = Color.gray;
+            colors[i] = Color.clear;
 
         grid.mesh.colors = colors;
         return colors;

@@ -1346,7 +1346,6 @@ MonoBehaviour:
   SceneCamera: {fileID: 529470510}
   Map: {fileID: 969094753}
   Player: {fileID: 11400000, guid: e42ec5aa33741e145aca8c721977ce73, type: 2}
-  Zipper: {fileID: 11400000, guid: 033a30ad73561984ba2f3335899aa224, type: 2}
   TurnManager: {fileID: 11400000, guid: d6980629fac7f6944a2666a6fc53a6bb, type: 2}
   GridData: {fileID: 11400000, guid: acebcf824761e8f489fe14b137176944, type: 2}
   illustrator: {fileID: 736465199}
@@ -1828,8 +1827,8 @@ LineRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 736465198}
-  m_Enabled: 1
-  m_CastShadows: 1
+  m_Enabled: 0
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -1844,7 +1843,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: ae8e7008498acf646b665ff58c0ebf48, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

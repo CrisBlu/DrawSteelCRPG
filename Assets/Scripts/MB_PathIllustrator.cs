@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine;
 public class MB_PathIllustrator : MonoBehaviour
 {
     private const float LineHeightOffset = 0.33f;
-    LineRenderer line;
+    [System.NonSerialized] public LineRenderer line;
 
     private void Start()
     {

@@ -3,23 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-[CreateAssetMenu(fileName = "SO_ZipperInit", menuName = "Scriptable Objects/ZipperInit")]
-public class SO_ZipperInit : ScriptableObject
+//[CreateAssetMenu(fileName = "SO_ZipperInit", menuName = "Scriptable Objects/ZipperInit")]
+public class ZipperInit
 {
-    [SerializeField] List<SO_User> users;
-    private int userIndex;
-    private Dictionary<SO_User, bool> roundTracker;
+    public int userIndex;
+    public Dictionary<SO_User, bool> roundTracker;
 
 
-    public SO_User activeUser
-    {
-        get
-        {
-            return users[userIndex];
-        }
-    }
 
-    private void OnEnable()
+
+    public SO_User EnableInitative(List<SO_User> users)
     {
         userIndex = 0;
         roundTracker = new Dictionary<SO_User, bool>();
@@ -29,12 +22,12 @@ public class SO_ZipperInit : ScriptableObject
             
         }
 
-        SO_TurnManager.Instance.EventPassInitative.AddListener(ShiftInitiative);
-
+        //Temp way of deciding who goes first
+        return users[userIndex];
 
     }
 
-   private void ShiftInitiative()
+   public SO_User ShiftInitiative(List<SO_User> users)
     {
         
         userIndex = (userIndex + 1) % users.Count;
@@ -51,20 +44,23 @@ public class SO_ZipperInit : ScriptableObject
             //If we've looped back around without finding a false
             if(userIndex == currentUserIndex)
             {
-                TopOfRound();
+                TopOfRound(users);
                 break;
             }
         }
 
-        if (activeUser.AI)
+        if (users[userIndex].AI)
         {
             //Hardcoded, target the first user (player)'s characters
-            activeUser.EnableAI(users[0].actorsUnderControl);
+            users[userIndex].EnableAI(users[0].actorsUnderControl);
         }
-       
+
+        return users[userIndex];
+
+
     }
 
-    public void TopOfRound()
+    public void TopOfRound(List<SO_User> users)
     {
         foreach (SO_User user in users)
         {

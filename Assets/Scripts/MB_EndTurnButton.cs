@@ -8,15 +8,21 @@ public class MB_EndTurnButton : MonoBehaviour
     [SerializeField] TMP_Text text;
     Button button;
 
+    private bool isPlayerAI = true;
+
     private void Start()
     {
         button = GetComponent<Button>();
-        TurnManager.EventPassInitative.AddListener(ManageButtonInteract);
+        SO_TurnManager.Instance.EventActivateUser += ManageButtonInteract;
     }
 
-    //Better ways of doing this, there probably will be an event system coming from turn manager, but I'm not building for this
+
     private void Update()
     {
+        if (isPlayerAI)
+            return;
+
+
         int turnCount = TurnManager.turnsToResolve.Count;
 
         if (turnCount > 0)
@@ -34,15 +40,17 @@ public class MB_EndTurnButton : MonoBehaviour
 
     }
 
-    private void ManageButtonInteract()
+    private void ManageButtonInteract(SO_User player)
     {
-        if(!TurnManager.turnsToResolve.Peek().TurnController.AI)
+        if(!player.AI)
         {
             button.interactable = true;
+            isPlayerAI = false;
         }
         else
         {
             button.interactable = false;
+            isPlayerAI = true;
         }
     }
 
