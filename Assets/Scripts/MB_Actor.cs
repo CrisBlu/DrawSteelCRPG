@@ -9,6 +9,7 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
     
     [SerializeField] public SO_User Controller;
     [SerializeField] private SO_ActorEvents ActorEvents;
+    public Animator ActorAnimator;
 
     //Temp
     public bool turnTaken = false;
@@ -83,6 +84,7 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
 
     public override async Task TakeDamage(int damage)
     {
+        ActorAnimator.SetTrigger("Damaged");
         await base.TakeDamage(damage);
         await SO_BattleEvents.TriggerActorTookDamageEvents(damage, this);
     }
@@ -91,6 +93,24 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
     public void Heal(int heals)
     {
         stamina += heals;
+    }
+
+
+    [SerializeField] private GameObject TestProjectile;
+    public async Task TestShoot(Tile target)
+    {
+        GameObject ball = Instantiate(TestProjectile, transform.position, transform.rotation);
+        Transform ballTransform = ball.transform;
+        Vector3 ballStart = ballTransform.position;
+        Vector3 ballEnd = new Vector3(target.position.x, 0, target.position.y);
+        for(float i = 0; i < 1; i += .05f)
+        {
+            ballTransform.position = Vector3.Lerp(ballStart, ballEnd, i);
+            await Task.Delay(10);
+        }
+
+        Destroy(ball);
+
     }
 
     public void DisplayAbilties(TurnData turn)

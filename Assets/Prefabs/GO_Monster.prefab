@@ -106,11 +106,13 @@ MonoBehaviour:
   position: {x: 0, y: 0}
   Controller: {fileID: 11400000, guid: e137cd085d97b084f94259a14e6f363d, type: 2}
   ActorEvents: {fileID: 11400000, guid: 7347c0d9ced81ce4fa24f2b31fc98934, type: 2}
+  ActorAnimator: {fileID: 6917485871359698334}
   turnTaken: 0
   sheet: {fileID: 11400000, guid: 0f96b3b9bcfb0c048bf7051d7e59b251, type: 2}
   Speed: 5
   trigger: 0
   HealthText: {fileID: 3457789806675921666}
+  TestProjectile: {fileID: 0}
 --- !u!1 &2697960761041239631
 GameObject:
   m_ObjectHideFlags: 0
@@ -123,6 +125,7 @@ GameObject:
   - component: {fileID: 8239441904758817920}
   - component: {fileID: 1623125026618822253}
   - component: {fileID: 2073473778264103030}
+  - component: {fileID: 6917485871359698334}
   m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
@@ -219,6 +222,28 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!95 &6917485871359698334
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2697960761041239631}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 034873980237441459d758f7ce42decd, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &6510633736959411792
 GameObject:
   m_ObjectHideFlags: 0

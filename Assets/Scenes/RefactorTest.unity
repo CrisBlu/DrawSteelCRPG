@@ -760,10 +760,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: John (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 6295651178445102212, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ae8e7008498acf646b665ff58c0ebf48, type: 2}
     - target: {fileID: 8593110225471675797, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
       propertyPath: sheet
       value: 
       objectReference: {fileID: 11400000, guid: 48edb55a4c2d8f34f9e61d80a85ec687, type: 2}
+    - target: {fileID: 8593110225471675797, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
+      propertyPath: turnTaken
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 0}
     - {fileID: 0}
@@ -2000,6 +2008,10 @@ PrefabInstance:
     - target: {fileID: 4357051453179300646, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
       propertyPath: m_Name
       value: John
+      objectReference: {fileID: 0}
+    - target: {fileID: 8593110225471675797, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
+      propertyPath: turnTaken
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 3022669711131476176, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
@@ -3426,6 +3438,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: John (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 8593110225471675797, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
+      propertyPath: turnTaken
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3839,6 +3855,10 @@ PrefabInstance:
       propertyPath: sheet
       value: 
       objectReference: {fileID: 11400000, guid: 2afe8301428db0c4abdc2575f5473154, type: 2}
+    - target: {fileID: 4907299169391481054, guid: 0daf8f3c56e6b404b918e0ad9d98ef55, type: 3}
+      propertyPath: TestProjectile
+      value: 
+      objectReference: {fileID: 2061675352640862247, guid: 31b5e53909b85144a83a13e17db7babe, type: 3}
     - target: {fileID: 7127641536199606279, guid: 0daf8f3c56e6b404b918e0ad9d98ef55, type: 3}
       propertyPath: m_LocalPosition.z
       value: -0.224

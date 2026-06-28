@@ -6,6 +6,7 @@ using UnityEngine;
 public class CS_AbilityParser
 {
     public CS_CallbackData currentCallback;
+    
     Queue<CS_CallbackData> callbackQueue;
     TurnData activeTurn;
     private Tile _selectedCell;
@@ -22,6 +23,7 @@ public class CS_AbilityParser
         }
     }
 
+   
 
     public async Task<bool> TryAbility(CS_Ability ability, MB_Actor activeActor, Tile activeTarget, TurnData turn)
     {
@@ -52,7 +54,12 @@ public class CS_AbilityParser
             }
         }
 
-
+        activeActor.ActorAnimator.SetTrigger("Attack");
+        if (ability.Tags.Contains("ranged"))
+        {
+            await activeActor.TestShoot(activeTarget);
+        }
+        
         CS_AbilityReturnData returnData = await ability.Use(turn);
 
 
