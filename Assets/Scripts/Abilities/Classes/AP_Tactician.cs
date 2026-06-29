@@ -8,7 +8,7 @@ using static UnityEngine.GraphicsBuffer;
 [CreateAssetMenu(fileName = "AP_Tactician", menuName = "Scriptable Objects/AbilityPacks/Classes/Tactician")]
 public class AP_Tactician : SO_AbilityPack
 {
-    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_StrikeNow(), new A_Parry() };
+    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_StrikeNow(), new A_Parry(), new A_BattleGrace() };
 
 }
 
@@ -55,6 +55,8 @@ public class A_BattleGrace: CS_Ability
 
         int damage = 0;
 
+        MB_Actor targetActor = (MB_Actor)data.target.entity;
+
         switch (tier)
         {
             case 1:
@@ -63,12 +65,71 @@ public class A_BattleGrace: CS_Ability
 
             case 2:
                 damage = 8 + favoredStat;
-                Dance(data.actor, data.target);
+                Dance(data.actor, targetActor);
                 break;
 
             case 3 or 4:
                 damage = 11 + favoredStat;
-                Dance(data.actor, data.target);
+                Dance(data.actor, targetActor);
+                break;
+
+        }
+
+        await targetActor.TakeDamage(damage);
+
+
+        return new CS_AbilityReturnData(true);
+    }
+
+    public override CS_AbilityTargetingData Target(Tile origin)
+    {
+
+        return CS_GridUtility.GetTilesAndAllWithin(origin, Range, true);
+    }
+
+    async void Dance(MB_Actor self, MB_Actor unwillingPartner)
+    {
+
+        await Movement.ActorSwapPlaces(self, unwillingPartner);
+
+    }
+}
+
+
+
+
+public class A_RangedFreeStrike: CS_Ability
+{
+    public override string Name => "Two Shot";
+    public override string Description => "Fire two arrows back to back";
+    public override E_ActionType Type => E_ActionType.main;
+    public override List<string> Tags => new List<string> { "ranged", "signature" };
+    public override int Range => 12;
+
+
+    public async override Task<CS_AbilityReturnData> Use(TurnData data)
+    {
+
+        CS_Characteristics stats = data.actor.sheet.stats;
+        int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
+
+        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges, data.banes);
+
+        int damage = 0;
+
+
+        switch (tier)
+        {
+            case 1:
+                damage = 4;
+                break;
+
+            case 2:
+                damage = 6;
+                break;
+
+            case 3 or 4:
+                damage = 8;
                 break;
 
         }
@@ -79,12 +140,6 @@ public class A_BattleGrace: CS_Ability
         return new CS_AbilityReturnData(true);
     }
 
-    void Dance(MB_Actor self, Tile unwillingPartner)
-    {
-        MB_Actor target = (MB_Actor)unwillingPartner.entity;
-        //ActorWalking isn't the correct play here but it might work for now
-
-    }
 }
 
 

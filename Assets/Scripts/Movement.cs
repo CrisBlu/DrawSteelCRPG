@@ -15,7 +15,8 @@ public static class Movement
             //If GridData tells us that our desired tile is empty
 
             //remove actor from tile in grid data
-            actor.currentTile.entity = null;
+            if(actor.currentTile != null)
+                actor.currentTile.entity = null;
 
             //assign new current tile in actor 
             actor.currentTile = newTile;
@@ -91,6 +92,30 @@ public static class Movement
         return;
     }
 
+
+    public static async Task ActorSwapPlaces(MB_Actor actor, MB_Actor targetActor)
+    {
+        //Save target actor tile
+        Tile targetTile = targetActor.currentTile;
+        Tile actorTile = actor.currentTile;
+
+        //Set actors current tiles to null
+        targetActor.currentTile = null;
+        actor.currentTile = null;
+
+        //clear entities on affected tiles so UpdateEntityPosition does not fail
+        targetTile.entity = null;
+        actorTile.entity = null;
+
+        UpdateEntityPosition(targetActor, actorTile);
+        UpdateEntityPosition(actor, targetTile);
+
+
+        //Seperate function for this animation, for right now hard code switch
+        actor.transform.position = new Vector3(targetTile.position.x, 0, targetTile.position.y);
+        targetActor.transform.position = new Vector3(actorTile.position.x, 0, actorTile.position.y);
+    }
+
     //I do not think it is wise to only trigger animation walking at the ned
     private static async Task AnimationWalking(MB_Actor actor, List<Vector2Int> stepsTaken)
     {
@@ -98,9 +123,16 @@ public static class Movement
 
         for (int i = 1; i < stepsTaken.Count; i++)
         {
-            Vector2 position = Vector2.Lerp(stepsTaken[i - 1], stepsTaken[i], 1);
-            actor.transform.position = new Vector3(position.x, 0, position.y);
+            
+            /*for(float j = 0; j <= 1; j += .1f)
+            {*/
+                Vector2 position = Vector2.Lerp(stepsTaken[i - 1], stepsTaken[i], 1);
+                actor.transform.position = new Vector3(position.x, 0, position.y);
+                //await Task.Delay(20);
+            //}
+
             await Task.Delay(200);
+
         }
 
         return;

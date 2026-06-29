@@ -14,6 +14,9 @@ public abstract class CS_Ability
     public abstract List<string> Tags { get; }
     public abstract int Range { get; }
 
+
+
+
     
     //This should be virtual
     public abstract Task<CS_AbilityReturnData> Use(TurnData data);
