@@ -111,7 +111,9 @@ public static class PlayerInputInterpreter
             turn.turnState = E_TurnState.SelectingAbility;
             return;
         }
-        turn.UseAbility(input);
+
+        if(CS_AbilityParser.SetTarget(turn.usingAbility, turn.actor, input))
+            turn.UseAbility(input);
     }
 
     private static void ResolvingAbility(TurnData turn, Tile input)

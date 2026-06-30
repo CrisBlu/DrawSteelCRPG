@@ -52,9 +52,12 @@ public class MB_PlayerInput : MonoBehaviour
 
         Vector3 mousePosition = MapPositionFromMouse(SceneCamera);
         currentTileMouseOver = Map.WorldToCell(mousePosition);
+        
 
 
         Vector2Int TwoDTile = new Vector2Int(currentTileMouseOver.x, currentTileMouseOver.z);
+
+
         Tile tile = GridData.GetTile(TwoDTile);
         if (tile != null && Player.activeTurn != null)
         {
@@ -95,6 +98,11 @@ public class MB_PlayerInput : MonoBehaviour
       
         return new Vector3(999, 999, 999);
     }
+
+
+
+
+
 
 
     //Things that do not belong here but are here just for the time being

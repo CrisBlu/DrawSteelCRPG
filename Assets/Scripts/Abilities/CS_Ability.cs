@@ -13,6 +13,10 @@ public abstract class CS_Ability
     public abstract E_ActionType Type { get;  }
     public abstract List<string> Tags { get; }
     public abstract int Range { get; }
+    public virtual int NumberOfTargets { get { return 1; } }
+    public List<Tile> targets = new List<Tile>();
+    
+   
 
 
 
@@ -21,7 +25,29 @@ public abstract class CS_Ability
     //This should be virtual
     public abstract Task<CS_AbilityReturnData> Use(TurnData data);
 
-    public virtual CS_AbilityTargetingData Target(Tile origin) { return null; }
+    public virtual CS_AbilityTargetingData Target(Tile origin)
+    {
+
+        return CS_GridUtility.GetTilesAndAllWithin(origin, Range, true);
+
+
+    }
+
+    public virtual int SetTarget(Tile target)
+    {
+        //Seems to be a general rule for multitarget abilities
+        if(!targets.Contains(target))
+            targets.Add(target);
+
+        CS_ColorGrid.ColorCells(targets, Color.yellow, false);
+
+        if (targets.Count == NumberOfTargets)
+            return 0;
+
+        
+
+        return NumberOfTargets - targets.Count;
+    }
     
 
 }
@@ -90,7 +116,7 @@ public class A_MeleeFreeStrike : CS_Ability
 
         int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges);
 
-        Debug.Log("Melee Free Strike " + data.target.entity + "A tier " + tier);
+        Debug.Log("Melee Free Strike " + targets[0].entity + "A tier " + tier);
         int damage = 0;
         switch (tier)
         {
@@ -108,7 +134,7 @@ public class A_MeleeFreeStrike : CS_Ability
 
         }
 
-        await data.target.entity.TakeDamage(damage + favoredStat);
+        await targets[0].entity.TakeDamage(damage + favoredStat);
 
         return new CS_AbilityReturnData(true);
     }

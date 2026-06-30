@@ -8,7 +8,7 @@ using static UnityEngine.GraphicsBuffer;
 [CreateAssetMenu(fileName = "AP_Tactician", menuName = "Scriptable Objects/AbilityPacks/Classes/Tactician")]
 public class AP_Tactician : SO_AbilityPack
 {
-    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_StrikeNow(), new A_Parry(), new A_BattleGrace() };
+    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_StrikeNow(), new A_Parry(), new A_BattleGrace(), new A_TwoShot() };
 
 }
 
@@ -98,13 +98,14 @@ public class A_BattleGrace: CS_Ability
 
 
 
-public class A_RangedFreeStrike: CS_Ability
+public class A_TwoShot: CS_Ability
 {
     public override string Name => "Two Shot";
     public override string Description => "Fire two arrows back to back";
     public override E_ActionType Type => E_ActionType.main;
     public override List<string> Tags => new List<string> { "ranged", "signature" };
     public override int Range => 12;
+    public override int NumberOfTargets => 2;
 
 
     public async override Task<CS_AbilityReturnData> Use(TurnData data)
@@ -134,7 +135,11 @@ public class A_RangedFreeStrike: CS_Ability
 
         }
 
-        await data.target.entity.TakeDamage(damage);
+        foreach(Tile target in targets)
+        {
+            await target.entity.TakeDamage(damage);
+        }
+        
 
 
         return new CS_AbilityReturnData(true);

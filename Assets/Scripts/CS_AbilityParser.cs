@@ -23,7 +23,29 @@ public class CS_AbilityParser
         }
     }
 
-   
+    public static bool SetTarget(CS_Ability ability, MB_Actor activeActor, Tile activeTarget)
+    {
+        //Returns true if ability requires no more targets to function
+        if (ability.SetTarget(activeTarget) == 0)
+            return true;
+        else
+            return false;
+    }
+
+    public static void RemoveTarget(CS_Ability ability, MB_Actor activeActor, Tile activeTarget)
+    {
+        //Returns true if ability requires no more targets to function
+        /*if (ability.targets.Count == 0)
+            
+        else*/
+           
+    }
+
+
+
+
+
+
 
     public async Task<bool> TryAbility(CS_Ability ability, MB_Actor activeActor, Tile activeTarget, TurnData turn)
     {
@@ -54,13 +76,17 @@ public class CS_AbilityParser
             }
         }
 
+        //TBH this should be a part of Use
         activeActor.ActorAnimator.SetTrigger("Attack");
+        
         if (ability.Tags.Contains("ranged"))
         {
-            await activeActor.TestShoot(activeTarget);
+            foreach(Tile target in ability.targets)
+                await activeActor.TestShoot(target);
         }
         
         CS_AbilityReturnData returnData = await ability.Use(turn);
+        ability.targets.Clear();
 
 
 
