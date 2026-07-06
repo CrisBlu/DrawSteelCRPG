@@ -309,6 +309,7 @@ public static class CS_GridUtility
         return new CS_AbilityTargetingData(targetedTiles, validTargets);
     }
 
+    //Gets the path from one tile to another, without performing the calculation that creates that path
     public static List<Tile> GetStepsToTake(Tile cellToMoveTo, Tile origin)
     {
 
@@ -334,6 +335,7 @@ public static class CS_GridUtility
 
     }
 
+    //More intellegnt pathfinding when looking for the distance between two tiles
     public static List<Tile> FindShortestPath(Tile destination, Tile origin)
     {
 
@@ -459,6 +461,29 @@ public class AwaitTrigger
     public void OnUserActionCompleted(bool isConfirmed)
     {
         _tcs.SetResult(isConfirmed);
+    }
+}
+
+public class AwaitTile
+{
+    private TaskCompletionSource<Tile> _tcs;
+    public List<Tile> validTiles;
+
+    public AwaitTile(List<Tile> validTiles)
+    {
+        this.validTiles = validTiles;
+    }
+
+    public Task<Tile> WaitForUserConfirmation()
+    {
+
+        _tcs = new TaskCompletionSource<Tile>();
+        return _tcs.Task;
+    }
+
+    public void OnUserActionCompleted(Tile selectedTile)
+    {
+        _tcs.SetResult(selectedTile);
     }
 }
 

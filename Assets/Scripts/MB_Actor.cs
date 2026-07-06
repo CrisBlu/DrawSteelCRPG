@@ -18,6 +18,8 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
     public Dictionary<string, CS_Ability> abilities = new Dictionary<string, CS_Ability>();
     public SO_CharacterSheet sheet;
 
+    [NonSerialized] public int resource = 0;
+
 
     public int Speed = 5;
     public bool trigger;
@@ -26,7 +28,9 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
         base.Start();
         
         abilities.Add("Knockback" ,new A_Knockback());
+        abilities["Knockback"].Owner = this;
         abilities.Add("Charge", new A_Charge());
+        abilities["Charge"].Owner = this;
 
         sheet.character = this;
         sheet.LoadAbilities(abilities);

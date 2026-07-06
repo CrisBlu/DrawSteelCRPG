@@ -17,7 +17,17 @@ public class MB_PlayerInput : MonoBehaviour
     
     private InputAction selectAction;
     private Vector3Int currentTileMouseOver;
-    private bool playerInputEnabled;
+    public static bool inputEnabled;
+
+    //Experimental
+    //Add a field for valid input list
+    public static AwaitTile inputRequest = null;
+    /*public static void AddToInputList(AwaitTile input)
+    {
+        inputRequests.Add(input);
+    }*/
+
+    //public static E_TurnState _turnState;
 
     private void OnEnable()
     {
@@ -34,21 +44,26 @@ public class MB_PlayerInput : MonoBehaviour
     {
         if (player == Player)
         {
-            playerInputEnabled = true;
+            inputEnabled = true;
         }
         else
         {
-            playerInputEnabled = false;
-            illustrator.line.enabled = false;
+            inputEnabled = false;
         }
             
     }
 
 
+
     void Update()
     {
-        if (!playerInputEnabled)
+        if (!inputEnabled)
+        {
+            illustrator.line.enabled = false;
             return;
+        }
+
+            
 
         Vector3 mousePosition = MapPositionFromMouse(SceneCamera);
         currentTileMouseOver = Map.WorldToCell(mousePosition);
@@ -73,7 +88,7 @@ public class MB_PlayerInput : MonoBehaviour
     void TileSelect(InputAction.CallbackContext context)
     {
         //Block input if it's not your turn and player doesn't have an owned turn
-        if(!playerInputEnabled)
+        if(!inputEnabled)
             return;
 
         Vector2Int TwoDTile = new Vector2Int(currentTileMouseOver.x, currentTileMouseOver.z);
@@ -99,8 +114,100 @@ public class MB_PlayerInput : MonoBehaviour
         return new Vector3(999, 999, 999);
     }
 
+    /*List<Tile> validTiles;
+    public E_TurnState turnState
+    {
+        get { return _turnState; }
 
 
+        set
+        {
+            //Exit
+            switch (_turnState)
+            {
+                case E_TurnState.SelectingMove:
+
+                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
+                    validTiles.Clear();
+
+
+                    break;
+
+                case E_TurnState.SelectingAbility:
+                    actor.HideAbilities();
+
+                    break;
+
+                case E_TurnState.UsingAbility:
+                    usingAbility = null;
+                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
+                    validTiles.Clear();
+
+                    break;
+
+                case E_TurnState.ResolvingAbility:
+                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
+                    validTiles.Clear();
+                    break;
+
+                case E_TurnState.HoldingForAnimation:
+                    break;
+            }
+
+            _turnState = value;
+
+            //Enter
+            switch (_turnState)
+            {
+                case E_TurnState.SelectingMove:
+
+
+                    validTiles = CS_GridUtility.GetWalkableTilesFromOrigin(actor.currentTile, actions[E_ActionType.move], false);
+                    if (validTiles.Count != 0)
+                    {
+                        Color green = new Color(0, 1, 0, .25f);
+                        CS_ColorGrid.ColorCells(validTiles, green);
+                    }
+
+
+                    break;
+
+                case E_TurnState.SelectingAbility:
+                    actor.DisplayAbilties(this);
+                    break;
+
+                case E_TurnState.UsingAbility:
+
+
+
+                    CS_AbilityTargetingData targetOutput = usingAbility.Target(actor.currentTile);
+
+                    if (targetOutput != null)
+                    {
+                        validTiles = targetOutput.validTargets;
+                        CS_ColorGrid.ColorCells(targetOutput.validArea, Color.red);
+                    }
+
+
+                    break;
+
+                case E_TurnState.ResolvingAbility:
+                    validTiles = AbilityHandler.currentCallback.validTiles;
+                    CS_ColorGrid.ColorCells(validTiles, Color.blue);
+                    break;
+
+                case E_TurnState.HoldingForAnimation:
+                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
+                    break;
+            }
+
+            if (TurnController.AI && _turnState != E_TurnState.HoldingForAnimation)
+                TurnManager.EventNotifyAI.Invoke();
+
+
+        }
+
+    }*/
 
 
 

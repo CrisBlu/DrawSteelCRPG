@@ -1,9 +1,9 @@
 
 using System.Collections.Generic;
-using UnityEngine;
 
 
-//[CreateAssetMenu(fileName = "SO_ZipperInit", menuName = "Scriptable Objects/ZipperInit")]
+
+
 public class ZipperInit
 {
     public int userIndex;

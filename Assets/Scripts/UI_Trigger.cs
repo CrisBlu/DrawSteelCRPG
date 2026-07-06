@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TriggerUI : MonoBehaviour
+public class UI_Trigger : MonoBehaviour
 {
     [SerializeField] GameObject TriggerUITextBox;
     [SerializeField] TMPro.TextMeshProUGUI Text;

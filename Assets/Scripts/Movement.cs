@@ -32,6 +32,12 @@ public static class Movement
 
     public static async Task ActorMovement(TurnData turn, Tile destination)
     {
+
+        if(SO_TurnManager.Instance.IsPlayerTurn)
+        {
+            MB_PlayerInput.inputEnabled = false;
+        }
+        
         MB_Actor actor = turn.actor;
         Dictionary<E_ActionType, int> actions = turn.actions;
 
@@ -66,13 +72,18 @@ public static class Movement
 
         await AnimationWalking(actor, stepsTaken);
 
+        if (SO_TurnManager.Instance.IsPlayerTurn)
+            MB_PlayerInput.inputEnabled = true;
+
         return;
     }
 
     //A variant that can be used to move off turn
     public static async Task ActorMovement(MB_Actor actor, List<Tile> stepsToTake)
     {
-
+    
+         MB_PlayerInput.inputEnabled = false;
+        
 
         //List<Tile> stepsToTake = CS_GridUtility.GetStepsToTake(destination, actor.currentTile);
         List<Vector2Int> stepsTaken = new List<Vector2Int>() { actor.currentTile.position };
@@ -88,6 +99,11 @@ public static class Movement
         }
 
         await AnimationWalking(actor, stepsTaken);
+
+        if(SO_TurnManager.Instance.IsPlayerTurn)
+        {
+            MB_PlayerInput.inputEnabled = true;
+        }
 
         return;
     }

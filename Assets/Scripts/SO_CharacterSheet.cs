@@ -47,12 +47,15 @@ public class SO_CharacterSheet : ScriptableObject
         foreach(CS_Ability ability in abilities)
         {
             abilityDic.Add(ability.Name, ability);
+            ability.Owner = character;
 
             if(ability is ITrigger triggerAbility)
             {
                 triggerAbility.SetTrigger(BattleEvents, character);
             }
         }
+
+
 
         return;
     }

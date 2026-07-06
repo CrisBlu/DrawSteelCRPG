@@ -1,6 +1,7 @@
 using NUnit.Framework.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
@@ -130,13 +131,13 @@ public class TurnData //Store all the data associated with an actor's single tur
 
 
 
-                    CS_AbilityTargetingData targetOutput = usingAbility.Target(actor.currentTile);
+                    /*CS_AbilityTargetingData targetOutput = usingAbility.Target(actor.currentTile);
 
                     if(targetOutput != null)
                     {
                         validTiles = targetOutput.validTargets;
                         CS_ColorGrid.ColorCells(targetOutput.validArea, Color.red);
-                    }
+                    }*/
                     
 
                     break;
@@ -151,8 +152,6 @@ public class TurnData //Store all the data associated with an actor's single tur
                     break;
             }
 
-            if(TurnController.AI && _turnState != E_TurnState.HoldingForAnimation)
-                TurnManager.EventNotifyAI.Invoke();
 
 
         }
@@ -175,23 +174,25 @@ public class TurnData //Store all the data associated with an actor's single tur
         {
             case E_TurnState.SelectingMove:
                 await Movement.ActorMovement(this, (Tile)input);
-                DefaultToState();
+                TurnManager.EventNotifyAI.Invoke();
 
                 break;
 
             case E_TurnState.SelectingAbility:
                 usingAbility = (CS_Ability)input;
-                turnState = E_TurnState.UsingAbility;
-
+                TurnManager.EventNotifyAI.Invoke();
                 break;
 
             case E_TurnState.UsingAbility:
-                UseAbility((Tile)input);
+                usingAbility.targets.Add((Tile)input);
+                await UseAbility();
+                TurnManager.EventNotifyAI.Invoke();
 
                 break;
 
             case E_TurnState.ResolvingAbility:
                 ResolveAbility((Tile)input);
+                TurnManager.EventNotifyAI.Invoke();
                 break;
 
             case E_TurnState.HoldingForAnimation:
@@ -199,6 +200,9 @@ public class TurnData //Store all the data associated with an actor's single tur
                 break;
         }
 
+        /*if (TurnController.AI && _turnState != E_TurnState.HoldingForAnimation)
+            TurnManager.EventNotifyAI.Invoke();
+        */
 
     }
 
@@ -241,7 +245,7 @@ public class TurnData //Store all the data associated with an actor's single tur
     //TODO: Remove functions below and place within a validation script
 
 
-    public async void UseAbility(Tile input, CS_Ability ability = null)
+    public async Task UseAbility(Tile input = null, CS_Ability ability = null)
     {
         if(ability == null)
         {
@@ -254,17 +258,17 @@ public class TurnData //Store all the data associated with an actor's single tur
             return;
         }
 
-        target = input;
+        //target = input;
 
         
 
-        if (await AbilityHandler.TryAbility(ability, actor, input, this))
+        if (await AbilityHandler.TryAbility(ability, actor, this))
         {
             actions[ability.Type] -= 1;
         }
 
-
-        DefaultToState();
+        if(SO_TurnManager.Instance.IsPlayerTurn)
+            DefaultToState();
 
 
     }
@@ -291,6 +295,20 @@ public class SO_TurnManager : ScriptableObject
     private ZipperInit Initative;
 
     public static SO_TurnManager Instance;
+    public bool IsPlayerTurn
+    {
+        get
+        {
+            if (!turnsToResolve.Peek().TurnController.AI)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
     [SerializeField] private List<SO_User> usersInBattle;
     private void OnEnable()
     {
@@ -362,7 +380,10 @@ public class SO_TurnManager : ScriptableObject
         TurnData activeTurn;
         if (turnsToResolve.TryPeek(out activeTurn))
         {
-            activeTurn.DefaultToState();
+            if (IsPlayerTurn)
+                activeTurn.DefaultToState();
+            else
+                EventNotifyAI.Invoke();
         }
         else
         {

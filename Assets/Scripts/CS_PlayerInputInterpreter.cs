@@ -91,9 +91,9 @@ public static class PlayerInputInterpreter
         turn.turnState = E_TurnState.SelectingMove;
     }
 
-    public static void SelectingAbility(CS_Ability ability, TurnData turn)
+    public static async void SelectingAbility(CS_Ability ability, TurnData turn)
     {
-        if (turn.actions[ability.Type] <= 0)
+        if (turn.actions[ability.Type] <= 0 || turn.actor.resource < ability.Cost)
         {
             return;
         }
@@ -101,25 +101,49 @@ public static class PlayerInputInterpreter
 
         turn.usingAbility = ability;
         turn.turnState = E_TurnState.UsingAbility;
+
+        bool proceed = await CS_AbilityParser.ReadAbility(ability);
+
+        if(proceed)
+            await turn.UseAbility(null, ability);
     }
 
 
     private static void SelectingTarget(TurnData turn, Tile input)
     {
-        if(!turn.validTiles.Contains(input))
+
+        if (MB_PlayerInput.inputRequest == null)
         {
-            turn.turnState = E_TurnState.SelectingAbility;
             return;
         }
 
-        if(CS_AbilityParser.SetTarget(turn.usingAbility, turn.actor, input))
-            turn.UseAbility(input);
+        AwaitTile local = MB_PlayerInput.inputRequest;
+        MB_PlayerInput.inputRequest = null;
+
+
+        if (!local.validTiles.Contains(input))
+        {
+            turn.turnState = E_TurnState.SelectingAbility;
+            local.OnUserActionCompleted(null);
+
+            return;
+        }
+
+
+        local.OnUserActionCompleted(input);
+            
+        
+
+
     }
 
     private static void ResolvingAbility(TurnData turn, Tile input)
     {
-        if(!turn.validTiles.Contains(input)) {return; }
-        turn.ResolveAbility(input);
+        /*if(!turn.validTiles.Contains(input)) {return; }
+        turn.ResolveAbility(input);*/
+        Debug.LogError("This pathway triggered resolving ability, which is currently marked for deletion");
+
+
     }
 
 

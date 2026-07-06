@@ -36,6 +36,7 @@ public class MB_EndTurnButton : MonoBehaviour
             {
                 text.text = "Done";
             }
+
         }
 
     }

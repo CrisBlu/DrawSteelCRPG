@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class CS_AbilityParser
 {
@@ -23,38 +24,94 @@ public class CS_AbilityParser
         }
     }
 
-    public static bool SetTarget(CS_Ability ability, MB_Actor activeActor, Tile activeTarget)
+
+
+    public static async Task<bool> ReadAbility(CS_Ability ability)
     {
-        //Returns true if ability requires no more targets to function
-        if (ability.SetTarget(activeTarget) == 0)
-            return true;
-        else
-            return false;
+        for(int i = 0; i < ability.Instructions.Count; i++)
+        {
+            Debug.Log(ability.Instructions.Count);
+            switch (ability.Instructions[i])
+            {
+                case E_AbilityInstructions.SelectTarget:
+
+
+                    CS_AbilityTargetingData targetOutput = ability.Target(ability.Owner.currentTile);
+
+                   
+                    List<Tile> validTiles = targetOutput.validTargets;
+                    CS_ColorGrid.ColorCells(targetOutput.validArea, Color.red);
+                    
+
+                    AwaitTile userInput = new AwaitTile(validTiles);
+                    MB_PlayerInput.inputRequest = userInput;
+                    Tile input = await userInput.WaitForUserConfirmation();
+
+
+
+                    if (input == null)
+                        return false;
+
+
+                    if (!AbilityInstructions.SetTarget(input, ability.targets))
+                        i--;
+
+                    break;
+
+
+
+                case E_AbilityInstructions.SpendResource:
+                    UserService spendConfirm = new UserService();
+                    ConfirmQueue.AddToConfirmQueue(spendConfirm);
+                    bool spendConfirmation = await spendConfirm.WaitForUserConfirmation();
+
+                    if(spendConfirmation)
+                    {
+                        ability.Owner.resource -= ability.Cost;
+                    }
+
+                    ability.Spend(spendConfirmation);
+
+                    break;
+
+
+
+
+                case E_AbilityInstructions.Confirm:
+                    UserService userConfirm = new UserService();
+
+                    ConfirmQueue.AddToConfirmQueue(userConfirm);
+                    bool confirmation = await userConfirm.WaitForUserConfirmation();
+
+                    if (!confirmation)
+                        i--;
+
+                    break;
+
+
+            }
+        }
+
+        return true;
+
+        
     }
 
-    public static void RemoveTarget(CS_Ability ability, MB_Actor activeActor, Tile activeTarget)
-    {
-        //Returns true if ability requires no more targets to function
-        /*if (ability.targets.Count == 0)
-            
-        else*/
-           
-    }
 
 
 
 
 
 
-
-    public async Task<bool> TryAbility(CS_Ability ability, MB_Actor activeActor, Tile activeTarget, TurnData turn)
+    public async Task<bool> TryAbility(CS_Ability ability, MB_Actor activeActor,  TurnData turn)
     {
 
         activeTurn = turn;
         int edges = 0;
         int banes = 0;
         //Check for flanking
-        if (ability.Tags.Contains("melee") && ability.Tags.Contains("strike") && CS_GridUtility.CheckForFlanking(activeActor, activeTarget)) { edges++; }
+        //ability.targets 0 is incorrect, likely each target should check it's own flank
+        if (ability.Tags.Contains("melee") && ability.Tags.Contains("strike") && CS_GridUtility.CheckForFlanking(activeActor, ability.targets[0])) { edges++; }
 
         if(ability.Tags.Contains("ranged"))
         {

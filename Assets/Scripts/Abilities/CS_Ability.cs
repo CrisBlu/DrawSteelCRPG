@@ -1,20 +1,25 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
 
 public abstract class CS_Ability
 {
-    
+
     public abstract string Name { get; }
     public abstract string Description { get; }
-    public abstract E_ActionType Type { get;  }
+    public abstract E_ActionType Type { get; }
     public abstract List<string> Tags { get; }
     public abstract int Range { get; }
-    public virtual int NumberOfTargets { get { return 1; } }
+    public int Cost = 0;
     public List<Tile> targets = new List<Tile>();
+
+    public MB_Actor Owner;
+
+    public virtual List<E_AbilityInstructions> Instructions { get { return new List<E_AbilityInstructions>() { E_AbilityInstructions.SelectTarget, E_AbilityInstructions.Confirm }; } }
     
    
 
@@ -33,22 +38,9 @@ public abstract class CS_Ability
 
     }
 
-    public virtual int SetTarget(Tile target)
-    {
-        //Seems to be a general rule for multitarget abilities
-        if(!targets.Contains(target))
-            targets.Add(target);
+    public virtual void Spend(bool spent) { return; }
 
-        CS_ColorGrid.ColorCells(targets, Color.yellow, false);
 
-        if (targets.Count == NumberOfTargets)
-            return 0;
-
-        
-
-        return NumberOfTargets - targets.Count;
-    }
-    
 
 }
 
@@ -200,13 +192,12 @@ public class A_Knockback : CS_Ability
     public override List<string> Tags => new List<string> { "push" };
     public override int Range => 1;
 
-    private int distance = 0;
     public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
         Queue<CS_CallbackData> callbackList = new();
-        MB_Actor targetActor = (MB_Actor)data.target.entity;
-        CS_Characteristics stats = data.actor.sheet.stats;
-        distance = 0;
+        //MB_Actor targetActor = (MB_Actor)targets[0].entity;
+        CS_Characteristics stats = Owner.sheet.stats;
+        int distance = 0;
 
         int tier = CS_DiceRoller.PowerRoll(stats.Might, data.edges, data.banes);
 
@@ -225,15 +216,22 @@ public class A_Knockback : CS_Ability
                 break;
         }
 
-        List<Tile> validPushLocations = CS_GridUtility.GetValidPushArea(data.actor.currentTile, data.target, distance);
+        List<Tile> validPushLocations = CS_GridUtility.GetValidPushArea(Owner.currentTile, targets[0], distance);
         //if original distance is (0,1), then this is along the y axis, only y needs to increase every cell
         //if original distance is (1,0), then this is along the y axis, only x needs to increase every cell
 
 
-        callbackList.Enqueue(new CS_CallbackData(KnockbackActor, targetActor, validPushLocations));
+        CS_ColorGrid.ColorCells(validPushLocations, Color.blue);
+        AwaitTile tileRequest = new AwaitTile(validPushLocations);
+        MB_PlayerInput.inputRequest = tileRequest;
+        Tile tileToPushTarget = await tileRequest.WaitForUserConfirmation();
+
+        MB_Actor targetActor = (MB_Actor)targets[0].entity;
+        targetActor.ForcedMovement(tileToPushTarget, distance);
 
 
-        return new CS_AbilityReturnData(true, callbackList);
+
+        return new CS_AbilityReturnData(true);
     }
 
     public override CS_AbilityTargetingData Target(Tile origin)
@@ -242,46 +240,7 @@ public class A_Knockback : CS_Ability
         return CS_GridUtility.GetTilesAndAllWithin(origin, Range, true);
     }
 
-    private void KnockbackActor(TurnData data, Tile destination)
-    {
-        MB_Actor targetActor = (MB_Actor)data.target.entity;
-        targetActor.ForcedMovement(destination, distance);
-    }
 }
-/*
-public class A_Advance : CS_Ability
-{
-    public override string Name => "Advance";
-    public override string Description => "Move up to your speed";
-    public override E_ActionType Type => E_ActionType.move;
-    public override List<string> Effects => new();
-    public override int Range => 0;
-
-
-    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
-    {
-        MB_Actor movingActor = (MB_Actor)data.target.entity;
-        movingActor.movement = movingActor.Speed;
-        return new CS_AbilityReturnData(true);
-    }
-}
-
-public class A_CatchBreath : CS_Ability
-{
-    public override string Name => "Catch Breath";
-    public override string Description => "Recover a third of your stamina";
-    public override E_ActionType Type => E_ActionType.manuever;
-    public override List<string> Effects => new();
-    public override int Range => 0;
-
-
-    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
-    {
-        MB_Hero hero = (MB_Hero)data.target.entity;
-        hero.SpendRecovery();
-        return new CS_AbilityReturnData(true);
-    }
-}*/
 
 public class A_Charge : CS_Ability
 {
@@ -291,95 +250,37 @@ public class A_Charge : CS_Ability
     public override List<string> Tags => new();
     public override int Range => 0;
 
-    private MB_Actor actor;
-    public override Task<CS_AbilityReturnData> Use(TurnData data)
+
+    public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
-        actor = data.actor;
-        Queue<CS_CallbackData> callbackQueue = new Queue<CS_CallbackData> ();
 
-        List<Tile> validCharge = CS_GridUtility.GetWalkableTilesFromOrigin(data.target, data.actor.Speed, true);
-        callbackQueue.Enqueue(new CS_CallbackData(Charge, data.actor, validCharge));
+        List<Tile> validChargePath = CS_GridUtility.GetStepsToTake(targets[0], Owner.currentTile);
 
-        return Task.FromResult(new CS_AbilityReturnData(true, callbackQueue));
+   
+
+        await Movement.ActorMovement(Owner, validChargePath);
+
+
+
+        TurnData newTurn = data.TurnManager.CreateAndStoreTurn(Owner, 1, 0, 0, "charge", E_TurnState.SelectingAbility);
+
+
+
+
+        return new CS_AbilityReturnData(true);
     }
 
     public override CS_AbilityTargetingData Target(Tile origin)
     {
-        MB_Actor self = (MB_Actor)origin.entity;
-        //Display charge range, but click on actor to use
-        return new CS_AbilityTargetingData(CS_GridUtility.GetWalkableTilesFromOrigin(origin, self.Speed, true), new List<Tile>() { origin });
+        MB_Actor acting = (MB_Actor)origin.entity;
+        List<Tile> abilityRange = CS_GridUtility.GetWalkableTilesFromOrigin(origin, acting.Speed, true);
+        return new CS_AbilityTargetingData(abilityRange, abilityRange);
+
     }
 
-    //TODO: This callback isn't required, just fold charge into the main Use function
-    async void Charge(TurnData data, Tile destination)
-    {
-        Debug.Log("Charging");
-        int path = CS_GridUtility.FindShortestPath(destination, data.actor.currentTile).Count;
-        TurnData newTurn = data.TurnManager.CreateAndStoreTurn(data.actor, 1, 0, path, "charge", E_TurnState.HoldingForAnimation);
-        
-        await Movement.ActorMovement(newTurn, destination);
-        newTurn.DefaultToState();
-    }
 
 
 }
-
-
-/*
-public class A_StrikeNow : CS_Ability
-{
-    public override string Name => "Strike Now!";
-    public override string Description => "a opening!";
-    public override E_ActionType Type => E_ActionType.main;
-    public override List<string> Effects => new List<string> { "ranged" };
-    public override int Range => 10;
-
-
-    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
-    {
-        data.addActorToTurn(new CS_ActorTurnStats((MB_Actor)data.target.entity, 1, 0, 0, "signature"));
-        return new CS_AbilityReturnData(true);
-    }
-
-}
-
-public class A_SpearCharge : CS_Ability
-{
-    public override string Name => "Spear Charge";
-    public override string Description => "The goblin rushes forward";
-    public override E_ActionType Type => E_ActionType.main;
-    public override List<string> Effects => new List<string> { "charge", "melee", "strike" };
-    public override int Range => 1;
-
-
-    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
-    {
-        CS_Characteristics stats = data.actor.sheet.stats;
-        int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
-
-
-
-        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges, data.banes);
-
-        switch (tier)
-        {
-            case 1:
-                data.target.entity.TakeDamage(1 + favoredStat);
-                break;
-
-            case 2:
-                data.target.entity.TakeDamage(2 + favoredStat);
-                break;
-
-            case 3 or 4:
-                data.target.entity.TakeDamage(3 + favoredStat);
-                break;
-
-        }
-
-        return new CS_AbilityReturnData(true);
-    }
-}*/
 
 
 

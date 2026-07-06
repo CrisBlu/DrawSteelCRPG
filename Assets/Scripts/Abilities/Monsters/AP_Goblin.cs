@@ -59,7 +59,7 @@ public class A_SpearCharge : CS_Ability
 
         }
 
-        await data.target.entity.TakeDamage(damage + favoredStat);//
+        await targets[0].entity.TakeDamage(damage + favoredStat);//
 
         return new CS_AbilityReturnData(true);
     }
@@ -104,7 +104,7 @@ public class A_Bow : CS_Ability
                 break;
 
         }
-        await data.target.entity.TakeDamage(damage);
+        await targets[0].entity.TakeDamage(damage);
         return new CS_AbilityReturnData(true);
     }
 }

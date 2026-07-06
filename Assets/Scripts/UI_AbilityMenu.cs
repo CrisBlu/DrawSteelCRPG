@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class MB_AbilityUI : MonoBehaviour
+public class UI_AbilityMenu : MonoBehaviour
 {
     [SerializeField] Transform ContentHolder;
     [SerializeField] GameObject AbilityPrefab;

@@ -82,8 +82,9 @@ public class SO_User : ScriptableObject
             TurnManager.CreateAndStoreTurn(actor, turnState: E_TurnState.HoldingForAnimation);
         }
 
-        activeTurn.DefaultToState();
-        
+        OnTurnStateUpdate();
+
+
 
     }
 
@@ -107,6 +108,7 @@ public class SO_User : ScriptableObject
    
         GameInput currentInput = aiActions[0];
         aiActions.RemoveAt(0);
+
 
         activeTurn.InvokeState(currentInput.data, currentInput.state);
 

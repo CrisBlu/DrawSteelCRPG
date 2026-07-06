@@ -3,7 +3,7 @@ using UnityEngine;
 public class TEST_TriggerButton : MonoBehaviour
 {
     [SerializeField] GameObject Button;
-    [SerializeField] MB_AbilityUI UI;
+    [SerializeField] UI_AbilityMenu UI;
 
     private void OnEnable()
     {

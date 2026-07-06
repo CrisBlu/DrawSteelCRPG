@@ -1,9 +1,9 @@
-using System;
+
 using System.Collections.Generic;
-using System.IO;
+
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+
 
 [CreateAssetMenu(fileName = "AP_Tactician", menuName = "Scriptable Objects/AbilityPacks/Classes/Tactician")]
 public class AP_Tactician : SO_AbilityPack
@@ -20,14 +20,37 @@ public class A_StrikeNow : CS_Ability
     public override List<string> Tags => new List<string> { "ranged" };
     public override int Range => 10;
 
+
+    private List<E_AbilityInstructions> InstructionsRef = new List<E_AbilityInstructions>() { E_AbilityInstructions.SpendResource };
+    public override List<E_AbilityInstructions> Instructions { 
+        get 
+        {
+            return InstructionsRef;
+        } 
+    }
+
+    
+
     public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
 
-        MB_Actor TargetActor = (MB_Actor)data.target.entity;
-
-        SO_TurnManager.Instance.CreateAndStoreTurn(TargetActor, 1, 0, 0, "signature", E_TurnState.SelectingAbility);
+        foreach(Tile target in targets)
+        {
+            MB_Actor targetActor = (MB_Actor)target.entity;
+            SO_TurnManager.Instance.CreateAndStoreTurn(targetActor, 1, 0, 0, "signature", E_TurnState.SelectingAbility);
+        }
+        
 
         return new CS_AbilityReturnData(true);
+    }
+
+    public override void Spend(bool spent)
+    {
+        if(spent)
+            InstructionsRef.AddRange(new List<E_AbilityInstructions>() { E_AbilityInstructions.SelectTarget, E_AbilityInstructions.SelectTarget, E_AbilityInstructions.Confirm });
+        else
+            InstructionsRef.AddRange(new List<E_AbilityInstructions>() { E_AbilityInstructions.SelectTarget, E_AbilityInstructions.Confirm });
+
     }
 
     public override CS_AbilityTargetingData Target(Tile origin)
@@ -43,6 +66,8 @@ public class A_BattleGrace: CS_Ability
     public override E_ActionType Type => E_ActionType.main;
     public override List<string> Tags => new List<string> { "melee", "signature", "strike" };
     public override int Range => 1;
+ 
+ 
 
     public override async Task<CS_AbilityReturnData> Use(TurnData data)
     {
@@ -55,7 +80,7 @@ public class A_BattleGrace: CS_Ability
 
         int damage = 0;
 
-        MB_Actor targetActor = (MB_Actor)data.target.entity;
+        MB_Actor targetActor = (MB_Actor)targets[0].entity;
 
         switch (tier)
         {
@@ -98,14 +123,16 @@ public class A_BattleGrace: CS_Ability
 
 
 
-public class A_TwoShot: CS_Ability
+public class A_TwoShot : CS_Ability
 {
     public override string Name => "Two Shot";
     public override string Description => "Fire two arrows back to back";
     public override E_ActionType Type => E_ActionType.main;
     public override List<string> Tags => new List<string> { "ranged", "signature" };
     public override int Range => 12;
-    public override int NumberOfTargets => 2;
+    public override List<E_AbilityInstructions> Instructions { get { return new List<E_AbilityInstructions>() { E_AbilityInstructions.SelectTarget, E_AbilityInstructions.SelectTarget,
+        E_AbilityInstructions.Confirm }; } }
+
 
 
     public async override Task<CS_AbilityReturnData> Use(TurnData data)
