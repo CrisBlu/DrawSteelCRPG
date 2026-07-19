@@ -63,12 +63,10 @@ public class CS_AbilityTargetingData
 public class CS_AbilityReturnData
 {
     public bool isSuccessful;
-    public Queue<CS_CallbackData> callbackQueue = null;
 
-    public CS_AbilityReturnData(bool success, Queue<CS_CallbackData> callbackToDo = null)
+    public CS_AbilityReturnData(bool success)
     {
         isSuccessful = success;
-        callbackQueue = callbackToDo;
 
     }
 }
@@ -262,7 +260,7 @@ public class A_Charge : CS_Ability
 
 
 
-        TurnData newTurn = data.TurnManager.CreateAndStoreTurn(Owner, 1, 0, 0, "charge", E_TurnState.SelectingAbility);
+        TurnData newTurn = data.TurnManager.CreateAndStoreTurn(Owner, 1, 0, 0, "charge");
 
 
 

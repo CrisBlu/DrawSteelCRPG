@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using static GF_PlayerInput;
 
 
 //Used for getting player input, from clicks and mousing over elements
@@ -16,22 +17,26 @@ public class MB_PlayerInput : MonoBehaviour
 
     
     private InputAction selectAction;
-    private Vector3Int currentTileMouseOver;
-    public static bool inputEnabled;
 
-    //Experimental
-    //Add a field for valid input list
+    //Use GF_PlayerInput for these
+    //public static bool inputEnabled;
     public static AwaitTile inputRequest = null;
-    /*public static void AddToInputList(AwaitTile input)
-    {
-        inputRequests.Add(input);
-    }*/
 
-    //public static E_TurnState _turnState;
+
+
+
+
+    public static MB_PlayerInput Instance;
+
 
     private void OnEnable()
     {
         SO_TurnManager.Instance.EventActivateUser += EnablePlayerInteraction;
+    }
+
+    private void Awake()
+    {
+        Instance = this;
     }
 
     void Start()
@@ -66,19 +71,25 @@ public class MB_PlayerInput : MonoBehaviour
             
 
         Vector3 mousePosition = MapPositionFromMouse(SceneCamera);
-        currentTileMouseOver = Map.WorldToCell(mousePosition);
+
+        /*if (mousePosition.x == 999)
+        {
+            illustrator.line.enabled = false;
+            return;
+        }*/
+        Vector3Int mouseOverCoords = Map.WorldToCell(mousePosition);
         
 
 
-        Vector2Int TwoDTile = new Vector2Int(currentTileMouseOver.x, currentTileMouseOver.z);
 
+        currentTileMouseOver = GridData.GetTile(new Vector2Int(mouseOverCoords.x, mouseOverCoords.z));
 
-        Tile tile = GridData.GetTile(TwoDTile);
-        if (tile != null && Player.activeTurn != null)
+        //There is a notable difference between it being the player's turn and the player having an active turn; SelectState should probably reflect this
+        if (currentTileMouseOver != null && Player.activeTurn != null && selectState == E_SelectState.SelectingMove)
         {
             illustrator.line.enabled = true;
             List<Tile> pathToDraw = new List<Tile> { Player.activeTurn.actor.currentTile };
-            pathToDraw.AddRange(CS_GridUtility.FindShortestPath(tile, pathToDraw[0]));
+            pathToDraw.AddRange(CS_GridUtility.FindShortestPath(currentTileMouseOver, pathToDraw[0]));
             illustrator.IllustratePath(pathToDraw);
         }
 
@@ -91,8 +102,7 @@ public class MB_PlayerInput : MonoBehaviour
         if(!inputEnabled)
             return;
 
-        Vector2Int TwoDTile = new Vector2Int(currentTileMouseOver.x, currentTileMouseOver.z);
-        PlayerInputInterpreter.ProcessInput(GridData.GetTile(TwoDTile), Player, TurnManager);
+        PlayerInputInterpreter.ProcessInput(currentTileMouseOver, Player, TurnManager);
     }
 
 
@@ -114,100 +124,89 @@ public class MB_PlayerInput : MonoBehaviour
         return new Vector3(999, 999, 999);
     }
 
-    /*List<Tile> validTiles;
-    public E_TurnState turnState
+
+    public void SetSelectState(E_SelectState newState)
     {
-        get { return _turnState; }
 
-
-        set
-        {
-            //Exit
-            switch (_turnState)
+            switch (selectState)
             {
-                case E_TurnState.SelectingMove:
+                case E_SelectState.SelectingMove:
 
-                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
-                    validTiles.Clear();
+                    CS_ColorGrid.ClearGridColors(GridData);
+                    Player.activeTurn.validTiles.Clear();
 
-
-                    break;
-
-                case E_TurnState.SelectingAbility:
-                    actor.HideAbilities();
 
                     break;
 
-                case E_TurnState.UsingAbility:
-                    usingAbility = null;
-                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
-                    validTiles.Clear();
+                case E_SelectState.SelectingAbility:
+                    Player.activeTurn.actor.HideAbilities();
 
                     break;
 
-                case E_TurnState.ResolvingAbility:
-                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
-                    validTiles.Clear();
+                case E_SelectState.UsingAbility:
+                    Player.activeTurn.usingAbility = null;
+                    CS_ColorGrid.ClearGridColors(GridData);
+                    Player.activeTurn.validTiles.Clear();
+
                     break;
 
-                case E_TurnState.HoldingForAnimation:
+                case E_SelectState.ResolvingAbility:
+                    CS_ColorGrid.ClearGridColors(GridData);
+                    Player.activeTurn.validTiles.Clear();
+                    break;
+
+                case E_SelectState.HoldingForAnimation:
                     break;
             }
 
-            _turnState = value;
+            selectState = newState;
 
             //Enter
-            switch (_turnState)
+            switch (selectState)
             {
-                case E_TurnState.SelectingMove:
+                case E_SelectState.SelectingMove:
 
 
-                    validTiles = CS_GridUtility.GetWalkableTilesFromOrigin(actor.currentTile, actions[E_ActionType.move], false);
-                    if (validTiles.Count != 0)
+                    Player.activeTurn.validTiles = CS_GridUtility.GetWalkableTilesFromOrigin(Player.activeTurn.actor.currentTile, Player.activeTurn.actions[E_ActionType.move], false);
+                    if (Player.activeTurn.validTiles.Count != 0)
                     {
                         Color green = new Color(0, 1, 0, .25f);
-                        CS_ColorGrid.ColorCells(validTiles, green);
+                        CS_ColorGrid.ColorCells(Player.activeTurn.validTiles, green);
                     }
 
 
                     break;
 
-                case E_TurnState.SelectingAbility:
-                    actor.DisplayAbilties(this);
+                case E_SelectState.SelectingAbility:
+                    Player.activeTurn.actor.DisplayAbilties(Player.activeTurn);
                     break;
 
-                case E_TurnState.UsingAbility:
+                case E_SelectState.UsingAbility:
 
 
 
-                    CS_AbilityTargetingData targetOutput = usingAbility.Target(actor.currentTile);
+                    /*CS_AbilityTargetingData targetOutput = usingAbility.Target(actor.currentTile);
 
-                    if (targetOutput != null)
+                    if(targetOutput != null)
                     {
                         validTiles = targetOutput.validTargets;
                         CS_ColorGrid.ColorCells(targetOutput.validArea, Color.red);
-                    }
+                    }*/
 
 
                     break;
 
-                case E_TurnState.ResolvingAbility:
-                    validTiles = AbilityHandler.currentCallback.validTiles;
-                    CS_ColorGrid.ColorCells(validTiles, Color.blue);
-                    break;
 
-                case E_TurnState.HoldingForAnimation:
-                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
+                case E_SelectState.HoldingForAnimation:
+                    CS_ColorGrid.ClearGridColors(GridData);
                     break;
             }
 
-            if (TurnController.AI && _turnState != E_TurnState.HoldingForAnimation)
-                TurnManager.EventNotifyAI.Invoke();
 
 
-        }
+    }
 
-    }*/
+    
 
 
 

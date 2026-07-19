@@ -33,7 +33,7 @@ public class AI_WalkIntoChargeRange : SO_AI
         List<Tile> pathToClosest = CS_GridUtility.FindShortestPath(closestTile, self.currentTile);
 
         //If closest is outside of range, get as close as you can to the closest chargable tile
-        return new List<GameInput>() { new TileInput(E_TurnState.SelectingMove, closestTile)};
+        return new List<GameInput>() { new TileInput(E_SelectState.SelectingMove, closestTile)};
 
 
 

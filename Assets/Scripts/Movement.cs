@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using static GF_PlayerInput;
 
 public static class Movement
 {
@@ -35,7 +36,7 @@ public static class Movement
 
         if(SO_TurnManager.Instance.IsPlayerTurn)
         {
-            MB_PlayerInput.inputEnabled = false;
+            inputEnabled = false;
         }
         
         MB_Actor actor = turn.actor;
@@ -73,7 +74,7 @@ public static class Movement
         await AnimationWalking(actor, stepsTaken);
 
         if (SO_TurnManager.Instance.IsPlayerTurn)
-            MB_PlayerInput.inputEnabled = true;
+            inputEnabled = true;
 
         return;
     }
@@ -82,7 +83,7 @@ public static class Movement
     public static async Task ActorMovement(MB_Actor actor, List<Tile> stepsToTake)
     {
     
-         MB_PlayerInput.inputEnabled = false;
+         inputEnabled = false;
         
 
         //List<Tile> stepsToTake = CS_GridUtility.GetStepsToTake(destination, actor.currentTile);
@@ -102,7 +103,7 @@ public static class Movement
 
         if(SO_TurnManager.Instance.IsPlayerTurn)
         {
-            MB_PlayerInput.inputEnabled = true;
+            inputEnabled = true;
         }
 
         return;
@@ -169,7 +170,7 @@ public struct CS_Variables
 {
     public MB_Actor actor;
     public int stamina;
-    public E_TurnState turnState;
+
     //public int recoveries;
     public Dictionary<E_ActionType, int> actions;
     public Vector2Int position;
@@ -179,7 +180,7 @@ public struct CS_Variables
 
         actor = turn.actor;
         stamina = turn.actor.stamina;
-        turnState = turn.turnState;
+
         //this.recoveries = recoveries;
         actions = turn.actions;
         position = turn.actor.position;

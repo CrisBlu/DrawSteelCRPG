@@ -59,7 +59,7 @@ public class AI_Charging : SO_AI //Scriptable objects because I would like these
     private List<GameInput> ChargeInput(MB_Actor self, Tile destination)
     {
         List<GameInput> chargeInputs = new List<GameInput>() { new AbilityInput(self.abilities["Charge"]), 
-            new TileInput(E_TurnState.UsingAbility, destination) };
+            new TileInput(E_SelectState.UsingAbility, destination) };
 
         return chargeInputs;
 

@@ -1,11 +1,11 @@
-
+using UnityEngine;
 
 public enum E_SelectState
 {
-    LookingForActor,
-    LookingForTarget,
-    LookingForMove,
-    LookingForTile,
-    WaitingForAnimation,
+    SelectingMove,
+    SelectingAbility,
+    UsingAbility,
+    ResolvingAbility,
+    HoldingForAnimation,
     None
 }

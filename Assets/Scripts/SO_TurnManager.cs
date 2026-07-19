@@ -32,7 +32,7 @@ public class TurnData //Store all the data associated with an actor's single tur
     public Dictionary<E_ActionType, int> actions;
 
     
-    public TurnData(MB_Actor actingActor, SO_TurnManager turnManager, int mainAction = 1, int maneuverAction = 1, int movement = -1, string abilityTagRestrict = null, E_TurnState turnState = E_TurnState.SelectingMove)
+    public TurnData(MB_Actor actingActor, SO_TurnManager turnManager, int mainAction = 1, int maneuverAction = 1, int movement = -1, string abilityTagRestrict = null)
     {
         actor = actingActor;
         TurnManager = turnManager;
@@ -54,105 +54,26 @@ public class TurnData //Store all the data associated with an actor's single tur
         
 
         this.abilityTagRestrict = abilityTagRestrict;
-        this.turnState = turnState;
 
-         AbilityHandler = new CS_AbilityParser();
+        AbilityHandler = new CS_AbilityParser();
 
     }
 
 
 
 
-
-    //This feels like an inherently user based feature, given the fact that it's only relevant to the player and AI doesn't even need this
-    private E_TurnState _turnState;
-    public E_TurnState turnState
+   
+    //TODO Remove when AI is reworked with Turn
+    private E_SelectState _turnState;
+    public E_SelectState turnState
     {
         get { return _turnState; }
 
 
         set
         {
-            //Exit
-            switch (_turnState)
-            {
-                case E_TurnState.SelectingMove:
-
-                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
-                    validTiles.Clear();
-
-
-                    break;
-
-                case E_TurnState.SelectingAbility:
-                    actor.HideAbilities();
-
-                    break;
-
-                case E_TurnState.UsingAbility:
-                    usingAbility = null;
-                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
-                    validTiles.Clear();
-
-                    break;
-
-                case E_TurnState.ResolvingAbility:
-                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
-                    validTiles.Clear();
-                    break;
-
-                case E_TurnState.HoldingForAnimation:
-                    break;
-            }
 
             _turnState = value;
-
-            //Enter
-            switch (_turnState)
-            {
-                case E_TurnState.SelectingMove:
-
-                    
-                    validTiles = CS_GridUtility.GetWalkableTilesFromOrigin(actor.currentTile, actions[E_ActionType.move], false);
-                    if (validTiles.Count != 0)
-                    {
-                        Color green = new Color(0, 1, 0, .25f);
-                        CS_ColorGrid.ColorCells(validTiles, green);
-                    }
-          
-
-                    break;
-
-                case E_TurnState.SelectingAbility:
-                    actor.DisplayAbilties(this);
-                    break;
-
-                case E_TurnState.UsingAbility:
-
-
-
-                    /*CS_AbilityTargetingData targetOutput = usingAbility.Target(actor.currentTile);
-
-                    if(targetOutput != null)
-                    {
-                        validTiles = targetOutput.validTargets;
-                        CS_ColorGrid.ColorCells(targetOutput.validArea, Color.red);
-                    }*/
-                    
-
-                    break;
-
-                case E_TurnState.ResolvingAbility:
-                    validTiles = AbilityHandler.currentCallback.validTiles;
-                    CS_ColorGrid.ColorCells(validTiles, Color.blue);
-                    break;
-
-                case E_TurnState.HoldingForAnimation:
-                    CS_ColorGrid.ClearGridColors(actor.currentTile.parentGrid);
-                    break;
-            }
-
-
 
         }
 
@@ -162,40 +83,40 @@ public class TurnData //Store all the data associated with an actor's single tur
     //This is currently, only used for AI behaviors, where the AI inputs a turn states and the system knows what to do because of that
     //Frankly, this is completely opposite to how the player input works, that reads the turn state and understands the player input through what it read
     //It seems to me that these concepts shouldn't be related in the way that they are
-    public async void InvokeState(object input, E_TurnState stateToInvoke = E_TurnState.None)
+    public async void InvokeState(object input, E_SelectState stateToInvoke = E_SelectState.None)
     {
 
-        if(stateToInvoke == E_TurnState.None)
+        if(stateToInvoke == E_SelectState.None)
         {
             stateToInvoke = _turnState;
         }
 
         switch (stateToInvoke)
         {
-            case E_TurnState.SelectingMove:
+            case E_SelectState.SelectingMove:
                 await Movement.ActorMovement(this, (Tile)input);
                 TurnManager.EventNotifyAI.Invoke();
 
                 break;
 
-            case E_TurnState.SelectingAbility:
+            case E_SelectState.SelectingAbility:
                 usingAbility = (CS_Ability)input;
                 TurnManager.EventNotifyAI.Invoke();
                 break;
 
-            case E_TurnState.UsingAbility:
+            case E_SelectState.UsingAbility:
                 usingAbility.targets.Add((Tile)input);
                 await UseAbility();
                 TurnManager.EventNotifyAI.Invoke();
 
                 break;
 
-            case E_TurnState.ResolvingAbility:
+            case E_SelectState.ResolvingAbility:
                 ResolveAbility((Tile)input);
                 TurnManager.EventNotifyAI.Invoke();
                 break;
 
-            case E_TurnState.HoldingForAnimation:
+            case E_SelectState.HoldingForAnimation:
                 
                 break;
         }
@@ -217,19 +138,19 @@ public class TurnData //Store all the data associated with an actor's single tur
 
         if(AbilityHandler.currentCallback != null)
         {
-            turnState = E_TurnState.ResolvingAbility;
+            MB_PlayerInput.Instance.SetSelectState(E_SelectState.ResolvingAbility);
             return;
         }
 
         if (actions[E_ActionType.move] > 0)
         {
-            turnState = E_TurnState.SelectingMove;
+            MB_PlayerInput.Instance.SetSelectState(E_SelectState.SelectingMove);
             return;
         }
         
         if (actions[E_ActionType.main] > 0 || actions[E_ActionType.maneuver] > 0)
         {
-            turnState = E_TurnState.SelectingAbility;
+            MB_PlayerInput.Instance.SetSelectState(E_SelectState.SelectingAbility);
             return;
         }
 
@@ -329,10 +250,12 @@ public class SO_TurnManager : ScriptableObject
     }
 
 
-    public TurnData CreateAndStoreTurn(MB_Actor actor, int mainAction = 1, int maneuverAction = 1, int movement = -1, string abilityTagRestrict = null, E_TurnState turnState = E_TurnState.SelectingMove)
+    public TurnData CreateAndStoreTurn(MB_Actor actor, int mainAction = 1, int maneuverAction = 1, int movement = -1, string abilityTagRestrict = null)
     {
-        TurnData turnForActor = new TurnData(actor, this, mainAction, maneuverAction, movement, abilityTagRestrict, turnState);
+        TurnData turnForActor = new TurnData(actor, this, mainAction, maneuverAction, movement, abilityTagRestrict);
         turnsToResolve.Push(turnForActor);
+
+        turnForActor.DefaultToState();
 
       
         return turnForActor;
@@ -361,15 +284,15 @@ public class SO_TurnManager : ScriptableObject
     }
 
     public void EndCurrentTurn()
-    {                                  
-        TurnData discardedTurn = turnsToResolve.Pop();
+    {
 
-            //Temp so ui elements do not stick around
-        discardedTurn.turnState = E_TurnState.HoldingForAnimation;
+        //Temp so ui elements do not stick around
+        MB_PlayerInput.Instance.SetSelectState(E_SelectState.HoldingForAnimation);
+        TurnData discardedTurn = turnsToResolve.Pop();
 
         if(discardedTurn.fullTurn) { discardedTurn.actor.turnTaken = true; }
 
-       WakeUpTurn();
+        WakeUpTurn();
 
         
     }

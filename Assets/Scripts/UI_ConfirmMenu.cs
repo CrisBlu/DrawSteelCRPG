@@ -5,6 +5,7 @@ using UnityEditor.PackageManager.Requests;
 using UnityEditor.Search;
 using UnityEngine;
 using UnityEngine.UI;
+using static GF_PlayerInput;
 
 public class UI_ConfirmMenu : MonoBehaviour
 {
@@ -38,7 +39,7 @@ public class UI_ConfirmMenu : MonoBehaviour
     void OnButtonClicked(bool confirm)
     {
 
-        MB_PlayerInput.inputEnabled = true;
+        inputEnabled = true;
         currentRequest.OnUserActionCompleted(confirm);
 
         ConfirmButton.onClick.RemoveAllListeners();
@@ -56,7 +57,7 @@ public class UI_ConfirmMenu : MonoBehaviour
     {
         if(requests.Count > 0)
         {
-            MB_PlayerInput.inputEnabled = false;
+            inputEnabled = false;
             transform.localPosition = OnPosition;
 
             if(currentRequest == null)

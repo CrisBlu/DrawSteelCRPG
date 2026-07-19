@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
-
+using TMPro;
+using static GF_PlayerInput;
 
 
 
@@ -14,6 +15,8 @@ public class ZipperInit
 
     public SO_User EnableInitative(List<SO_User> users)
     {
+        // hardcoded, player goes first
+        isPlayerTurn = true;
         userIndex = 0;
         roundTracker = new Dictionary<SO_User, bool>();
         foreach(SO_User user in users)
@@ -51,8 +54,14 @@ public class ZipperInit
 
         if (users[userIndex].AI)
         {
+            isPlayerTurn = false;
+
             //Hardcoded, target the first user (player)'s characters
             users[userIndex].EnableAI(users[0].actorsUnderControl);
+        }
+        else
+        {
+            isPlayerTurn = true;
         }
 
         return users[userIndex];

@@ -46,13 +46,13 @@ public class SquadPlay
 
 public class TileInput : GameInput
 {
-    public override E_TurnState state => _state;
-    E_TurnState _state;
+    public override E_SelectState state => _state;
+    E_SelectState _state;
 
     public override object data => tile;
     Tile tile;
 
-    public TileInput(E_TurnState state, Tile tile)
+    public TileInput(E_SelectState state, Tile tile)
     {
         this.tile = tile;
         _state = state;
@@ -62,7 +62,7 @@ public class TileInput : GameInput
 
 public class AbilityInput : GameInput
 {
-    public override E_TurnState state => E_TurnState.SelectingAbility;
+    public override E_SelectState state => E_SelectState.SelectingAbility;
     public override object data => ability;
     CS_Ability ability;
 
@@ -74,7 +74,7 @@ public class AbilityInput : GameInput
 
 public abstract class GameInput
 {
-    public abstract E_TurnState state { get;}
+    public abstract E_SelectState state { get;}
     public abstract object data { get; }
 }
 //an A* search might be helpful for determining distances

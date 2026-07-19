@@ -147,12 +147,6 @@ public class CS_AbilityParser
 
 
 
-        if(returnData.callbackQueue != null)
-        {
-            //Callback data parsing
-            callbackQueue = returnData.callbackQueue;
-            currentCallback = callbackQueue.Dequeue();
-        }
 
             
             

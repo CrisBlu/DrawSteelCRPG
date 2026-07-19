@@ -25,7 +25,7 @@ public class AI_RangedAttack : SO_AI
     private List<GameInput> AttackInput(MB_Actor self, Tile target)
     {
         List<GameInput> attackInputs = new List<GameInput>() { new AbilityInput(self.abilities[self.sheet.preferredAttack]),
-            new TileInput(E_TurnState.UsingAbility, target)};
+            new TileInput(E_SelectState.UsingAbility, target)};
 
 
         return attackInputs;

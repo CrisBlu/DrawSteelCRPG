@@ -1,6 +1,7 @@
 using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using static GF_PlayerInput;
 
 //Intakes player input and figures out what to do with it based on where they are in the turn structure
 public static class PlayerInputInterpreter
@@ -23,21 +24,22 @@ public static class PlayerInputInterpreter
         }
 
         
-        switch(user.activeTurn.turnState)
+        switch(selectState)
         {
-            case E_TurnState.SelectingMove:
+            case E_SelectState.SelectingMove:
                 SelectingMove(user.activeTurn, input);
                 break;
 
-            case E_TurnState.SelectingAbility:
-                ReturnToMove(user.activeTurn);
+            case E_SelectState.SelectingAbility:
+                //If a tile is selected when an ability should be, leave SelectingAbility State
+                ReturnToMove();
                 break;
 
-            case E_TurnState.UsingAbility:
-                SelectingTarget(user.activeTurn, input);
+            case E_SelectState.UsingAbility:
+                SelectingTarget(input);
                 break;
 
-            case E_TurnState.ResolvingAbility:
+            case E_SelectState.ResolvingAbility:
                 ResolvingAbility(user.activeTurn, input);
                 break;
 
@@ -71,12 +73,12 @@ public static class PlayerInputInterpreter
 
         if(input == turn.actor.currentTile)
         {
-            turn.turnState = E_TurnState.SelectingAbility;
+            MB_PlayerInput.Instance.SetSelectState(E_SelectState.SelectingAbility);
         }
 
         else if(turn.validTiles.Contains(input))
         {
-            turn.turnState = E_TurnState.HoldingForAnimation;
+            MB_PlayerInput.Instance.SetSelectState(E_SelectState.HoldingForAnimation);
         
             await Movement.ActorMovement(turn, input);
 
@@ -86,9 +88,9 @@ public static class PlayerInputInterpreter
         
     }
     
-    private static void ReturnToMove(TurnData turn)
+    private static void ReturnToMove()
     {
-        turn.turnState = E_TurnState.SelectingMove;
+        MB_PlayerInput.Instance.SetSelectState(E_SelectState.SelectingMove);
     }
 
     public static async void SelectingAbility(CS_Ability ability, TurnData turn)
@@ -100,7 +102,7 @@ public static class PlayerInputInterpreter
    
 
         turn.usingAbility = ability;
-        turn.turnState = E_TurnState.UsingAbility;
+        MB_PlayerInput.Instance.SetSelectState(E_SelectState.UsingAbility);
 
         bool proceed = await CS_AbilityParser.ReadAbility(ability);
 
@@ -109,7 +111,7 @@ public static class PlayerInputInterpreter
     }
 
 
-    private static void SelectingTarget(TurnData turn, Tile input)
+    private static void SelectingTarget(Tile input)
     {
 
         if (MB_PlayerInput.inputRequest == null)
@@ -123,7 +125,8 @@ public static class PlayerInputInterpreter
 
         if (!local.validTiles.Contains(input))
         {
-            turn.turnState = E_TurnState.SelectingAbility;
+            //If input isn't valid move back to selecting ability state, feels bad, change
+            MB_PlayerInput.Instance.SetSelectState(E_SelectState.SelectingAbility);
             local.OnUserActionCompleted(null);
 
             return;

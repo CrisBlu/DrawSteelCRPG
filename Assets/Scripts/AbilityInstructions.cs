@@ -23,10 +23,6 @@ public static class AbilityInstructions
 
     }
 
-    /*public static bool SpendResource(int amount, MB_Actor acting)
-    {
-        acting.resource -= amount;
-    }*/
 
 
 }

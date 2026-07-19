@@ -37,7 +37,7 @@ public class A_StrikeNow : CS_Ability
         foreach(Tile target in targets)
         {
             MB_Actor targetActor = (MB_Actor)target.entity;
-            SO_TurnManager.Instance.CreateAndStoreTurn(targetActor, 1, 0, 0, "signature", E_TurnState.SelectingAbility);
+            SO_TurnManager.Instance.CreateAndStoreTurn(targetActor, 1, 0, 0, "signature");
         }
         
 

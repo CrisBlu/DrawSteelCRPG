@@ -79,7 +79,7 @@ public class SO_User : ScriptableObject
   
         foreach(MB_Actor actor in actingActors)
         {
-            TurnManager.CreateAndStoreTurn(actor, turnState: E_TurnState.HoldingForAnimation);
+            TurnManager.CreateAndStoreTurn(actor);
         }
 
         OnTurnStateUpdate();
