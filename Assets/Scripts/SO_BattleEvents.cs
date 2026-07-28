@@ -13,7 +13,7 @@ public class SO_BattleEvents : ScriptableObject
 
     [HideInInspector] public static event Action EventPotentialTriggersChanged;
 
-    static private UserService HoldOnTriggerList;
+    static private WaitFor HoldOnTriggerList;
     private void OnEnable()
     {
         CS_BattleLog.BattleEvents = this;
@@ -29,16 +29,14 @@ public class SO_BattleEvents : ScriptableObject
     {
         EventActorTookDamage.Invoke(damage, actor);
 
-        HoldOnTriggerList = new UserService();
-
-        Task<bool> confirmationTask = HoldOnTriggerList.WaitForUserConfirmation();
+        HoldOnTriggerList = new WaitFor();
 
         await Task.Delay(100);
 
         // This line will await until HoldOnTriggerList is empty
         if (triggers.Count > 0)
         {
-            bool confirmed = await confirmationTask;
+            await HoldOnTriggerList.WaitForUserConfirmation();
         }
             
 

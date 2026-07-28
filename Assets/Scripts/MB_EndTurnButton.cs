@@ -15,7 +15,7 @@ public class MB_EndTurnButton : MonoBehaviour
         button = GetComponent<Button>();
         SO_TurnManager.Instance.EventActivateUser += ManageButtonInteract;
     }
-
+    
 
     private void Update()
     {

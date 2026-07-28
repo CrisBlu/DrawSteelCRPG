@@ -14,7 +14,7 @@ public static class AbilityInstructions
         if (!targets.Contains(target))
         {
             targets.Add(target);
-            CS_ColorGrid.ColorCells(targets, Color.yellow, false);
+            CS_ColorGrid.ColorCells(targets, Color.white, false);
             return true;
         }
 

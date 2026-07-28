@@ -487,7 +487,30 @@ public class AwaitTile
     }
 }
 
-public class UserService
+public class AwaitConfirm
+{
+    private TaskCompletionSource<bool> _tcs;
+    public string reason;
+
+    public AwaitConfirm(string reason = "test")
+    {
+        this.reason = reason;
+    }
+
+    public Task<bool> WaitForUserConfirmation()
+    {
+
+        _tcs = new TaskCompletionSource<bool>();
+        return _tcs.Task;
+    }
+
+    public void OnUserActionCompleted(bool isConfirmed)
+    {
+        _tcs.SetResult(isConfirmed);
+    }
+}
+
+public class WaitFor
 {
     private TaskCompletionSource<bool> _tcs;
 

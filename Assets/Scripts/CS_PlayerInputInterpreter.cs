@@ -14,18 +14,20 @@ public static class PlayerInputInterpreter
             return;
         }
 
-        //If there is no turn for user currently 
-        if (user.activeTurn == null)
-        {
-            //AND valid actor is in selected Tile
-            MB_Actor validActor = SelectYourActor(input, user);
-            //Create a turn and return
-            if (validActor != null) { TM.CreateAndStoreTurn(validActor); return; } else { return; }
-        }
-
         
         switch(selectState)
         {
+            case E_SelectState.SelectingActor:
+                MB_Actor validActor = SelectYourActor(input, user);
+                //Create a turn and return
+                if (validActor != null) 
+                { 
+                    TM.CreateAndStoreTurn(validActor); 
+                    return; 
+                } 
+  
+                break;
+
             case E_SelectState.SelectingMove:
                 SelectingMove(user.activeTurn, input);
                 break;

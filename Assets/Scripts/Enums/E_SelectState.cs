@@ -7,5 +7,6 @@ public enum E_SelectState
     UsingAbility,
     ResolvingAbility,
     HoldingForAnimation,
-    None
+    None,
+    SelectingActor
 }

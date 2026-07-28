@@ -1,8 +1,6 @@
 
 using System;
 using System.Collections.Generic;
-using UnityEditor.PackageManager.Requests;
-using UnityEditor.Search;
 using UnityEngine;
 using UnityEngine.UI;
 using static GF_PlayerInput;
@@ -14,8 +12,9 @@ public class UI_ConfirmMenu : MonoBehaviour
 
     [SerializeField] private Button ConfirmButton;
     [SerializeField] private Button RejectButton;
+    [SerializeField] private TMPro.TMP_Text ConfirmInfo;
 
-    [NonSerialized] public UserService currentRequest;
+    [NonSerialized] public AwaitConfirm currentRequest;
 
     void OnEnable()
     {
@@ -27,7 +26,7 @@ public class UI_ConfirmMenu : MonoBehaviour
         ConfirmQueue.ClearQueue();
     }
 
-    void SetUpButtons(UserService request)
+    void SetUpButtons(AwaitConfirm request)
     {
         currentRequest = request;
 
@@ -53,7 +52,7 @@ public class UI_ConfirmMenu : MonoBehaviour
 
 
 
-    void UpdateMenu(Queue<UserService> requests)
+    void UpdateMenu(Queue<AwaitConfirm> requests)
     {
         if(requests.Count > 0)
         {
@@ -63,7 +62,8 @@ public class UI_ConfirmMenu : MonoBehaviour
             if(currentRequest == null)
             {
                 
-                UserService request = requests.Dequeue();
+                AwaitConfirm request = requests.Dequeue();
+                ConfirmInfo.text = request.reason;
                 SetUpButtons(request);
             }
                 
@@ -79,10 +79,10 @@ public class UI_ConfirmMenu : MonoBehaviour
 
 public static class ConfirmQueue
 {
-    private static Queue<UserService> confirmRequests = new Queue<UserService>();
-    public static event Action<Queue<UserService>> test;
+    private static Queue<AwaitConfirm> confirmRequests = new Queue<AwaitConfirm>();
+    public static event Action<Queue<AwaitConfirm>> test;
 
-    public static void AddToConfirmQueue(UserService confirmReq)
+    public static void AddToConfirmQueue(AwaitConfirm confirmReq)
     {
         confirmRequests.Enqueue(confirmReq);
         test.Invoke(confirmRequests);

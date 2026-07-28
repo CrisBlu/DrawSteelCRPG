@@ -11,6 +11,7 @@ public class Tile
     public float costToDestination = 0;
     public int terrainCost = 0;
     public float TotalCost { get { return costFromOrigin + costToDestination + terrainCost; } }
+    public Color color;
 
     public SO_GridData parentGrid;
 

@@ -31,7 +31,7 @@ public class MB_PlayerInput : MonoBehaviour
 
     private void OnEnable()
     {
-        SO_TurnManager.Instance.EventActivateUser += EnablePlayerInteraction;
+        SO_TurnManager.Instance.EventActivateUser += StartPlayerTurn;
     }
 
     private void Awake()
@@ -45,11 +45,12 @@ public class MB_PlayerInput : MonoBehaviour
         selectAction.performed += TileSelect;
     }
 
-    void EnablePlayerInteraction(SO_User player)
+    void StartPlayerTurn(SO_User player)
     {
         if (player == Player)
         {
             inputEnabled = true;
+            selectState = E_SelectState.SelectingActor;
         }
         else
         {
@@ -84,13 +85,27 @@ public class MB_PlayerInput : MonoBehaviour
 
         currentTileMouseOver = GridData.GetTile(new Vector2Int(mouseOverCoords.x, mouseOverCoords.z));
 
-        //There is a notable difference between it being the player's turn and the player having an active turn; SelectState should probably reflect this
-        if (currentTileMouseOver != null && Player.activeTurn != null && selectState == E_SelectState.SelectingMove)
+
+        if (currentTileMouseOver != null && selectState == E_SelectState.SelectingMove)
         {
-            illustrator.line.enabled = true;
+            
             List<Tile> pathToDraw = new List<Tile> { Player.activeTurn.actor.currentTile };
             pathToDraw.AddRange(CS_GridUtility.FindShortestPath(currentTileMouseOver, pathToDraw[0]));
-            illustrator.IllustratePath(pathToDraw);
+            if (pathToDraw.Count <= Player.activeTurn.actions[E_ActionType.move] + 1)
+            {
+                illustrator.line.enabled = true;
+                illustrator.IllustratePath(pathToDraw);
+            }
+            else
+            {
+                illustrator.line.enabled = false;
+            }
+
+            
+        }
+        else if(selectState != E_SelectState.SelectingMove)
+        {
+            illustrator.line.enabled = false;
         }
 
         //Debug.Log(currentTileMouseOver);
@@ -130,6 +145,10 @@ public class MB_PlayerInput : MonoBehaviour
 
             switch (selectState)
             {
+                case E_SelectState.SelectingActor:
+
+                    break;
+
                 case E_SelectState.SelectingMove:
 
                     CS_ColorGrid.ClearGridColors(GridData);
@@ -164,6 +183,10 @@ public class MB_PlayerInput : MonoBehaviour
             //Enter
             switch (selectState)
             {
+                case E_SelectState.SelectingActor:
+
+                    break;
+
                 case E_SelectState.SelectingMove:
 
 

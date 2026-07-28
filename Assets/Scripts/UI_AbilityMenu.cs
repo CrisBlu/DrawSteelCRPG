@@ -34,6 +34,8 @@ public class UI_AbilityMenu : MonoBehaviour
         {
             return;
         }
+
+        
         ToggleSidebar(true);
 
         List<CS_Ability> abilities = turn.actor.abilities.Values.ToList();
@@ -83,10 +85,11 @@ public class UI_AbilityMenu : MonoBehaviour
 
     public void SetAbilityType(SO_ActionType newType)
     {
+
         typeToDisplay = newType.actionType;
         if (Player.activeTurn != null)
         {
-            LoadAbilities(Player.activeTurn);
+            MB_PlayerInput.Instance.SetSelectState(E_SelectState.SelectingAbility);
         }
 
     }

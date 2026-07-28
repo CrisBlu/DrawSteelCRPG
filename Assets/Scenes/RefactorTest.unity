@@ -2108,6 +2108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConfirmButton: {fileID: 1506814357}
   RejectButton: {fileID: 373226765}
+  ConfirmInfo: {fileID: 1528721337}
 --- !u!1 &736465198
 GameObject:
   m_ObjectHideFlags: 0
@@ -3073,6 +3074,7 @@ GameObject:
   - component: {fileID: 945069852}
   - component: {fileID: 945069851}
   - component: {fileID: 945069855}
+  - component: {fileID: 945069856}
   m_Layer: 5
   m_Name: BattleUI
   m_TagString: Untagged
@@ -3188,6 +3190,19 @@ MonoBehaviour:
   ActorEvents: {fileID: 11400000, guid: 7347c0d9ced81ce4fa24f2b31fc98934, type: 2}
   Sidebar: {fileID: 452360781}
   Player: {fileID: 11400000, guid: e42ec5aa33741e145aca8c721977ce73, type: 2}
+--- !u!114 &945069856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 945069850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71a5c6d00cb07e846b302b5df4b67d6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HighlightColor: {r: 1, g: 1, b: 0, a: 1}
 --- !u!1 &969094752
 GameObject:
   m_ObjectHideFlags: 0
@@ -4046,7 +4061,7 @@ GameObject:
   - component: {fileID: 1528721338}
   - component: {fileID: 1528721337}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Info
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

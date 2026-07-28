@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
@@ -39,9 +40,13 @@ public class CS_AbilityParser
                     CS_AbilityTargetingData targetOutput = ability.Target(ability.Owner.currentTile);
 
                    
-                    List<Tile> validTiles = targetOutput.validTargets;
-                    CS_ColorGrid.ColorCells(targetOutput.validArea, Color.red);
-                    
+                    List<Tile> validTiles = targetOutput.validTargets.Except(ability.targets).ToList();
+
+                    //We can imagine a system where tiles store highlight colors and display those above their usual color
+                    CS_ColorGrid.ColorCells(targetOutput.validArea.Except(ability.targets).ToList(), Color.red);
+                    CS_ColorGrid.ColorCells(validTiles, Color.yellow, false);
+                    CS_ColorGrid.ColorCells(ability.targets, Color.white, false);
+
 
                     AwaitTile userInput = new AwaitTile(validTiles);
                     MB_PlayerInput.inputRequest = userInput;
@@ -61,7 +66,7 @@ public class CS_AbilityParser
 
 
                 case E_AbilityInstructions.SpendResource:
-                    UserService spendConfirm = new UserService();
+                    AwaitConfirm spendConfirm = new AwaitConfirm("Would you like to spend X (Resource)?");
                     ConfirmQueue.AddToConfirmQueue(spendConfirm);
                     bool spendConfirmation = await spendConfirm.WaitForUserConfirmation();
 
@@ -78,7 +83,7 @@ public class CS_AbilityParser
 
 
                 case E_AbilityInstructions.Confirm:
-                    UserService userConfirm = new UserService();
+                    AwaitConfirm userConfirm = new AwaitConfirm("Confirm Action?");
 
                     ConfirmQueue.AddToConfirmQueue(userConfirm);
                     bool confirmation = await userConfirm.WaitForUserConfirmation();
