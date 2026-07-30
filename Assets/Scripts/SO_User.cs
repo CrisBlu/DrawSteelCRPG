@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -89,11 +90,17 @@ public class SO_User : ScriptableObject
     }
 
     
-    private void OnTurnStateUpdate()
+    private async void OnTurnStateUpdate()
     {
         //For now this will work but won't for more than one AI controlled party
         if (!AI)
             return;
+
+        //Busy wait, temp solution
+        while (SO_BattleEvents.triggers.Count > 0)
+        {
+            await Task.Delay(1000);
+        }
 
 
         if (aiActions == null || aiActions.Count <= 0)
@@ -110,9 +117,15 @@ public class SO_User : ScriptableObject
         aiActions.RemoveAt(0);
 
 
+       
+
+        
+
+   
+
         activeTurn.InvokeState(currentInput.data, currentInput.state);
 
- 
+        
 
     }
 

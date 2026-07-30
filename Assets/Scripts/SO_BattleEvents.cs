@@ -9,11 +9,45 @@ public class SO_BattleEvents : ScriptableObject
 {
 
     [HideInInspector] public event Action<Tile, Tile, MB_Actor> EventActorLeftTile;
+    [HideInInspector] public static event Action<RequestDamage> EventBeforeTakeDamage;
     [HideInInspector] public static event Action<int, MB_Actor> EventActorTookDamage;
+    [HideInInspector] public static event Action<RequestForceMove> EventBeforeForcedMoved;
+    [HideInInspector] public static event Action<Tile> EventActorForcedMoved;
 
     [HideInInspector] public static event Action EventPotentialTriggersChanged;
 
-    static private WaitFor HoldOnTriggerList;
+    [HideInInspector] public static Queue<IRequest> RequestQueue = new();
+
+
+
+    static bool requestLock = false;
+    public static async void TestingGoThroughQueue()
+    {
+        //For now, bullshit
+        if(requestLock) { return; }
+
+        requestLock = true;
+        while (RequestQueue.Count > 0)
+        {
+            IRequest request = RequestQueue.Dequeue();
+            await request.InvokeBeforeTriggers();
+
+            //If rest of request is not canceled
+            if (request != null)
+            {
+                await request?.Resolve();
+            }
+            
+        }
+
+        requestLock = false;
+
+        if (SO_TurnManager.Instance.IsPlayerTurn)
+            MB_PlayerInput.Instance.SetSelectState(E_SelectState.SelectingMove);
+
+    }
+
+    static public WaitFor HoldOnTriggerList;
     private void OnEnable()
     {
         CS_BattleLog.BattleEvents = this;
@@ -25,12 +59,47 @@ public class SO_BattleEvents : ScriptableObject
         EventActorLeftTile.Invoke(exit, entered, actor);
     }
 
+
+    public static async Task TriggerBeforeTakeDamageEvents(RequestDamage request)
+    {
+        EventBeforeTakeDamage.Invoke(request);
+
+        await HoldUntilTriggersAreDone();
+
+    }
+
+
+
     public static async Task TriggerActorTookDamageEvents(int damage, MB_Actor actor)
     {
         EventActorTookDamage.Invoke(damage, actor);
 
+        await HoldUntilTriggersAreDone();
+
+    }
+
+    public static async Task TriggerBeforeForcedMovedEvents(RequestForceMove request)
+    {
+        EventBeforeForcedMoved?.Invoke(request);
+
+        await HoldUntilTriggersAreDone();
+
+    }
+
+    public static async Task TriggerActorForcedMovedEvents(Tile target)
+    {
+        EventActorForcedMoved?.Invoke(target);
+
+
+        await HoldUntilTriggersAreDone();
+
+    }
+
+    private static async Task HoldUntilTriggersAreDone()
+    {
         HoldOnTriggerList = new WaitFor();
 
+        //Required because the script doesn't wait long enough to let triggers populate by default
         await Task.Delay(100);
 
         // This line will await until HoldOnTriggerList is empty
@@ -38,8 +107,6 @@ public class SO_BattleEvents : ScriptableObject
         {
             await HoldOnTriggerList.WaitForUserConfirmation();
         }
-            
-
     }
 
     public static List<AwaitTrigger> triggers = new List<AwaitTrigger>();
@@ -67,10 +134,17 @@ public class SO_BattleEvents : ScriptableObject
 
 
 
+
     private void OnDisable()
     {
         EventActorLeftTile = null;
         EventActorTookDamage = null;
         EventPotentialTriggersChanged = null;
+        EventBeforeForcedMoved = null;
+        EventActorForcedMoved = null;
+
+
+        RequestQueue.Clear();
+
     }
 }

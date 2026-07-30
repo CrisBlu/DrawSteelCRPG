@@ -197,16 +197,18 @@ public class A_Parry : CS_Ability, ITrigger
         return new CS_AbilityReturnData(true);
     }
 
-    private async void Trigger(int damage, MB_Actor target)
+    private async void Trigger(RequestDamage request)
     {
         if (user.trigger == false)
             return;
 
+        MB_Actor targetActor = request.target.entity as MB_Actor;
+
         //Disregard is damaged target is not ally
-        if (!target.CompareTag(user.tag))
+        if (!targetActor.CompareTag(user.tag))
             return;
 
-        List<Tile> PathToFriend = CS_GridUtility.FindShortestPath(target.currentTile, user.currentTile);
+        List<Tile> PathToFriend = CS_GridUtility.FindShortestPath(request.target, Owner.currentTile);
 
         //If target out of range disregard
         if (PathToFriend.Count > Range) { return; }
@@ -237,7 +239,7 @@ public class A_Parry : CS_Ability, ITrigger
                 await Movement.ActorMovement(user, PathToFriend);
             }
 
-            target.Heal(damage / 2);
+            request.damage /= 2;
             user.trigger = false;
 
         }
@@ -256,7 +258,7 @@ public class A_Parry : CS_Ability, ITrigger
     public void SetTrigger(SO_BattleEvents events, MB_Actor user)
     {
         this.user = user;
-        SO_BattleEvents.EventActorTookDamage += Trigger;
+        SO_BattleEvents.EventBeforeTakeDamage += Trigger;
 
     }
 }

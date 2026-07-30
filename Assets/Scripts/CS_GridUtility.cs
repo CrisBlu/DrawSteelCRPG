@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
+using Unity.Burst.Intrinsics;
 using UnityEngine;
 
 
@@ -320,6 +323,8 @@ public static class CS_GridUtility
 
         while (current != origin)
         {
+            
+
             stepsToTake.Add(current);
             if (current.parent != null)
             {
@@ -328,9 +333,7 @@ public static class CS_GridUtility
             else
                 break;
         }
-
         stepsToTake.Reverse();
-
         return stepsToTake;
 
     }

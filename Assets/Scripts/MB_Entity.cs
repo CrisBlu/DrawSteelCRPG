@@ -5,7 +5,7 @@ using UnityEngine;
 public class MB_Entity : MonoBehaviour
 {
 
-    [SerializeField] protected SO_GridData gridData;
+    [SerializeField] public SO_GridData gridData;
     public int stamina = 10;
 
     //I think this can just get transform position and cast it into a Vector2Int

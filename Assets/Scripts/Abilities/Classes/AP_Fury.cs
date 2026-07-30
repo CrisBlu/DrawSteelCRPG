@@ -143,4 +143,75 @@ public class A_BrutalSlam : CS_Ability
         }
     }
 
+    public class A_LinesOfForce : CS_Ability, ITrigger
+    {
+        public override string Name => "Lines of Force";
+        public override string Description => "No! You move!";
+        public override E_ActionType Type => E_ActionType.trigger;
+        public override List<string> Tags => new List<string> { "magic", "melee" };
+        public override int Range => 1;
+
+
+
+        public override async Task<CS_AbilityReturnData> Use(TurnData data)
+        {
+
+
+
+            return new CS_AbilityReturnData(true);
+        }
+
+        private async void Trigger(RequestForceMove request)
+        {
+            if (Owner.trigger == false)
+                return;
+
+
+            List<Tile> PathToTarget = CS_GridUtility.FindShortestPath(request.target, Owner.currentTile);
+
+            //If target out of range disregard
+            if (PathToTarget.Count > Range) { return; }
+
+
+
+
+            AwaitTrigger userService = new AwaitTrigger(this, Owner);
+            // Begin waiting for the user's confirmation.
+
+
+            SO_BattleEvents.AddToTriggerList(userService);
+
+            Task<bool> confirmationTask = userService.WaitForUserConfirmation();
+
+
+
+            // This line will await the user's confirmation.
+            bool confirmed = await confirmationTask;
+
+            // Now you can use the user's confirmation.
+            if (confirmed)
+            {
+
+                //If confirmed, allow the user to select new target, push them distance + might score
+
+            }
+
+            SO_BattleEvents.RemoveFromTriggerList(userService);
+
+
+        }
+
+        /*public override CS_AbilityTargetingData Target(Tile origin)
+        {
+
+            return new CS_AbilityTargetingData(CS_GridUtility.GetTilesFromOrigin(origin, Range, true), new List<Tile>() { origin });
+        }*/
+
+        public void SetTrigger(SO_BattleEvents events, MB_Actor user)
+        {
+            SO_BattleEvents.EventBeforeForcedMoved += Trigger;
+
+        }
+    }
+
 }

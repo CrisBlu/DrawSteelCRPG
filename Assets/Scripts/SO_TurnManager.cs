@@ -188,8 +188,8 @@ public class TurnData //Store all the data associated with an actor's single tur
             actions[ability.Type] -= 1;
         }
 
-        if(SO_TurnManager.Instance.IsPlayerTurn)
-            DefaultToState();
+        //if(SO_TurnManager.Instance.IsPlayerTurn)
+            //DefaultToState();
 
 
     }

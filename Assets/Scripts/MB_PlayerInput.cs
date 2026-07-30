@@ -13,7 +13,7 @@ public class MB_PlayerInput : MonoBehaviour
 {
     [SerializeField] Camera SceneCamera;
     [SerializeField] Grid Map;
-    [SerializeField] SO_User Player;
+    [SerializeField] public SO_User Player;
 
     
     private InputAction selectAction;

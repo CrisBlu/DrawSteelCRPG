@@ -59,7 +59,8 @@ public class A_SpearCharge : CS_Ability
 
         }
 
-        await targets[0].entity.TakeDamage(damage + favoredStat);//
+        SO_BattleEvents.RequestQueue.Enqueue(new RequestDamage(targets[0], damage + favoredStat));
+        SO_BattleEvents.TestingGoThroughQueue();
 
         return new CS_AbilityReturnData(true);
     }
@@ -104,7 +105,9 @@ public class A_Bow : CS_Ability
                 break;
 
         }
-        await targets[0].entity.TakeDamage(damage);
+
+        SO_BattleEvents.RequestQueue.Enqueue(new RequestDamage(targets[0], damage));
+        SO_BattleEvents.TestingGoThroughQueue();
         return new CS_AbilityReturnData(true);
     }
 }

@@ -213,20 +213,9 @@ public class A_Knockback : CS_Ability
                 distance = 3;
                 break;
         }
-
-        List<Tile> validPushLocations = CS_GridUtility.GetValidPushArea(Owner.currentTile, targets[0], distance);
-        //if original distance is (0,1), then this is along the y axis, only y needs to increase every cell
-        //if original distance is (1,0), then this is along the y axis, only x needs to increase every cell
-
-
-        CS_ColorGrid.ColorCells(validPushLocations, Color.blue);
-        AwaitTile tileRequest = new AwaitTile(validPushLocations);
-        MB_PlayerInput.inputRequest = tileRequest;
-        Tile tileToPushTarget = await tileRequest.WaitForUserConfirmation();
-
-        MB_Actor targetActor = (MB_Actor)targets[0].entity;
-        targetActor.ForcedMovement(tileToPushTarget, distance);
-
+        
+        SO_BattleEvents.RequestQueue.Enqueue(new RequestForceMove(targets[0], distance, Owner.currentTile));
+        SO_BattleEvents.TestingGoThroughQueue();
 
 
         return new CS_AbilityReturnData(true);
