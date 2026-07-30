@@ -29,7 +29,9 @@ public class CS_AbilityParser
 
     public static async Task<bool> ReadAbility(CS_Ability ability)
     {
-        for(int i = 0; i < ability.Instructions.Count; i++)
+        MB_PlayerInput.Instance.SetSelectState(E_SelectState.UsingAbility);
+
+        for (int i = 0; i < ability.Instructions.Count; i++)
         {
             Debug.Log(ability.Instructions.Count);
             switch (ability.Instructions[i])
@@ -147,7 +149,7 @@ public class CS_AbilityParser
                 await activeActor.TestShoot(target);
         }
         
-        CS_AbilityReturnData returnData = await ability.Use(turn);
+        bool returnData = await ability.Use();
         ability.targets.Clear();
 
 
@@ -157,7 +159,7 @@ public class CS_AbilityParser
             
         
         
-        return returnData.isSuccessful;
+        return returnData;
     }
 
 

@@ -34,14 +34,14 @@ public class A_SpearCharge : CS_Ability
     public override int Range => 1;
 
 
-    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    public override async Task<bool> Use()
     {
-        CS_Characteristics stats = data.actor.sheet.stats;
+        CS_Characteristics stats = Owner.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
 
 
 
-        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges, data.banes);
+        int tier = CS_DiceRoller.PowerRoll(favoredStat);
         int damage = 0;
         switch (tier)
         {
@@ -61,7 +61,7 @@ public class A_SpearCharge : CS_Ability
 
         SO_BattleEvents.AddRequest(new RequestDamage(targets[0], damage + favoredStat));
 
-        return new CS_AbilityReturnData(true);
+        return true;
     }
 }
 
@@ -74,20 +74,20 @@ public class A_Bow : CS_Ability
     public override int Range => 10;
 
 
-    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    public override async Task<bool> Use()
     {
-        CS_Characteristics stats = data.actor.sheet.stats;
+        CS_Characteristics stats = Owner.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
 
         int edge = 0;
-        if (data.actions[E_ActionType.move] == data.actor.Speed)
+        /*if (data.actions[E_ActionType.move] == data.actor.Speed)
         {
             data.actions[E_ActionType.move] = 0;
             edge++;
 
-        }
+        }*/
 
-        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges + edge, data.banes);
+        int tier = CS_DiceRoller.PowerRoll(favoredStat);
         int damage = 0;
         switch (tier)
         {
@@ -106,7 +106,7 @@ public class A_Bow : CS_Ability
         }
 
         SO_BattleEvents.AddRequest(new RequestDamage(targets[0], damage));
-        return new CS_AbilityReturnData(true);
+        return true;
     }
 }
 
@@ -125,13 +125,13 @@ public class A_GoblinFreeStrike : CS_Ability, ITrigger
 
     MB_Actor user;
 
-    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    public override async Task<bool> Use()
     {
 
         Debug.Log("Free strike");
         //data.target.entity.TakeDamage(2);
 
-        return new CS_AbilityReturnData(true);
+        return true;
     }
 
     public async void Trigger(Tile exit, Tile entered, MB_Actor actor)

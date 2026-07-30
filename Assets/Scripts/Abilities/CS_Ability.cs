@@ -1,7 +1,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -27,8 +26,8 @@ public abstract class CS_Ability
 
 
     
-    //This should be virtual
-    public abstract Task<CS_AbilityReturnData> Use(TurnData data);
+    
+    public abstract Task<bool> Use();
 
     public virtual CS_AbilityTargetingData Target(Tile origin)
     {
@@ -97,14 +96,14 @@ public class A_MeleeFreeStrike : CS_Ability
     public override int Range => 1;
 
 
-    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    public override async Task<bool> Use()
     {
-        CS_Characteristics stats = data.actor.sheet.stats;
+        CS_Characteristics stats = Owner.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
        
 
 
-        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges);
+        int tier = CS_DiceRoller.PowerRoll(favoredStat, 0);
 
         Debug.Log("Melee Free Strike " + targets[0].entity + "A tier " + tier);
         int damage = 0;
@@ -126,7 +125,7 @@ public class A_MeleeFreeStrike : CS_Ability
 
         SO_BattleEvents.AddRequest(new RequestDamage(targets[0], damage + favoredStat));
 
-        return new CS_AbilityReturnData(true);
+        return true;
     }
 
    
@@ -136,51 +135,7 @@ public class A_MeleeFreeStrike : CS_Ability
         return CS_GridUtility.GetTilesAndAllWithin(origin, Range, true);
     }
 }
-/*
 
-
-public class A_RangedFreeStrike: CS_Ability
-{
-    public override string Name => "Ranged Free Strike";
-    public override string Description => "A pot shot";
-    public override E_ActionType Type => E_ActionType.main;
-    public override List<string> Effects => new List<string> { "ranged", "signature" };
-    public override int Range => 5;
-
-
-    public override CS_AbilityReturnData Use(CS_AbilityInputData data)
-    {
-
-
-
-        CS_Characteristics stats = data.actor.sheet.stats;
-        int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
-
-        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges, data.banes);
-
-
-
-        switch (tier)
-        {
-            case 1:
-                data.target.entity.TakeDamage(2 + favoredStat);
-                break;
-
-            case 2:
-                data.target.entity.TakeDamage(4 + favoredStat);
-                break;
-
-            case 3 or 4:
-                data.target.entity.TakeDamage(6 + favoredStat);
-                break;
-
-        }
-
-
-        return new CS_AbilityReturnData(true);
-    }
-
-}*/
 
 public class A_Knockback : CS_Ability
 {
@@ -190,14 +145,14 @@ public class A_Knockback : CS_Ability
     public override List<string> Tags => new List<string> { "push" };
     public override int Range => 1;
 
-    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    public override async Task<bool> Use()
     {
         Queue<CS_CallbackData> callbackList = new();
         //MB_Actor targetActor = (MB_Actor)targets[0].entity;
         CS_Characteristics stats = Owner.sheet.stats;
         int distance = 0;
 
-        int tier = CS_DiceRoller.PowerRoll(stats.Might, data.edges, data.banes);
+        int tier = CS_DiceRoller.PowerRoll(stats.Might);
 
         switch (tier)
         {
@@ -217,7 +172,7 @@ public class A_Knockback : CS_Ability
         SO_BattleEvents.AddRequest(new RequestForceMove(targets[0], distance, Owner.currentTile));
 
 
-        return new CS_AbilityReturnData(true);
+        return true;
     }
 
     public override CS_AbilityTargetingData Target(Tile origin)
@@ -237,7 +192,7 @@ public class A_Charge : CS_Ability
     public override int Range => 0;
 
 
-    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    public override async Task<bool> Use()
     {
 
         List<Tile> validChargePath = CS_GridUtility.GetStepsToTake(targets[0], Owner.currentTile);
@@ -248,12 +203,12 @@ public class A_Charge : CS_Ability
 
 
 
-        TurnData newTurn = data.TurnManager.CreateAndStoreTurn(Owner, 1, 0, 0, "charge");
+        TurnData newTurn = SO_TurnManager.Instance.CreateAndStoreTurn(Owner, 1, 0, 0, "charge");
 
 
 
 
-        return new CS_AbilityReturnData(true);
+        return true;
     }
 
     public override CS_AbilityTargetingData Target(Tile origin)

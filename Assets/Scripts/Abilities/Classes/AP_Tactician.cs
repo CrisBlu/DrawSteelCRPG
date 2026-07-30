@@ -31,7 +31,7 @@ public class A_StrikeNow : CS_Ability
 
     
 
-    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    public override async Task<bool> Use()
     {
 
         foreach(Tile target in targets)
@@ -41,7 +41,7 @@ public class A_StrikeNow : CS_Ability
         }
         
 
-        return new CS_AbilityReturnData(true);
+        return true;
     }
 
     public override void Spend(bool spent)
@@ -69,14 +69,14 @@ public class A_BattleGrace: CS_Ability
  
  
 
-    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    public override async Task<bool> Use()
     {
 
-        CS_Characteristics stats = data.actor.sheet.stats;
+        CS_Characteristics stats = Owner.sheet.stats;
         Queue<CS_CallbackData> callbackQueue = new Queue<CS_CallbackData>();
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
 
-        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges, data.banes);
+        int tier = CS_DiceRoller.PowerRoll(favoredStat);
 
         int damage = 0;
 
@@ -90,20 +90,20 @@ public class A_BattleGrace: CS_Ability
 
             case 2:
                 damage = 8 + favoredStat;
-                Dance(data.actor, targetActor);
+                Dance(Owner, targetActor);
                 break;
 
             case 3 or 4:
                 damage = 11 + favoredStat;
-                Dance(data.actor, targetActor);
+                Dance(Owner, targetActor);
                 break;
 
         }
 
-        SO_BattleEvents.AddRequest(new RequestDamage(targets[0], damage));
+        SO_BattleEvents.AddRequest(new RequestDamage(targetActor.currentTile, damage));
 
 
-        return new CS_AbilityReturnData(true);
+        return true;
     }
 
     public override CS_AbilityTargetingData Target(Tile origin)
@@ -135,13 +135,13 @@ public class A_TwoShot : CS_Ability
 
 
 
-    public async override Task<CS_AbilityReturnData> Use(TurnData data)
+    public async override Task<bool> Use()
     {
 
-        CS_Characteristics stats = data.actor.sheet.stats;
+        CS_Characteristics stats = Owner.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
 
-        int tier = CS_DiceRoller.PowerRoll(favoredStat, data.edges, data.banes);
+        int tier = CS_DiceRoller.PowerRoll(favoredStat);
 
         int damage = 0;
 
@@ -169,7 +169,7 @@ public class A_TwoShot : CS_Ability
         
 
 
-        return new CS_AbilityReturnData(true);
+        return true;
     }
 
 }
@@ -186,7 +186,7 @@ public class A_Parry : CS_Ability, ITrigger
     MB_Actor user;
 
 
-    public override async Task<CS_AbilityReturnData> Use(TurnData data)
+    public override async Task<bool> Use()
     {
 
         //List<Tile> PathToFriend = CS_GridUtility.FindShortestPath(target.currentTile, user.currentTile);
@@ -194,7 +194,7 @@ public class A_Parry : CS_Ability, ITrigger
      
 
 
-        return new CS_AbilityReturnData(true);
+        return true;
     }
 
     private async void Trigger(RequestDamage request)

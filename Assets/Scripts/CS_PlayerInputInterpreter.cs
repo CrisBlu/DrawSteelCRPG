@@ -104,7 +104,7 @@ public static class PlayerInputInterpreter
    
 
         turn.usingAbility = ability;
-        MB_PlayerInput.Instance.SetSelectState(E_SelectState.UsingAbility);
+        
 
         bool proceed = await CS_AbilityParser.ReadAbility(ability);
 
