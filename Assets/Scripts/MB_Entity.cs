@@ -48,6 +48,7 @@ public class MB_Entity : MonoBehaviour
         return false;
     }
 
+    /*
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public virtual async Task TakeDamage(int damage)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -59,6 +60,6 @@ public class MB_Entity : MonoBehaviour
             Debug.Log(gameObject.name + " is dead");
         }
     }
-
+    */
 
 }

@@ -50,7 +50,7 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
 
 
 
-    public async void ForcedMovement(Tile pushedInto, int distance)
+    /*public async void ForcedMovement(Tile pushedInto, int distance)
     {
         //Shoves the actor into the next square to their destination, up to the distance
         //If something exists in that space, take damage and don't move 
@@ -91,7 +91,7 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
         ActorAnimator.SetTrigger("Damaged");
         await base.TakeDamage(damage);
         await SO_BattleEvents.TriggerActorTookDamageEvents(damage, this);
-    }
+    }*/
 
     //TODO: Implement Cap
     public void Heal(int heals)

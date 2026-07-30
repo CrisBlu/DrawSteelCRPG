@@ -2,11 +2,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using static A_BrutalSlam;
+using static UnityEngine.GraphicsBuffer;
 
 [CreateAssetMenu(fileName = "AP_Fury", menuName = "Scriptable Objects/AbilityPacks/Classes/Fury")]
 public class AP_Fury : SO_AbilityPack
 {
-    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_BrutalSlam(), new A_DevastatingRush() };
+    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_BrutalSlam(), new A_DevastatingRush(), new A_LinesOfForce() };
 }
 
 
@@ -52,25 +53,12 @@ public class A_BrutalSlam : CS_Ability
                 damage += 9;
                 distance = 4;
                 break;
-
         }
 
-        await targetActor.TakeDamage(damage);
+        SO_BattleEvents.AddRequest(new RequestDamage(targets[0], damage));
 
 
-        //This chunk of code can maybe be a "push request"
-
-        List<Tile> validPushLocations = CS_GridUtility.GetValidPushArea(Owner.currentTile, targets[0], distance);
-
-        CS_ColorGrid.ColorCells(validPushLocations, Color.blue);
-        AwaitTile tileRequest = new AwaitTile(validPushLocations);
-        MB_PlayerInput.inputRequest = tileRequest;
-        Tile tileToPushTarget = await tileRequest.WaitForUserConfirmation();
-
-       
-        targetActor.ForcedMovement(tileToPushTarget, distance);
-        //
-
+        SO_BattleEvents.AddRequest(new RequestForceMove(targets[0], distance, Owner.currentTile));
 
         return new CS_AbilityReturnData(true);
     }
@@ -135,7 +123,7 @@ public class A_BrutalSlam : CS_Ability
 
             await Movement.ActorMovement(Owner, chargePath);
             MB_Actor targetActor = (MB_Actor)target.entity;
-            await targetActor.TakeDamage(damage);
+            SO_BattleEvents.AddRequest(new RequestDamage(targets[0], damage));
  
 
             return new CS_AbilityReturnData(true);
@@ -191,8 +179,32 @@ public class A_BrutalSlam : CS_Ability
             // Now you can use the user's confirmation.
             if (confirmed)
             {
+                Owner.trigger = false;
 
-                //If confirmed, allow the user to select new target, push them distance + might score
+                //The original action is nulled, every trigger that was associated with it is cancelled
+                int newDistance = request.distance + Owner.sheet.stats.Might;
+                request.Cancel = true;
+
+
+                //If confirmed, allow the user to select new target within range
+                GF_PlayerInput.inputEnabled = true;
+
+
+                //Then the user will select where they would like to push that user, distance + might score
+                MB_PlayerInput.Instance.SetSelectState(E_SelectState.UsingAbility);
+                MB_PlayerInput.inputRequest = new AwaitTile(CS_GridUtility.GetTilesAndAllWithin(Owner.currentTile, Range).validTargets);
+
+                Tile newTarget = await MB_PlayerInput.inputRequest.WaitForUserConfirmation();
+
+                //Build the new request
+                RequestForceMove newRequest = new(newTarget, newDistance, Owner.currentTile);
+
+                
+                
+
+
+                //The new push happens instead
+                SO_BattleEvents.AddRequest(newRequest);
 
             }
 

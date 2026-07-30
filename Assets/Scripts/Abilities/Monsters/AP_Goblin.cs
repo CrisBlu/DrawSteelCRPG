@@ -59,8 +59,7 @@ public class A_SpearCharge : CS_Ability
 
         }
 
-        SO_BattleEvents.RequestQueue.Enqueue(new RequestDamage(targets[0], damage + favoredStat));
-        SO_BattleEvents.TestingGoThroughQueue();
+        SO_BattleEvents.AddRequest(new RequestDamage(targets[0], damage + favoredStat));
 
         return new CS_AbilityReturnData(true);
     }
@@ -106,8 +105,7 @@ public class A_Bow : CS_Ability
 
         }
 
-        SO_BattleEvents.RequestQueue.Enqueue(new RequestDamage(targets[0], damage));
-        SO_BattleEvents.TestingGoThroughQueue();
+        SO_BattleEvents.AddRequest(new RequestDamage(targets[0], damage));
         return new CS_AbilityReturnData(true);
     }
 }
@@ -148,7 +146,7 @@ public class A_GoblinFreeStrike : CS_Ability, ITrigger
 
         if (!actor.CompareTag(user.tag))
         {
-            await actor.TakeDamage(2);
+            //await actor.TakeDamage(2);
         }
 
 

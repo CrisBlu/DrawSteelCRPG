@@ -9,6 +9,8 @@ public interface IRequest
     public Task InvokeBeforeTriggers();
     public Task Resolve();
 
+    public bool Cancel { get; set; }
+
 }
 
 
@@ -16,6 +18,14 @@ public class RequestDamage : IRequest
 {
     public Tile target;
     public int damage;
+
+    public bool Cancel
+    {
+        get { return cancelled; }
+        set { cancelled = value; }
+    }
+    private bool cancelled = false;
+
 
     public RequestDamage(Tile target, int damage)
     {
@@ -49,6 +59,12 @@ public class RequestForceMove : IRequest
     public Tile target;
     public int distance;
     public Tile origin;
+    public bool Cancel
+    {
+        get { return cancelled; }
+        set { cancelled = value; }
+    }
+    private bool cancelled = false;
 
     public RequestForceMove(Tile target, int distance, Tile origin)
     {
@@ -71,6 +87,8 @@ public class RequestForceMove : IRequest
         
         await ForcedMovement(tileToPushTarget);
     }
+
+
 
     //I already know this is gonna need to be tweak to allow for off turn stuff
     public async Task<Tile> SelectTileToMoveTo()
@@ -117,9 +135,11 @@ public class RequestForceMove : IRequest
 
             if (!targetActor.UpdatePosition(targetActor.gridData.GetTile(nextCell)))
             {
-                await targetActor.TakeDamage(1);
+                //Need differentiate between taking damage from an ability and taking damage like this
+                //Wouldn't hurt to apply this all at once either
+                //await targetActor.TakeDamage(1);
 
-                await targetActor.gridData.GetTile(nextCell).entity.TakeDamage(1);
+                //await targetActor.gridData.GetTile(nextCell).entity.TakeDamage(1);
 
                 nextCell = targetActor.currentTile.position;
             }

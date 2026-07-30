@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   character: {fileID: 0}
   stats:
-    Might: 0
+    Might: 2
     Agility: 0
     Reason: 0
     Intuition: 0

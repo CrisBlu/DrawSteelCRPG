@@ -33,7 +33,7 @@ public class SO_BattleEvents : ScriptableObject
             await request.InvokeBeforeTriggers();
 
             //If rest of request is not canceled
-            if (request != null)
+            if (request.Cancel != true)
             {
                 await request?.Resolve();
             }
@@ -42,9 +42,16 @@ public class SO_BattleEvents : ScriptableObject
 
         requestLock = false;
 
+        //Needs a return to default function, can't use GF_PlayerInput because SelectMove requires an actor
         if (SO_TurnManager.Instance.IsPlayerTurn)
             MB_PlayerInput.Instance.SetSelectState(E_SelectState.SelectingMove);
 
+    }
+
+    public static void AddRequest(IRequest request)
+    {
+        RequestQueue.Enqueue(request);
+        TestingGoThroughQueue();
     }
 
     static public WaitFor HoldOnTriggerList;

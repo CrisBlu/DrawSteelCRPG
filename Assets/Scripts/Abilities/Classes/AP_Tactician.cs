@@ -100,7 +100,7 @@ public class A_BattleGrace: CS_Ability
 
         }
 
-        await targetActor.TakeDamage(damage);
+        SO_BattleEvents.AddRequest(new RequestDamage(targets[0], damage));
 
 
         return new CS_AbilityReturnData(true);
@@ -164,7 +164,7 @@ public class A_TwoShot : CS_Ability
 
         foreach(Tile target in targets)
         {
-            await target.entity.TakeDamage(damage);
+            SO_BattleEvents.AddRequest(new RequestDamage(target, damage));
         }
         
 

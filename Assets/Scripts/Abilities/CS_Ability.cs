@@ -124,7 +124,7 @@ public class A_MeleeFreeStrike : CS_Ability
 
         }
 
-        await targets[0].entity.TakeDamage(damage + favoredStat);
+        SO_BattleEvents.AddRequest(new RequestDamage(targets[0], damage + favoredStat));
 
         return new CS_AbilityReturnData(true);
     }
@@ -214,8 +214,7 @@ public class A_Knockback : CS_Ability
                 break;
         }
         
-        SO_BattleEvents.RequestQueue.Enqueue(new RequestForceMove(targets[0], distance, Owner.currentTile));
-        SO_BattleEvents.TestingGoThroughQueue();
+        SO_BattleEvents.AddRequest(new RequestForceMove(targets[0], distance, Owner.currentTile));
 
 
         return new CS_AbilityReturnData(true);
