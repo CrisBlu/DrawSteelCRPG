@@ -12,16 +12,17 @@ public class AP_Fury : SO_AbilityPack
 
 
 
-public class A_BrutalSlam : CS_Ability
+public class A_BrutalSlam : CS_Ability, ITieredAbility
 {
     public override string Name => "Brutal Slam";
     public override string Description => "Drive them back!";
     public override E_ActionType Type => E_ActionType.main;
     public override List<string> Tags => new List<string> { "melee", "signature", "strike" };
     public override int Range => 1;
+    public List<E_Stats> BonusStat => new() { E_Stats.M };
 
 
-    public async override Task<bool> Use()
+    public async override Task<bool> Use(int tier = 0)
     {
 
         CS_Characteristics stats = Owner.sheet.stats;
@@ -29,7 +30,6 @@ public class A_BrutalSlam : CS_Ability
 
         int favoredStat = stats.Might;
 
-        int tier = CS_DiceRoller.PowerRoll(favoredStat);
 
         int damage = favoredStat;
 
@@ -62,24 +62,25 @@ public class A_BrutalSlam : CS_Ability
     }
 
 }
-public class A_DevastatingRush : CS_Ability
+public class A_DevastatingRush : CS_Ability, ITieredAbility
 {
     public override string Name => "Devastating Rush";
     public override string Description => "Ready or not!";
     public override E_ActionType Type => E_ActionType.main;
     public override List<string> Tags => new List<string> { "melee", "signature", "strike" };
     public override int Range => 4;
+    public List<E_Stats> BonusStat => new() { E_Stats.M, E_Stats.A };
 
 
-    public async override Task<bool> Use()
+    public async override Task<bool> Use(int tier = 0)
     {
         CS_Characteristics stats = Owner.sheet.stats;
         Tile target = targets[0];
 
+        //Might and agility, you find this out in RollAbility, how can we avoid this?
         int favoredStat = stats.Might;
 
         int damage = favoredStat;
-        int tier = CS_DiceRoller.PowerRoll(favoredStat);
 
 
         //Charge could work like this, but if your target is surrounded I need a fail condition
@@ -139,7 +140,7 @@ public class A_LinesOfForce : CS_Ability, ITrigger
 
 
     RequestForceMove request;
-    public override async Task<bool> Use()
+    public override async Task<bool> Use(int tier = 0)
     {
         //The original action is nulled, every trigger that was associated with it is cancelled
         request.Cancel = true;

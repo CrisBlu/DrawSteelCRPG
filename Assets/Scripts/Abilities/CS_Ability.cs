@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 
 
 public abstract class CS_Ability
@@ -27,7 +28,7 @@ public abstract class CS_Ability
 
     
     
-    public abstract Task<bool> Use();
+    public abstract Task<bool> Use(int tier = 0);
 
     public virtual CS_AbilityTargetingData Target(Tile origin)
     {
@@ -42,6 +43,33 @@ public abstract class CS_Ability
 
 
 }
+
+
+
+public interface ITieredAbility
+{
+    public List<E_Stats> BonusStat { get;}
+
+    public void RollAbility(int edges, int banes)
+    {
+        CS_Ability abilityData = this as CS_Ability;
+        CS_Characteristics stats = abilityData.Owner.sheet.stats;
+
+        int bonus = -5;
+        foreach(E_Stats stat in BonusStat)
+        {
+            if(stats.Get(stat) > bonus)
+            {
+                bonus = stats.Get(stat);
+            }
+        }
+        
+
+        SO_BattleEvents.AddRequest(new RequestPowerRoll(abilityData, bonus, edges, banes));
+    }
+}
+
+
 
 
 public class CS_AbilityTargetingData
@@ -87,25 +115,22 @@ public class CS_CallbackData
     }
 }
 
-public class A_MeleeFreeStrike : CS_Ability
+public class A_MeleeFreeStrike : CS_Ability, ITieredAbility
 {
     public override string Name => "Melee Free Strike";
     public override string Description => "A simple strike";
     public override E_ActionType Type => E_ActionType.main;
     public override List<string> Tags => new List<string> { "charge", "signature", "melee", "strike"};
     public override int Range => 1;
+    public List<E_Stats> BonusStat => new List<E_Stats>() { E_Stats.M, E_Stats.A};
 
-
-    public override async Task<bool> Use()
+    public override async Task<bool> Use(int tier = 0)
     {
         CS_Characteristics stats = Owner.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
-       
+   
 
-
-        int tier = CS_DiceRoller.PowerRoll(favoredStat, 0);
-
-        Debug.Log("Melee Free Strike " + targets[0].entity + "A tier " + tier);
+     
         int damage = 0;
         switch (tier)
         {
@@ -128,31 +153,30 @@ public class A_MeleeFreeStrike : CS_Ability
         return true;
     }
 
-   
-
     public override CS_AbilityTargetingData Target(Tile origin)
     {
         return CS_GridUtility.GetTilesAndAllWithin(origin, Range, true);
     }
+
+    
+ 
+
 }
 
 
-public class A_Knockback : CS_Ability
+public class A_Knockback : CS_Ability, ITieredAbility
 {
     public override string Name => "Knockback";
     public override string Description => "Push your target back";
     public override E_ActionType Type => E_ActionType.maneuver;
     public override List<string> Tags => new List<string> { "push" };
     public override int Range => 1;
+    public List<E_Stats> BonusStat => new List<E_Stats>() { E_Stats.M};
 
-    public override async Task<bool> Use()
+    public override async Task<bool> Use(int tier = 0)
     {
-        Queue<CS_CallbackData> callbackList = new();
-        //MB_Actor targetActor = (MB_Actor)targets[0].entity;
-        CS_Characteristics stats = Owner.sheet.stats;
-        int distance = 0;
 
-        int tier = CS_DiceRoller.PowerRoll(stats.Might);
+        int distance = 0;
 
         switch (tier)
         {
@@ -192,7 +216,7 @@ public class A_Charge : CS_Ability
     public override int Range => 0;
 
 
-    public override async Task<bool> Use()
+    public override async Task<bool> Use(int tier = 0)
     {
 
         List<Tile> validChargePath = CS_GridUtility.GetStepsToTake(targets[0], Owner.currentTile);

@@ -8,7 +8,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AP_Tactician", menuName = "Scriptable Objects/AbilityPacks/Classes/Tactician")]
 public class AP_Tactician : SO_AbilityPack
 {
-    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_StrikeNow(), new A_Parry(), new A_BattleGrace(), new A_TwoShot() };
+    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_StrikeNow(), new A_Mark(), new A_Parry(), new A_BattleGrace(), new A_TwoShot() };
 
 }
 
@@ -31,7 +31,7 @@ public class A_StrikeNow : CS_Ability
 
     
 
-    public override async Task<bool> Use()
+    public override async Task<bool> Use(int tier = 0)
     {
 
         foreach(Tile target in targets)
@@ -59,24 +59,21 @@ public class A_StrikeNow : CS_Ability
     }
 }
 
-public class A_BattleGrace: CS_Ability
+public class A_BattleGrace: CS_Ability, ITieredAbility
 {
     public override string Name => "Battle Grace";
     public override string Description => "Fient and Spin";
     public override E_ActionType Type => E_ActionType.main;
     public override List<string> Tags => new List<string> { "melee", "signature", "strike" };
     public override int Range => 1;
- 
- 
+    public List<E_Stats> BonusStat => new() { E_Stats.M, E_Stats.A };
 
-    public override async Task<bool> Use()
+
+    public override async Task<bool> Use(int tier = 0)
     {
 
         CS_Characteristics stats = Owner.sheet.stats;
-        Queue<CS_CallbackData> callbackQueue = new Queue<CS_CallbackData>();
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
-
-        int tier = CS_DiceRoller.PowerRoll(favoredStat);
 
         int damage = 0;
 
@@ -123,7 +120,7 @@ public class A_BattleGrace: CS_Ability
 
 
 
-public class A_TwoShot : CS_Ability
+public class A_TwoShot : CS_Ability, ITieredAbility
 {
     public override string Name => "Two Shot";
     public override string Description => "Fire two arrows back to back";
@@ -133,18 +130,15 @@ public class A_TwoShot : CS_Ability
     public override List<E_AbilityInstructions> Instructions { get { return new List<E_AbilityInstructions>() { E_AbilityInstructions.SelectTarget, E_AbilityInstructions.SelectTarget,
         E_AbilityInstructions.Confirm }; } }
 
+    public List<E_Stats> BonusStat => new() { E_Stats.M, E_Stats.A };
 
 
-    public async override Task<bool> Use()
+
+    public async override Task<bool> Use(int tier = 0)
     {
 
-        CS_Characteristics stats = Owner.sheet.stats;
-        int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
-
-        int tier = CS_DiceRoller.PowerRoll(favoredStat);
 
         int damage = 0;
-
 
         switch (tier)
         {
@@ -174,6 +168,283 @@ public class A_TwoShot : CS_Ability
 
 }
 
+public class A_Mark : CS_Ability, ITrigger
+{
+    public override string Name => "Mark";
+    public override string Description => "Nothing gets by me";
+    public override E_ActionType Type => E_ActionType.maneuver;
+    public override List<string> Tags => new List<string> { "ranged" };
+    public override int Range => 10;
+
+    A_TriggerMark TriggerAbility;
+    Status mark = new Status(E_StatusType.marked, E_StatusEnd.Never);
+
+
+
+    public async override Task<bool> Use(int tier = 0)
+    {
+
+        MB_Actor targetActor = targets[0].entity as MB_Actor;
+
+        if (TriggerAbility.currentlyMarked != null)
+        {
+            if (targetActor == TriggerAbility.currentlyMarked) { return false; }
+            TriggerAbility.currentlyMarked.Condition.Remove(mark);
+        }
+
+
+
+
+
+        foreach (Status status in targetActor.Condition)
+        {
+            if (status.status == E_StatusType.marked) { return false; }
+
+        }
+
+        targetActor.Condition.Add(mark);
+        TriggerAbility.currentlyMarked = targetActor;
+
+        //Temp, this ability makes no requests so... yeah
+        MB_PlayerInput.Instance.SetSelectState(E_SelectState.SelectingMove);
+
+        return true;
+    }
+
+    public void Trigger(RequestPowerRoll request)
+    {
+
+        //Mark gives an edge to allies
+        if (!Owner.CompareTag(request.ability.Owner.tag))
+            return;
+
+        request.edge++;
+    }
+
+    public void SetTrigger(SO_BattleEvents events, MB_Actor user)
+    {
+        TriggerAbility = new A_TriggerMark(Owner);
+        SO_BattleEvents.EventBeforePowerRoll += Trigger;
+        SO_BattleEvents.EventBeforeTakeDamage += TriggerAbility.Trigger;
+    }
+
+
+
+}
+
+public class A_TriggerMark: CS_Ability, ITrigger
+{
+    public override string Name => name;
+    private string name = "Trigger Mark";
+    public override string Description => description;
+    private string description = "There! Exploit their weakness...";
+    public override E_ActionType Type => E_ActionType.trigger;
+    public override List<string> Tags => new List<string> {};
+    public override int Range => 1;
+
+    public MB_Actor currentlyMarked = null;
+
+    public A_TriggerMark(MB_Actor Owner, string name = "Trigger Mark", string description = "There! Exploit their weakness...")
+    {
+        this.name = name;
+        this.description = description;
+        this.Owner = Owner;
+    }
+
+    public async override Task<bool> Use(int tier = 0)
+    {
+        return true;
+    }
+
+    public async void Trigger(RequestDamage request)
+    {
+        MB_Actor targetActor = request.target.entity as MB_Actor;
+
+        //if the target is marked by this tactician
+        if (targetActor != currentlyMarked) { return; }
+
+        List<AwaitTrigger> triggers = new List<AwaitTrigger>();
+
+
+        //Need to ask to spend one focus, maybe this is another ability entirely?
+
+        //Start adding triggers
+        TriggerExtraDamage(request, triggers);
+        TriggerRecovery(request, triggers);
+        TriggerShift(request, triggers);
+        TriggerTaunt(request, triggers);
+
+
+
+    }
+
+  
+
+    //Biggest thing is that this is a free trigger but you may only pick one of these options,I think the play is one trigger function
+    //that makes four triggers, and choosing one removes the rest
+
+    //And also need to check if person damaging is friend and if enemy is marked
+
+    private async void TriggerExtraDamage(RequestDamage request, List<AwaitTrigger> triggerFamily)
+    {
+
+        A_TriggerMark thisAbility = new(Owner, "Strike Hard", "...and go for the eyes!");
+        AwaitTrigger trigger = new(thisAbility, Owner);
+
+        triggerFamily.Add(trigger);
+
+
+        SO_BattleEvents.AddToTriggerList(trigger);
+
+
+        Task<bool> confirmationTask = trigger.WaitForUserConfirmation();
+
+
+        bool confirmed = await confirmationTask;
+
+        if (confirmed)
+        {
+            //If one option in the family is selected, the rest are discarded
+            foreach (AwaitTrigger option in triggerFamily)
+            {
+                if (trigger != option)
+                {
+                    option.OnUserActionCompleted(false);
+                }
+            }
+
+            request.damage += Owner.sheet.stats.Reason * 2;
+
+
+        }
+
+        //Remove yourself from trigger list
+        SO_BattleEvents.RemoveFromTriggerList(trigger);
+    }
+
+    private async void TriggerRecovery(RequestDamage request, List<AwaitTrigger> triggerFamily)
+    {
+        //Need to implement recovery
+
+        A_TriggerMark thisAbility = new(Owner, "Strike Proud", "...and they cannot win!");
+
+        AwaitTrigger trigger = new(thisAbility, Owner);
+
+        triggerFamily.Add(trigger);
+
+
+        SO_BattleEvents.AddToTriggerList(trigger);
+
+
+        Task<bool> confirmationTask = trigger.WaitForUserConfirmation();
+
+
+        bool confirmed = await confirmationTask;
+
+        if (confirmed)
+        {
+            //If one option in the family is selected, the rest are discarded
+            foreach (AwaitTrigger option in triggerFamily)
+            {
+                if (trigger != option)
+                {
+                    option.OnUserActionCompleted(false);
+                }
+            }
+
+            //Do effect now
+
+        }
+
+        //Remove yourself from trigger list
+        SO_BattleEvents.RemoveFromTriggerList(trigger);
+    }
+
+    private async void TriggerShift(RequestDamage request, List<AwaitTrigger> triggerFamily)
+    {
+        //Need to implement shift movement
+        A_TriggerMark thisAbility = new(Owner, "Strike Fast", "...to get in and get out!");
+
+        AwaitTrigger trigger = new(thisAbility, Owner);
+
+        triggerFamily.Add(trigger);
+
+
+        SO_BattleEvents.AddToTriggerList(trigger);
+
+
+        Task<bool> confirmationTask = trigger.WaitForUserConfirmation();
+
+
+        bool confirmed = await confirmationTask;
+
+        if (confirmed)
+        {
+            //If one option in the family is selected, the rest are discarded
+            foreach (AwaitTrigger option in triggerFamily)
+            {
+                if (trigger != option)
+                {
+                    option.OnUserActionCompleted(false);
+                }
+            }
+
+            //Do effect now
+
+        }
+
+        //Remove yourself from trigger list
+        SO_BattleEvents.RemoveFromTriggerList(trigger);
+    }
+
+    private async void TriggerTaunt(RequestDamage request, List<AwaitTrigger> triggerFamily)
+    {
+        //Need to implement data for attacker in Request
+        //Need to implement shift taunt
+        A_TriggerMark thisAbility = new (Owner, "Strike Foul", "...and keep their eyes on me.");
+
+        AwaitTrigger trigger = new(thisAbility, Owner);
+
+        triggerFamily.Add(trigger);
+
+
+        SO_BattleEvents.AddToTriggerList(trigger);
+
+
+        Task<bool> confirmationTask = trigger.WaitForUserConfirmation();
+
+
+        bool confirmed = await confirmationTask;
+
+        if (confirmed)
+        {
+            //If one option in the family is selected, the rest are discarded
+            foreach (AwaitTrigger option in triggerFamily)
+            {
+                if (trigger != option)
+                {
+                    option.OnUserActionCompleted(false);
+                }
+            }
+
+            //Do effect now
+
+        }
+
+        //Remove yourself from trigger list
+        SO_BattleEvents.RemoveFromTriggerList(trigger);
+    }
+
+    public void SetTrigger(SO_BattleEvents events, MB_Actor user)
+    {
+       
+    }
+
+    
+
+}
+
+
 
 public class A_Parry : CS_Ability, ITrigger
 {
@@ -186,7 +457,7 @@ public class A_Parry : CS_Ability, ITrigger
     MB_Actor user;
 
 
-    public override async Task<bool> Use()
+    public override async Task<bool> Use(int tier = 0)
     {
 
         //List<Tile> PathToFriend = CS_GridUtility.FindShortestPath(target.currentTile, user.currentTile);

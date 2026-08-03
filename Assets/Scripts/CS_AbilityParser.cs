@@ -33,7 +33,7 @@ public class CS_AbilityParser
 
         for (int i = 0; i < ability.Instructions.Count; i++)
         {
-            Debug.Log(ability.Instructions.Count);
+       
             switch (ability.Instructions[i])
             {
                 case E_AbilityInstructions.SelectTarget:
@@ -148,9 +148,21 @@ public class CS_AbilityParser
             foreach(Tile target in ability.targets)
                 await activeActor.TestShoot(target);
         }
+
+        bool returnData = true;
         
-        bool returnData = await ability.Use();
-        ability.targets.Clear();
+        //This whole function feels not very needed, edges and banes can be determined slowly off of triggers
+        if(ability is ITieredAbility)
+        {
+            ITieredAbility tieredAbility = (ITieredAbility)ability;
+            tieredAbility.RollAbility(edges, banes);
+        }else
+        {
+            returnData = await ability.Use();
+            ability.targets.Clear();
+        }
+        
+        
 
 
 

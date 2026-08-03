@@ -230,6 +230,14 @@ public class SO_TurnManager : ScriptableObject
             }
         }
     }
+
+    public TurnData ActiveTurn
+    {
+        get
+        {
+            return turnsToResolve.Peek();
+        }
+    }
     [SerializeField] private List<SO_User> usersInBattle;
     private void OnEnable()
     {

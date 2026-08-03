@@ -2,6 +2,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+
+
+
+public enum E_Stats
+{
+    M,
+    A,
+    R,
+    I,
+    P
+}
+
 [System.Serializable]
 public class CS_Characteristics
 {
@@ -20,6 +32,29 @@ public class CS_Characteristics
         Reason = R;
         Intuition = I;
         Presence = P;
+    }
+
+    public int Get(E_Stats stat)
+    {
+        switch(stat)
+        {
+            case E_Stats.M:
+                return Might;
+
+            case E_Stats.A:
+                return Agility;
+
+            case E_Stats.R:
+                return Reason;
+
+            case E_Stats.I:
+                return Intuition;
+
+            case E_Stats.P:
+                return Presence;
+        }
+
+        return 0;
     }
 }
 

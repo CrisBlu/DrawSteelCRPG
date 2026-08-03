@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 using static GF_PlayerInput;
-using static UnityEngine.UI.GridLayoutGroup;
+
 
 public static class Movement
 {
     
-
+    //The fact that current tile can equal one and the actor can be elsewhere is really bad
     public static bool UpdateEntityPosition(MB_Entity actor, Tile newTile)
     {
         //Add to grid will update this in grid data, I think I do not like this
@@ -24,8 +24,7 @@ public static class Movement
             //assign new current tile in actor 
             actor.currentTile = newTile;
 
-            //Move actor in physical space, not to be done outside of a coroutine
-            //actor.transform.position = new Vector3(newTile.position.x, 0, newTile.position.y);
+
 
             return true;
         }

@@ -25,23 +25,22 @@ public class AP_Goblin : SO_AbilityPack
 
 
 
-public class A_SpearCharge : CS_Ability
+public class A_SpearCharge : CS_Ability, ITieredAbility
 {
     public override string Name => "Spear Charge";
     public override string Description => "The goblin rushes forward";
     public override E_ActionType Type => E_ActionType.main;
     public override List<string> Tags => new List<string> { "charge", "melee", "strike" };
     public override int Range => 1;
+    public List<E_Stats> BonusStat => new() { E_Stats.M, E_Stats.A };
 
 
-    public override async Task<bool> Use()
+    public override async Task<bool> Use(int tier = 0)
     {
         CS_Characteristics stats = Owner.sheet.stats;
         int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
 
 
-
-        int tier = CS_DiceRoller.PowerRoll(favoredStat);
         int damage = 0;
         switch (tier)
         {
@@ -65,29 +64,27 @@ public class A_SpearCharge : CS_Ability
     }
 }
 
-public class A_Bow : CS_Ability
+public class A_Bow : CS_Ability, ITieredAbility
 {
     public override string Name => "Bow";
     public override string Description => "deadass this is the only attack named bow";
     public override E_ActionType Type => E_ActionType.main;
     public override List<string> Tags => new List<string> { "ranged", "weapon", "strike" };
     public override int Range => 10;
+    public List<E_Stats> BonusStat => new() { E_Stats.M, E_Stats.A};
 
-
-    public override async Task<bool> Use()
+    public override async Task<bool> Use(int tier = 0)
     {
-        CS_Characteristics stats = Owner.sheet.stats;
-        int favoredStat = stats.Might >= stats.Agility ? stats.Might : stats.Agility;
 
-        int edge = 0;
-        /*if (data.actions[E_ActionType.move] == data.actor.Speed)
+
+        /*int edge = 0;
+        if (data.actions[E_ActionType.move] == data.actor.Speed)
         {
             data.actions[E_ActionType.move] = 0;
             edge++;
 
         }*/
 
-        int tier = CS_DiceRoller.PowerRoll(favoredStat);
         int damage = 0;
         switch (tier)
         {
@@ -125,7 +122,7 @@ public class A_GoblinFreeStrike : CS_Ability, ITrigger
 
     MB_Actor user;
 
-    public override async Task<bool> Use()
+    public override async Task<bool> Use(int tier = 0)
     {
 
         Debug.Log("Free strike");

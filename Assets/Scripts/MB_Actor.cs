@@ -11,18 +11,24 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
     [SerializeField] private SO_ActorEvents ActorEvents;
     public Animator ActorAnimator;
 
-    //Temp
-    public bool turnTaken = false;
-
+   
     //public List<CS_Ability> abilities = new List<CS_Ability>();
     public Dictionary<string, CS_Ability> abilities = new Dictionary<string, CS_Ability>();
     public SO_CharacterSheet sheet;
-
-    [NonSerialized] public int resource = 0;
-
-
     public int Speed = 5;
+
+
+
+    //Per battle (temp)
+    [NonSerialized] public int resource = 0;
+    public bool turnTaken = false;
     public bool trigger;
+    /*[NonSerialized]*/ public List<Status> Condition = new List<Status>();
+    int surges;
+
+
+    
+    
     protected override void Start()
     {
         base.Start();

@@ -1,7 +1,9 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using UnityEngine;
+
 
 
 public interface IRequest
@@ -13,6 +15,101 @@ public interface IRequest
 
 }
 
+public enum E_MoveType
+{
+    normal,
+    shift,
+    teleport
+}
+
+public class RequestPowerRoll : IRequest
+{
+    public int edge = 0;
+    public int bane = 0;
+    public int bonus = 0;
+    public CS_Ability ability;
+    public bool Cancel
+    {
+        get { return cancelled; }
+        set { cancelled = value; }
+    }
+    private bool cancelled = false;
+
+    public RequestPowerRoll(CS_Ability ability, int bonus = 0, int edge = 0, int bane = 0)
+    {
+        this.edge = edge;
+        this.bane = bane;
+        this.bonus = bonus;
+        this.ability = ability;
+    }
+
+    public async Task InvokeBeforeTriggers()
+    {
+        await SO_BattleEvents.TriggerBeforePowerRollEvents(this);
+    }
+
+    public async Task Resolve()
+    {
+
+
+        int tier = CS_DiceRoller.PowerRoll(bonus, edge, bane);
+        await ability.Use(tier);
+
+        
+      
+
+    }
+}
+
+public class RequestMovmentWithInput : IRequest
+{
+    //There is a class of ability that will require movement input after the ability happens
+    public MB_Actor acting;
+    public List<Tile> validInputs;
+    public E_MoveType moveType;
+
+
+    public bool Cancel
+    {
+        get { return cancelled; }
+        set { cancelled = value; }
+    }
+    private bool cancelled = false;
+
+    public RequestMovmentWithInput(MB_Actor acting, List<Tile> validInputs, E_MoveType moveType = E_MoveType.normal)
+    {
+        this.acting = acting;
+        this.validInputs = validInputs;
+        this.moveType = moveType;
+    }
+
+    public async Task InvokeBeforeTriggers()
+    {
+
+    }
+
+    public async Task Resolve()
+    {
+
+        switch(moveType) 
+        {
+            case E_MoveType.teleport:
+
+
+                //This pattern of four lines can probably be it's own function
+                CS_ColorGrid.ColorCells(validInputs, Color.blue);
+                AwaitTile tileRequest = new AwaitTile(validInputs);
+                MB_PlayerInput.inputRequest = tileRequest;
+                Tile tileToTeleportTo = await tileRequest.WaitForUserConfirmation();
+
+                Movement.UpdateEntityPosition(acting, tileToTeleportTo);
+                acting.transform.position = new Vector3(tileToTeleportTo.position.x, 0, tileToTeleportTo.position.y);
+
+                break;
+        }
+    }
+
+}
 
 public class RequestDamage : IRequest
 {

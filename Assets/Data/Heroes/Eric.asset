@@ -10,18 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 174415ff9d8c64c4181ea787d453c0c2, type: 3}
-  m_Name: John
+  m_Name: Eric
   m_EditorClassIdentifier: 
   character: {fileID: 0}
   stats:
-    Might: 2
+    Might: 0
     Agility: 0
-    Reason: 2
+    Reason: 0
     Intuition: 0
     Presence: 0
-  abilityPacks:
-  - {fileID: 11400000, guid: 36b892ec0d9e54e47b202956cea39e3d, type: 2}
-  - {fileID: 11400000, guid: 5bca7751f260bcc42aca6b6d477aa98d, type: 2}
-  BattleEvents: {fileID: 11400000, guid: d3f20eab4781bb447a2a2b32a56fb261, type: 2}
+  abilityPacks: []
+  BattleEvents: {fileID: 0}
   behaviors: []
   preferredAttack: 

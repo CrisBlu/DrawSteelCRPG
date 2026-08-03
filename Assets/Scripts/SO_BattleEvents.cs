@@ -9,6 +9,8 @@ public class SO_BattleEvents : ScriptableObject
 {
 
     [HideInInspector] public event Action<Tile, Tile, MB_Actor> EventActorLeftTile;
+    [HideInInspector] public static event Action<RequestPowerRoll> EventBeforePowerRoll;
+
     [HideInInspector] public static event Action<RequestDamage> EventBeforeTakeDamage;
     [HideInInspector] public static event Action<int, MB_Actor> EventActorTookDamage;
     [HideInInspector] public static event Action<RequestForceMove> EventBeforeForcedMoved;
@@ -64,6 +66,13 @@ public class SO_BattleEvents : ScriptableObject
     {
         //Will ask all enemies with triggers that trigger when an enemy enters or leaves a space to check their triggers
         EventActorLeftTile.Invoke(exit, entered, actor);
+    }
+
+    public static async Task TriggerBeforePowerRollEvents(RequestPowerRoll request)
+    {
+        EventBeforePowerRoll?.Invoke(request);
+
+        await HoldUntilTriggersAreDone();
     }
 
 
