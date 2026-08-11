@@ -1129,6 +1129,7 @@ GameObject:
   - component: {fileID: 338471314}
   - component: {fileID: 338471317}
   - component: {fileID: 338471316}
+  - component: {fileID: 338471318}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1254,6 +1255,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 338471313}
   m_CullTransparentMesh: 1
+--- !u!114 &338471318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 338471313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 153ac8dcea3ec794e82d88e5e7975f08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 338471316}
 --- !u!1 &373226763
 GameObject:
   m_ObjectHideFlags: 0
@@ -1442,7 +1456,7 @@ PrefabInstance:
     - target: {fileID: 8593110225471675797, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
       propertyPath: sheet
       value: 
-      objectReference: {fileID: 11400000, guid: 48edb55a4c2d8f34f9e61d80a85ec687, type: 2}
+      objectReference: {fileID: 11400000, guid: e02b17cc4cacbb44194b6692a633f2f4, type: 2}
     - target: {fileID: 8593110225471675797, guid: 882814225fffdbe4b90c6ac64e996e6c, type: 3}
       propertyPath: turnTaken
       value: 0

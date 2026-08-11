@@ -17,9 +17,11 @@ MonoBehaviour:
     Might: 0
     Agility: 0
     Reason: 0
-    Intuition: 0
+    Intuition: 2
     Presence: 0
-  abilityPacks: []
-  BattleEvents: {fileID: 0}
+  abilityPacks:
+  - {fileID: 11400000, guid: 36b892ec0d9e54e47b202956cea39e3d, type: 2}
+  - {fileID: 11400000, guid: 70a713b77fbd22b4cb92a2c4032cba9e, type: 2}
+  BattleEvents: {fileID: 11400000, guid: d3f20eab4781bb447a2a2b32a56fb261, type: 2}
   behaviors: []
   preferredAttack: 

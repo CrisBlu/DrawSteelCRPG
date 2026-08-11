@@ -10,6 +10,7 @@ public static class GF_PlayerInput
 
     public static bool inputEnabled;
     public static bool isPlayerTurn;
+    public static bool actorCommited;
 
     public static E_SelectState selectState;
 }

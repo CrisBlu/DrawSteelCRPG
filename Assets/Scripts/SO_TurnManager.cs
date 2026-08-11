@@ -255,6 +255,7 @@ public class SO_TurnManager : ScriptableObject
     {
         InputSystem.actions.FindAction("Select").performed -= StartBattle;
         EventActivateUser.Invoke(Initative.EnableInitative(usersInBattle));
+        GF_PlayerInput.actorCommited = false;
     }
 
 
