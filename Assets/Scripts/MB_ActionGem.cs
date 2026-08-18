@@ -16,7 +16,7 @@ public class MB_ActionGem : MonoBehaviour
     //Clicking button should bring up selectAction mode
     private void Update()
     {
-        if (Player.activeTurn != null && Player.activeTurn.actions[ActionType.actionType] > 0)
+        if ((Player.activeTurn != null && Player.activeTurn.actions[ActionType.actionType] > 0) || GF_PlayerInput.isPlayerTurn)
         {
             button.interactable = true;
         }

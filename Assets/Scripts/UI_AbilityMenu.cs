@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,23 +12,31 @@ public class UI_AbilityMenu : MonoBehaviour
     [SerializeField] SO_ActorEvents ActorEvents;
     [SerializeField] GameObject Sidebar;
 
+
     [SerializeField] SO_User Player;
 
     private E_ActionType typeToDisplay = E_ActionType.main;
     private List<GameObject> displayedAbilties = new List<GameObject>();
 
+
+    //Testing
+    public static UI_AbilityMenu instance;
+
     public void Awake()
     {
-        ActorEvents.DisplayAbilities.AddListener(LoadAbilities);
+        instance = this;
         ActorEvents.HideAbilities.AddListener(UnloadAbilities);
 
         SO_BattleEvents.EventPotentialTriggersChanged += LoadTriggers;
     }
 
-    public void LoadAbilities(TurnData turn)
+    public void LoadAbilities()
     {
         
         ClearAbilities();
+        TurnData turn = SO_TurnManager.Instance.ActiveTurn;
+
+        if(turn == null) { return; }
 
         //Hardcode, Monsters don't trigger this
         if (turn.actor.CompareTag("Monster"))
@@ -36,6 +45,7 @@ public class UI_AbilityMenu : MonoBehaviour
         }
 
         
+        
         ToggleSidebar(true);
 
         List<CS_Ability> abilities = turn.actor.abilities.Values.ToList();
@@ -43,6 +53,7 @@ public class UI_AbilityMenu : MonoBehaviour
         {
             if (ability.Type != typeToDisplay)
             { continue; }
+
 
             if (turn.abilityTagRestrict != null && !ability.Tags.Contains(turn.abilityTagRestrict))
             { continue; }
@@ -57,13 +68,56 @@ public class UI_AbilityMenu : MonoBehaviour
 
             MB_AbilityItem abilityInstance = obj.GetComponent<MB_AbilityItem>();
             abilityInstance.Ability = ability;
-            abilityInstance.Actor = turn.actor;
+            abilityInstance.Actor = ability.Owner;
 
             abilityInstance.UpdateText();
 
             displayedAbilties.Add(obj);
         }
     }
+
+    public void LoadAbilitiesForViewing(MB_Actor loadingActor)
+    {
+
+        ClearAbilities();
+
+        //Hardcode, Monsters don't trigger this
+        if (loadingActor.CompareTag("Monster"))
+        {
+            return;
+        }
+
+
+        ToggleSidebar(true);
+
+        List<CS_Ability> abilities = loadingActor.abilities.Values.ToList();
+        foreach (CS_Ability ability in abilities)
+        {
+            if (ability.Type != typeToDisplay)
+            { continue; }
+
+
+            /*if (turn.abilityTagRestrict != null && !ability.Tags.Contains(turn.abilityTagRestrict))
+            { continue; }*/
+
+            GameObject obj = Instantiate(AbilityPrefab, ContentHolder);
+
+
+
+
+
+            MB_AbilityItem abilityInstance = obj.GetComponent<MB_AbilityItem>();
+            abilityInstance.Ability = ability;
+            abilityInstance.Actor = ability.Owner;
+
+            abilityInstance.UpdateText();
+
+            displayedAbilties.Add(obj);
+        }
+    }
+
+
+
 
     public void UnloadAbilities()
     {
@@ -90,6 +144,10 @@ public class UI_AbilityMenu : MonoBehaviour
         if (Player.activeTurn != null)
         {
             MB_PlayerInput.Instance.SetSelectState(E_SelectState.SelectingAbility);
+        }
+        else if (GF_PlayerInput.isPlayerTurn && GF_PlayerInput.relevantActor)
+        {
+            LoadAbilitiesForViewing(GF_PlayerInput.relevantActor);
         }
 
     }

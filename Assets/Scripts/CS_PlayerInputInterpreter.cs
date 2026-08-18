@@ -1,5 +1,4 @@
-using Unity.VisualScripting;
-using UnityEditor.PackageManager;
+using System.Collections.Generic;
 using UnityEngine;
 using static GF_PlayerInput;
 
@@ -7,7 +6,7 @@ using static GF_PlayerInput;
 public static class PlayerInputInterpreter
 {
     
-    public static void ProcessInput(Tile input, SO_User user, SO_TurnManager TM)
+    public static async void ProcessInput(Tile input, SO_User user, SO_TurnManager TM)
     {
         if(input == null)
         {
@@ -19,13 +18,40 @@ public static class PlayerInputInterpreter
         {
             case E_SelectState.SelectingActor:
                 MB_Actor validActor = SelectYourActor(input, user);
-                //Create a turn and return
-                if (validActor != null) 
-                { 
-                    TM.CreateAndStoreTurn(validActor); 
-                    return; 
-                } 
-  
+
+                if(validActor == null) { return; }
+
+                //If Mouse over an actor
+                //View Actor's health (Assuming hidden by default)
+                //View actor's move range
+
+                UI_AbilityMenu.instance.LoadAbilitiesForViewing(validActor);
+                relevantActor = validActor;
+
+                List<Tile> walkingTiles = CS_GridUtility.GetWalkableTilesFromOrigin(relevantActor.currentTile, relevantActor.Speed, false);
+                if (walkingTiles.Count != 0)
+                {
+                    Color green = new Color(0, 1, 0, .25f);
+                    CS_ColorGrid.ColorCells(walkingTiles, green);
+                }
+
+                AwaitConfirm activateConfirm = new AwaitConfirm("Would you like to activate " + validActor.name + "?");
+                ConfirmQueue.AddToConfirmQueue(activateConfirm);
+
+                bool activateConfirmation = await activateConfirm.WaitForUserConfirmation();
+                if(activateConfirmation)
+                {
+                    //Create a turn and return
+                    TM.CreateAndStoreTurn(validActor);
+                    return;
+                }
+
+                CS_ColorGrid.ClearGridColors(relevantActor.currentTile.parentGrid);
+                relevantActor = null;
+                UI_AbilityMenu.instance.UnloadAbilities();
+
+
+
                 break;
 
             case E_SelectState.SelectingMove:
@@ -160,6 +186,16 @@ public static class PlayerInputInterpreter
     public static void HoverOffAbility(SO_GridData grid)
     {
         CS_ColorGrid.ClearGridColors(grid);
+
+        if(selectState == E_SelectState.SelectingActor && relevantActor)
+        {
+            List<Tile> walkingTiles = CS_GridUtility.GetWalkableTilesFromOrigin(relevantActor.currentTile, relevantActor.Speed, false);
+            if (walkingTiles.Count != 0)
+            {
+                Color green = new Color(0, 1, 0, .25f);
+                CS_ColorGrid.ColorCells(walkingTiles, green);
+            }
+        }
     }
 
 

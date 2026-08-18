@@ -158,7 +158,7 @@ public class MB_PlayerInput : MonoBehaviour
                     break;
 
                 case E_SelectState.SelectingAbility:
-                    Player.activeTurn.actor.HideAbilities();
+                    UI_AbilityMenu.instance.UnloadAbilities();
 
                     break;
 
@@ -201,7 +201,8 @@ public class MB_PlayerInput : MonoBehaviour
                     break;
 
                 case E_SelectState.SelectingAbility:
-                    Player.activeTurn.actor.DisplayAbilties(Player.activeTurn);
+
+                    UI_AbilityMenu.instance.LoadAbilities();
                     break;
 
                 case E_SelectState.UsingAbility:
