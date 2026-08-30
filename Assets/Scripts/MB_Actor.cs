@@ -123,13 +123,4 @@ public class MB_Actor : MB_Entity //All functions relating and requiring a certa
 
     }
 
-    public void DisplayAbilties(TurnData turn)
-    {
-        ActorEvents.TriggerDisplayAbilities(turn);
-    }
-
-    public void HideAbilities()
-    {
-        ActorEvents.TriggerHideAbilities();
-    }
 }

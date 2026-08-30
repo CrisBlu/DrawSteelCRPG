@@ -8,7 +8,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AP_Tactician", menuName = "Scriptable Objects/AbilityPacks/Classes/Tactician")]
 public class AP_Tactician : SO_AbilityPack
 {
-    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_StrikeNow(), new A_Mark(), new A_Parry(), new A_BattleGrace(), new A_TwoShot() };
+    public override List<CS_Ability> Abilities => new List<CS_Ability> { new A_StrikeNow(), new A_Mark(), new A_Parry(), new A_BattleGrace(), new A_TwoShot(), new A_InspiringStrike() };
 
 }
 
@@ -19,6 +19,8 @@ public class A_StrikeNow : CS_Ability
     public override E_ActionType Type => E_ActionType.main;
     public override List<string> Tags => new List<string> { "ranged" };
     public override int Range => 10;
+
+    public override int[] Cost => new int[2] { 0, 5 };
 
 
     private List<E_AbilityInstructions> InstructionsRef = new List<E_AbilityInstructions>() { E_AbilityInstructions.SpendResource };
@@ -56,6 +58,64 @@ public class A_StrikeNow : CS_Ability
     public override CS_AbilityTargetingData Target(Tile origin)
     {
         return CS_GridUtility.GetFriendsWithin(origin, Range, origin.entity.tag, true);
+    }
+}
+
+public class A_InspiringStrike : CS_Ability, ITieredAbility
+{
+    public override string Name => "Inspiring Strike";
+
+    public override string Description => "If they bleed!";
+
+    public override E_ActionType Type => E_ActionType.main;
+
+    public override List<string> Tags => new List<string> { "Melee, Strike, Weapon"};
+
+    public override int Range => 1;
+
+    public List<E_Stats> BonusStat => new List<E_Stats> { E_Stats.M };
+
+    public override async Task<bool> Use(int tier = 0)
+    {
+        CS_Characteristics stats = Owner.sheet.stats;
+        int favoredStat = stats.Get(BonusStat[0]);
+
+        int damage = 0;
+
+        MB_Actor targetActor = (MB_Actor)targets[0].entity;
+        List<Tile> validTiles = new();
+
+        switch (tier)
+        {
+            case 1:
+                validTiles = CS_GridUtility.GetFriendsWithin(Owner.currentTile, 10, Owner.tag).validTargets;
+                validTiles.Add(Owner.currentTile);
+                damage = 3 + favoredStat;
+                break;
+
+            case 2:
+                validTiles = CS_GridUtility.GetFriendsWithin(Owner.currentTile, 10, Owner.tag).validTargets;
+                validTiles.Add(Owner.currentTile);
+                damage = 5 + favoredStat;
+                break;
+
+            case 3 or 4:
+                validTiles = CS_GridUtility.GetFriendsWithin(Owner.currentTile, 10, Owner.tag).validTargets;
+                damage = 8 + favoredStat;
+                break;
+
+        }
+
+        AwaitTile userInput = new(validTiles);
+        CS_ColorGrid.ColorCells(validTiles, Color.blue);
+        MB_PlayerInput.inputRequest = userInput;
+        Tile allyToSupport = await userInput.WaitForUserConfirmation();
+
+        Debug.Log(allyToSupport.entity.name);
+        SO_BattleEvents.AddRequest(new RequestDamage(targetActor.currentTile, damage));
+
+
+        return true;
     }
 }
 

@@ -93,7 +93,7 @@ public static class Movement
         for (int i = 0; i < stepsToTake.Count; i++)
         {
 
-            CS_BattleLog.BattleEvents.TriggerActorLeftTileEvents(actor.currentTile, stepsToTake[i], actor);
+            //CS_BattleLog.BattleEvents.TriggerActorLeftTileEvents(actor.currentTile, stepsToTake[i], actor);
             UpdateEntityPosition(actor, stepsToTake[i]);
 
             stepsTaken.Add(stepsToTake[i].position);

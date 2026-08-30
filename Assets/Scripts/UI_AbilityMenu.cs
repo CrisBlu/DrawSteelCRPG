@@ -61,7 +61,18 @@ public class UI_AbilityMenu : MonoBehaviour
             GameObject obj = Instantiate(AbilityPrefab, ContentHolder);
 
             Button abilityButton = obj.GetComponent<Button>();
-            abilityButton.onClick.AddListener(delegate { PlayerInputInterpreter.SelectingAbility(ability, turn); });
+
+            if(ability.Owner.resource < ability.Cost[0])
+            {
+                abilityButton.interactable = false;
+            }
+            else
+            {
+                abilityButton.onClick.AddListener(delegate { PlayerInputInterpreter.SelectingAbility(ability, turn); });
+            }
+            
+
+            
 
 
 

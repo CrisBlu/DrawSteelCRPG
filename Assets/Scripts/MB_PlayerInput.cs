@@ -147,6 +147,10 @@ public class MB_PlayerInput : MonoBehaviour
             {
                 case E_SelectState.SelectingActor:
 
+                    CS_ColorGrid.ClearGridColors(relevantActor.currentTile.parentGrid);
+                    relevantActor = null;
+                    UI_AbilityMenu.instance.UnloadAbilities();
+
                     break;
 
                 case E_SelectState.SelectingMove:

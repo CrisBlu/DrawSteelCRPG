@@ -14,7 +14,9 @@ public abstract class CS_Ability
     public abstract E_ActionType Type { get; }
     public abstract List<string> Tags { get; }
     public abstract int Range { get; }
-    public int Cost = 0;
+
+    //first entry is associated with intial resource cost to use the ability, second entry is any resource cost associated within the ability
+    public virtual int[] Cost { get { return new int[2] { 0, 0 }; } }
     public List<Tile> targets = new List<Tile>();
 
     public MB_Actor Owner;

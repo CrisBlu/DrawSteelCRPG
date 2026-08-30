@@ -42,6 +42,7 @@ public static class PlayerInputInterpreter
                 if(activateConfirmation)
                 {
                     //Create a turn and return
+                    validActor.resource += 2;
                     TM.CreateAndStoreTurn(validActor);
                     return;
                 }
@@ -123,7 +124,7 @@ public static class PlayerInputInterpreter
 
     public static async void SelectingAbility(CS_Ability ability, TurnData turn)
     {
-        if (turn.actions[ability.Type] <= 0 || turn.actor.resource < ability.Cost)
+        if (turn.actions[ability.Type] <= 0 || turn.actor.resource < ability.Cost[0])
         {
             return;
         }

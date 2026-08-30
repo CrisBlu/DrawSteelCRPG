@@ -68,13 +68,25 @@ public class CS_AbilityParser
 
 
                 case E_AbilityInstructions.SpendResource:
-                    AwaitConfirm spendConfirm = new AwaitConfirm("Would you like to spend X (Resource)?");
-                    ConfirmQueue.AddToConfirmQueue(spendConfirm);
-                    bool spendConfirmation = await spendConfirm.WaitForUserConfirmation();
+                    bool spendConfirmation;
+                    if (ability.Owner.resource < ability.Cost[1])
+                    {
+                        spendConfirmation = false;
+                    }
+                    else
+                    {
+                        AwaitConfirm spendConfirm = new AwaitConfirm("Would you like to spend " + ability.Cost[1] + " (Resource)?");
+                        ConfirmQueue.AddToConfirmQueue(spendConfirm);
+                        spendConfirmation = await spendConfirm.WaitForUserConfirmation();
+                    }
+   
+
+
+                       
 
                     if(spendConfirmation)
                     {
-                        ability.Owner.resource -= ability.Cost;
+                        ability.Owner.resource -= ability.Cost[1];
                     }
 
                     ability.Spend(spendConfirmation);
